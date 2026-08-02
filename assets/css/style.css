@@ -2,7 +2,7 @@
    НУЛЕВОЙ ТРИБУНАЛ — базовая дизайн-система сайта
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tektur:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lexend:wght@400;500&family=Neucha&family=Marck+Script&family=Kalam:wght@400;700&family=Comforter&display=swap');
 
 /* =========================================================
    ПРИМЕР: подключение своего (скачанного) шрифта, а не из Google Fonts.
@@ -58,9 +58,10 @@
   --radius-md: 14px;
   --radius-sm: 8px;
 
-  --font-display: 'Orbitron', sans-serif;
+  --font-display: 'Tektur', sans-serif;
   --font-ui:      'Rajdhani', sans-serif;
-  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --font-serif:   'Ubuntu', 'Book Antiqua', Georgia, serif; /* имя переменной осталось историческим — это "шрифт для чтения" */
+  --font-readable: 'Lexend', var(--font-serif); /* лёгкий для чтения / дружелюбный к дислексии режим */
 
   --shadow-glow:  0 0 24px rgba(138,79,232,.35);
   --shadow-card:  0 10px 40px rgba(0,0,0,.45);
@@ -152,6 +153,10 @@ a{ color: inherit; text-decoration: none; }
 .brand-logo--sm{ font-size:20px; -webkit-text-stroke: .6px rgba(169,112,255,.9); }
 .brand-logo--sm small{ letter-spacing:.35em; font-size:.32em; }
 
+.site-logo-link{ flex:0 0 auto; display:flex; align-items:center; }
+.site-logo{ height: 42px; width:auto; display:block; }
+@media (max-width: 480px){ .site-logo{ height: 34px; } }
+
 /* ============================= КНОПКИ ============================= */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -228,12 +233,14 @@ a{ color: inherit; text-decoration: none; }
 @media (min-width: 760px){ .about-grid{ grid-template-columns: 260px 1fr; } }
 
 /* ============================= ПЕРСОНАЖИ ============================= */
-.char-card{ scroll-snap-align:start; flex: 0 0 148px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.char-card{ scroll-snap-align:start; flex: 0 0 140px; display:flex; flex-direction:column; align-items:center; gap:10px; }
 .char-card__portrait{
-  width:148px; height:148px; border-radius: 50%; border: 2px solid var(--violet-500);
+  width:140px; height:186px; border-radius: var(--radius-sm);
+  border: 2px solid var(--char-border, var(--violet-500));
   box-shadow: 0 0 0 4px rgba(138,79,232,.12), 0 0 26px rgba(138,79,232,.35); overflow:hidden;
   background: linear-gradient(160deg, var(--violet-900), var(--bg-panel-2)); display:flex; align-items:center; justify-content:center; transition:.2s;
 }
+.char-card__portrait.no-border{ border:none; box-shadow:none; background:none; border-radius:0; }
 .char-card:hover .char-card__portrait{ box-shadow: 0 0 0 4px rgba(209,63,214,.18), 0 0 30px rgba(209,63,214,.55); }
 .char-card__portrait img{ width:100%; height:100%; object-fit:cover; }
 .char-card__portrait .initial{ font-family: var(--font-display); font-size:38px; color: var(--violet-300); opacity:.6; }
@@ -305,18 +312,24 @@ a{ color: inherit; text-decoration: none; }
   -webkit-hyphens: auto;
 }
 .reader p{ margin: 0 0 0.85em; text-indent: 1.6em; }
-/* по классической типографике первый абзац после заголовка, разделителя сцены,
-   иллюстрации или письма — без красной строки (так делают в книгах) */
-.reader > p:first-child,
-.scene-divider + p,
-.reader-illustration + p,
-.letter + p,
-.epigraph + p{ text-indent: 0; }
 .reader p.no-indent{ text-indent: 0; }
+
+/* буквица — опционально, вешается на первый абзац главы вручную: <p class="dropcap"> */
+.reader p.dropcap{ text-indent: 0; }
+.reader p.dropcap::first-letter{
+  font-family: var(--font-display);
+  float: left;
+  font-size: 3.4em;
+  line-height: .82;
+  padding: .05em .08em 0 0;
+  color: var(--violet-300);
+  text-shadow: 0 0 14px rgba(169,112,255,.6);
+}
 .reader em{ color: var(--violet-300); font-style:italic; }
 .reader strong{ color:#fff; }
 
 .epigraph{ max-width: 480px; margin: 0 auto 10px; text-align:center; font-style:italic; color: var(--text-dim); font-size:19px; line-height:1.6; padding-bottom: 10px; }
+.epigraph p{ text-indent:0; }
 .epigraph cite{ display:block; margin-top:10px; font-style:normal; font-family: var(--font-ui); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color: var(--text-faint); }
 
 .scene-divider{ text-align:center; margin: 3em auto; letter-spacing: .6em; color: var(--violet-400); font-size:15px; text-shadow: 0 0 10px rgba(169,112,255,.7); }
@@ -332,7 +345,7 @@ a{ color: inherit; text-decoration: none; }
 }
 .letter::before{ content: "✦"; position:absolute; top:-14px; left: 28px; background: var(--bg-void); color: var(--violet-400); padding: 0 10px; font-style:normal; }
 .letter p{ margin: 0 0 1em; }
-.letter .sign{ text-align:right; color: var(--text-faint); font-style:normal; font-family: var(--font-ui); letter-spacing:.05em; }
+.letter .sign{ text-align:right; text-indent:0; color: var(--text-faint); font-style:normal; font-family: var(--font-ui); letter-spacing:.05em; }
 
 /* именованные стилевые классы для форматирования по markdown-разметке автора */
 .fx-system{ font-family: var(--font-ui); letter-spacing:.03em; color: var(--pink-400); background: rgba(209,63,214,.07); border-left: 2px solid var(--pink-500); padding: 2px 10px; display:inline-block; }
@@ -343,6 +356,12 @@ a{ color: inherit; text-decoration: none; }
 .fx-pink{ color: var(--pink-400); }
 .fx-small{ font-size:.82em; }
 .fx-large{ font-size:1.25em; }
+
+/* "почерки" — рукописные шрифты для реплик/списков персонажей, все с поддержкой кириллицы */
+.fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--violet-300); }
+.fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: var(--pink-400); display:inline-block; transform: rotate(-1deg); }
+.fx-hand-3{ font-family: 'Kalam', cursive; font-size: 1.15em; color: var(--gold-soft); }
+.fx-hand-4{ font-family: 'Comforter', cursive; font-size: 1.3em; color: var(--text-main); display:inline-block; transform: rotate(1deg); }
 
 /* сноски a-ля фикбук */
 .footnote{ color: var(--violet-400); cursor: help; font-family: var(--font-ui); font-weight:700; border-bottom: 1px dotted var(--violet-400); position: relative; padding: 0 2px; }
@@ -357,6 +376,7 @@ a{ color: inherit; text-decoration: none; }
 .footnote.is-open .footnote-tip, .footnote:hover .footnote-tip{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
 
 .chapter-foot-nav{ display:flex; justify-content:space-between; gap:16px; margin-top: 70px; padding-top: 30px; border-top: 1px solid var(--line); flex-wrap:wrap; }
+.chapter-top-nav{ display:flex; justify-content:space-between; gap:16px; margin: 4px 0 44px; padding-bottom: 24px; border-bottom: 1px solid var(--line); flex-wrap:wrap; }
 .chapter-foot-nav__side{ flex:1; min-width:160px; }
 .chapter-foot-nav__side.next{ text-align:right; }
 .chapter-foot-nav__label{ font-family: var(--font-ui); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color: var(--text-faint); display:block; margin-bottom:6px; }
@@ -367,8 +387,16 @@ a{ color: inherit; text-decoration: none; }
 .reader-tools .icon-btn{ background: var(--bg-panel); }
 .reader-tools .icon-btn.is-active{ border-color: var(--violet-400); color:#fff; box-shadow: var(--shadow-glow); }
 
-body.font-lg .reader{ font-size: 23px; }
+body.font-xs .reader{ font-size: 15px; }
 body.font-sm .reader{ font-size: 17px; }
+body.font-lg .reader{ font-size: 23px; }
+body.font-xl .reader{ font-size: 27px; }
+
+/* режим "легче читать" — шрифт Lexend вместо основного, помогает части читателей
+   (в т.ч. с дислексией); полноценный OpenDyslexic можно подключить так же,
+   как свой шрифт — см. гайд, раздел "Шрифты" */
+body.font-readable .reader{ font-family: var(--font-readable); }
+.reader-tools__divider{ width:1px; background:var(--line); margin:2px 4px; }
 
 /* =====================================================================
    АРХИВ ПЕРСОНАЖЕЙ
@@ -379,7 +407,12 @@ body.font-sm .reader{ font-size: 17px; }
 
 .char-tile{ border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg-card); padding: 18px; text-align:center; transition:.2s; }
 .char-tile:hover{ border-color: var(--violet-400); transform: translateY(-3px); box-shadow: var(--shadow-glow); }
-.char-tile__portrait{ width:96px; height:96px; margin: 0 auto 14px; border-radius:50%; border: 2px solid var(--violet-500); background: linear-gradient(160deg, var(--violet-900), var(--bg-panel-2)); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.char-tile__portrait{
+  width:110px; height:148px; margin: 0 auto 14px; border-radius: var(--radius-sm);
+  border: 2px solid var(--char-border, var(--violet-500));
+  background: linear-gradient(160deg, var(--violet-900), var(--bg-panel-2)); display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.char-tile__portrait.no-border{ border:none; background:none; border-radius:0; }
 .char-tile__portrait img{ width:100%; height:100%; object-fit:cover; }
 .char-tile__name{ font-family: var(--font-ui); font-weight:700; font-size:15px; color:#fff; }
 .char-tile__role{ font-family: var(--font-ui); font-size:12px; color: var(--text-faint); margin-top:4px; }

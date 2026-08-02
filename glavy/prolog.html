@@ -12,7 +12,9 @@
 <header class="site-header">
   <div class="site-header__row">
     <button class="icon-btn" data-burger aria-label="Меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-    <a href="../index.html" class="brand-logo brand-logo--sm" style="flex:0 0 auto;">НУЛЕВОЙ<br>ТРИБУНАЛ</a>
+    <a href="../index.html" class="site-logo-link">
+      <img src="../assets/img/logo.png" alt="Нулевой Трибунал" class="site-logo">
+    </a>
     <div class="search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" placeholder="Поиск по сайту (скоро)…" disabled>
@@ -40,14 +42,28 @@
   </div>
 
   <div class="reader-tools">
-    <button class="icon-btn" data-font-size="sm" title="Мельче">A-</button>
+    <button class="icon-btn" data-font-size="xs" title="Совсем мелко" style="font-size:11px;">A</button>
+    <button class="icon-btn" data-font-size="sm" title="Мельче" style="font-size:14px;">A</button>
     <button class="icon-btn is-active" data-font-size="md" title="Обычный">A</button>
-    <button class="icon-btn" data-font-size="lg" title="Крупнее">A+</button>
+    <button class="icon-btn" data-font-size="lg" title="Крупнее" style="font-size:22px;">A</button>
+    <button class="icon-btn" data-font-size="xl" title="Совсем крупно" style="font-size:26px;">A</button>
+    <span class="reader-tools__divider"></span>
+    <button class="icon-btn" data-font-readable title="Шрифт полегче для чтения (в т.ч. для дислексии)">Aa</button>
   </div>
 
   <div class="chapter-head">
     <div class="chapter-head__eyebrow">Акт I. Валтасаров пир</div>
     <h1 class="chapter-head__title">Пролог. Светская преамбула</h1>
+  </div>
+
+  <div class="chapter-top-nav">
+    <div class="chapter-foot-nav__side "></div>
+    <div class="chapter-foot-nav__side next">
+      <a href="glava-1-1.html">
+        <span class="chapter-foot-nav__label">Далее</span>
+        <span class="chapter-foot-nav__title">Глава I. Веяние чужеземных ветров →</span>
+      </a>
+    </div>
   </div>
 
   <figure class="reader-illustration">
@@ -61,7 +77,7 @@
   </div>
 
   <div class="chapter-foot-nav">
-    <div class="chapter-foot-nav__side"></div>
+    <div class="chapter-foot-nav__side "></div>
     <div class="chapter-foot-nav__side next">
       <a href="glava-1-1.html">
         <span class="chapter-foot-nav__label">Далее</span>

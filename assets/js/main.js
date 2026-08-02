@@ -34,17 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* ---------- настройки читалки: размер шрифта ---------- */
+  /* ---------- настройки читалки: размер шрифта (5 уровней) ---------- */
+  const FONT_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
   const fontBtns = document.querySelectorAll('[data-font-size]');
   const savedFont = localStorage.getItem('nt-font-size');
   if (savedFont) {
-    document.body.classList.add('font-' + savedFont);
+    if (savedFont !== 'md') document.body.classList.add('font-' + savedFont);
     fontBtns.forEach(b => b.classList.toggle('is-active', b.dataset.fontSize === savedFont));
   }
   fontBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const size = btn.dataset.fontSize;
-      document.body.classList.remove('font-sm', 'font-lg');
+      FONT_SIZES.forEach(s => document.body.classList.remove('font-' + s));
       fontBtns.forEach(b => b.classList.remove('is-active'));
       if (size !== 'md') {
         document.body.classList.add('font-' + size);
@@ -55,6 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('is-active');
     });
   });
+
+  /* ---------- режим "легче читать" (Lexend / в перспективе OpenDyslexic) ---------- */
+  const readableBtn = document.querySelector('[data-font-readable]');
+  if (readableBtn) {
+    if (localStorage.getItem('nt-font-readable') === '1') {
+      document.body.classList.add('font-readable');
+      readableBtn.classList.add('is-active');
+    }
+    readableBtn.addEventListener('click', () => {
+      const on = document.body.classList.toggle('font-readable');
+      readableBtn.classList.toggle('is-active', on);
+      if (on) localStorage.setItem('nt-font-readable', '1');
+      else localStorage.removeItem('nt-font-readable');
+    });
+  }
 
   /* ---------- переключатель вкладок "О серии / Об авторах / О сайте" ---------- */
   const infoTabs = document.querySelectorAll('[data-info-tab]');
