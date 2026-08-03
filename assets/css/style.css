@@ -251,7 +251,7 @@ a{ color: inherit; text-decoration: none; }
 .divider-row{ display:flex; align-items:center; gap:16px; margin: 46px 0 26px; }
 .divider-row::before, .divider-row::after{ content:""; flex:1; height:1px; background: linear-gradient(90deg, transparent, var(--violet-500), transparent); }
 
-.site-footer{ margin-top: 80px; padding: 40px 28px 60px; border-top: 1px solid var(--line); text-align:center; font-family: var(--font-ui); color: var(--text-faint); font-size:13px; }
+.site-footer{ margin-top: 80px; padding: 40px 28px 60px; border-top: 1px solid var(--line); text-align:center; font-family: var(--font-display); color: var(--text-faint); font-size:13px; }
 .site-footer .brand-logo{ font-size:22px; margin-bottom:14px; }
 .site-footer a:hover{ color: var(--violet-300); }
 .footer-links{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-bottom:18px; }
