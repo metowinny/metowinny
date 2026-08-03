@@ -59,7 +59,7 @@
   --radius-sm: 8px;
 
   --font-display: 'Tektur', sans-serif;
-  --font-ui:      'Rajdhani', sans-serif;
+  --font-ui:      'Ubuntu', sans-serif;
   --font-serif:   'Ubuntu', 'Book Antiqua', Georgia, serif; /* имя переменной осталось историческим — это "шрифт для чтения" */
   --font-readable: 'Lexend', var(--font-serif); /* лёгкий для чтения / дружелюбный к дислексии режим */
 
