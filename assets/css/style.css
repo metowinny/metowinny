@@ -249,7 +249,7 @@ a{ color: inherit; text-decoration: none; }
 .char-card__tag{ font-family: var(--font-ui); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-faint); }
 
 /* ============================= РАЗДЕЛИТЕЛИ / ФУТЕР ============================= */
-.divider-row{ display:flex; align-items:center; gap:16px; margin: 46px 0 26px; }
+.divider-row{ display:flex; align-items:center; gap:0px; margin: 46px 0 26px; }
 .divider-row::before, .divider-row::after{ content:""; flex:1; height:1px; background: linear-gradient(90deg, transparent, var(--violet-500), transparent); }
 
 .site-footer{ margin-top: 80px; padding: 40px 28px 60px; border-top: 1px solid var(--line); text-align:center; font-family: var(--font-display); color: var(--text-faint); font-size:13px; }
