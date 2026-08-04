@@ -135,7 +135,14 @@ a{ color: inherit; text-decoration: none; }
 .header-nav a:hover, .header-nav a.is-active{ color:#fff; border-color: var(--violet-400); }
 @media (min-width: 880px){ .header-nav{ display:flex; } }
 
-.mobile-nav{ display:none; flex-direction:column; gap: 2px; padding: 10px 28px 18px; border-top: 1px solid var(--line); font-family: var(--font-display); font-weight:600; }
+.mobile-nav{
+  display:none; flex-direction:column; gap: 2px;
+  font-family: var(--font-display); font-weight:600;
+  position:absolute; top: 62px; left: 28px; z-index: 70;
+  width: 230px; max-width: calc(100vw - 56px); padding: 10px 14px 14px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-md);
+  background: var(--bg-panel-2); box-shadow: var(--shadow-card);
+}
 .mobile-nav.is-open{ display:flex; }
 .mobile-nav a{ padding: 12px 4px; color: var(--text-dim); border-bottom:1px solid rgba(169,112,255,.12); display:flex; align-items:center; gap:10px; }
 .mobile-nav a:hover{ color:#fff; }
@@ -145,17 +152,10 @@ a{ color: inherit; text-decoration: none; }
 }
 .mobile-nav__platforms a svg{ width:17px; height:17px; flex:0 0 auto; opacity:.75; }
 
-/* на десктопе список страниц дублирует то, что уже видно в шапке — прячем его,
-   а блок с ссылками на другие площадки остаётся и раскрывается компактным
-   выпадающим окном прямо под кнопкой меню */
+/* на широких экранах список страниц дублирует то, что уже видно в шапке — прячем его,
+   в выпадающем окне остаются только ссылки на другие площадки */
 @media (min-width: 880px){
   .mobile-nav__pages{ display:none; }
-  .mobile-nav{
-    position:absolute; top: 62px; left: 28px; z-index: 70;
-    width: 230px; padding: 10px 14px 14px;
-    border-top:none; border: 1px solid var(--line-strong); border-radius: var(--radius-md);
-    background: var(--bg-panel-2); box-shadow: var(--shadow-card);
-  }
 }
 
 .brand-logo{
@@ -290,7 +290,7 @@ a{ color: inherit; text-decoration: none; }
 .tome-hero__text{ flex:1; min-width:240px; }
 .tome-hero__title{ font-family: var(--font-display); font-weight:800; font-size: clamp(24px,4vw,34px); color:#fff; text-shadow: 0 0 20px rgba(169,112,255,.6); margin: 10px 0 6px; text-transform:uppercase; }
 .tome-hero__part{ font-family: var(--font-ui); color: var(--pink-400); font-weight:600; margin-bottom:16px; }
-.tome-hero__desc{ color: var(--text-dim); font-size:17px; }
+.tome-hero__desc{ color: var(--text-dim); font-size:17px; text-align: justify; hyphens: auto; }
 
 .structure{ margin-top: 50px; display:flex; flex-direction:column; gap:16px; }
 .part-block{ border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg-card); overflow:hidden; }
@@ -325,6 +325,7 @@ a{ color: inherit; text-decoration: none; }
 .chapter-head{ text-align:center; margin: 10px 0 50px; }
 .chapter-head__eyebrow{ font-family: var(--font-ui); letter-spacing:.3em; text-transform:uppercase; font-size:12px; color: var(--pink-400); margin-bottom:14px; }
 .chapter-head__title{ font-family: var(--font-display); font-weight:700; font-size: clamp(26px,4.4vw,40px); color:#fff; text-shadow: 0 0 22px rgba(169,112,255,.55); text-transform:uppercase; letter-spacing:.02em; }
+.chapter-head__title-num{ color: var(--violet-400); }
 
 .reader{
   font-family: var(--font-serif); font-size: 20px; line-height: 1.85; color: var(--text-main);
