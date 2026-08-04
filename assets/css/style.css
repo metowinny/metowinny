@@ -381,7 +381,7 @@ a{ color: inherit; text-decoration: none; }
 
 /* "почерки" — рукописные шрифты для реплик/списков персонажей, все с поддержкой кириллицы */
 .fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--text-main); }
-.fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: var(--text-main); display:inline-block; }
+.fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: #B99FDF; display:inline-block; }
 .fx-hand-3{ font-family: 'Kalam', cursive; font-size: 1.15em; color: var(--text-main); }
 .fx-hand-4{ font-family: 'Comforter', cursive; font-size: 1.3em; color: var(--text-main); display:inline-block; }
 
