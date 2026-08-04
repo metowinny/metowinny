@@ -410,9 +410,9 @@ a{ color: inherit; text-decoration: none; }
 .reader-tools .icon-btn.is-active{ border-color: var(--violet-400); color:#fff; box-shadow: var(--shadow-glow); }
 
 body.font-xs .reader{ font-size: 15px; }
-body.font-sm .reader{ font-size: 17px; }
-body.font-lg .reader{ font-size: 23px; }
-body.font-xl .reader{ font-size: 27px; }
+body.font-sm .reader{ font-size: 18px; }
+body.font-lg .reader{ font-size: 25px; }
+body.font-xl .reader{ font-size: 33px; }
 
 /* режим "легче читать" — шрифт Lexend вместо основного, помогает части читателей
    (в т.ч. с дислексией); полноценный OpenDyslexic можно подключить так же,
