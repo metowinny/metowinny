@@ -350,7 +350,7 @@ a{ color: inherit; text-decoration: none; }
 .reader em{ font-style:italic; }
 .reader strong{ color:#fff; }
 
-.epigraph{ max-width: 480px; margin: 0 auto 10px; text-align:center; font-style:italic; color: var(--text-dim); font-size:19px; line-height:1.6; padding-bottom: 10px; }
+.epigraph{ max-width: 600px; margin: 0 auto 10px; text-align:center; font-style:italic; color: var(--text-dim); font-size:19px; line-height:1.6; padding-bottom: 10px; }
 .epigraph p{ text-indent:0; }
 .epigraph cite{ display:block; margin-top:10px; font-style:normal; font-family: var(--font-ui); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color: var(--text-faint); }
 
