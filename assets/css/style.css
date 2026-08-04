@@ -380,10 +380,10 @@ a{ color: inherit; text-decoration: none; }
 .fx-large{ font-size:1.25em; }
 
 /* "почерки" — рукописные шрифты для реплик/списков персонажей, все с поддержкой кириллицы */
-.fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--violet-300); }
-.fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: var(--pink-400); display:inline-block; transform: rotate(-1deg); }
-.fx-hand-3{ font-family: 'Kalam', cursive; font-size: 1.15em; color: var(--gold-soft); }
-.fx-hand-4{ font-family: 'Comforter', cursive; font-size: 1.3em; color: var(--text-main); display:inline-block; transform: rotate(1deg); }
+.fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--text-main); }
+.fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: var(--text-main); display:inline-block; }
+.fx-hand-3{ font-family: 'Kalam', cursive; font-size: 1.15em; color: var(--text-main); }
+.fx-hand-4{ font-family: 'Comforter', cursive; font-size: 1.3em; color: var(--text-main); display:inline-block; }
 
 /* сноски a-ля фикбук */
 .footnote{ color: var(--violet-400); cursor: help; font-family: var(--font-ui); font-weight:700; border-bottom: 1px dotted var(--violet-400); position: relative; padding: 0 2px; }
