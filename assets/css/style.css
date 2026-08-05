@@ -347,14 +347,14 @@ a{ color: inherit; text-decoration: none; }
 
 /* буквица — опционально, вешается на первый абзац главы вручную: <p class="dropcap"> */
 .reader p.dropcap{ text-indent: 0; }
-.reader p.dropcap::first-letter{
-  font-family: var(--font-display);
-  float: left;
-  font-size: 3.4em;
-  line-height: .82;
-  padding: .05em .08em 0 0;
-  color: var(--violet-300);
-  text-shadow: 0 0 14px rgba(169,112,255,.6);
+.reader p.dropcap .dropcap-letter{
+   font-family: var(--font-display);
+   float:left;
+   font-size:3.4em;
+   line-height:.82;
+   padding:.05em .08em 0 0;
+   color:var(--violet-300);
+   text-shadow:0 0 14px rgba(169,112,255,.6);
 }
 .reader em{ font-style:italic; }
 .reader strong{ color:#fff; }
