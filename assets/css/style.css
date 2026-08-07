@@ -434,20 +434,20 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    в этой области — цвет подхватится сам везде ниже по дереву.
    ===================================================================== */
 .reader-top.theme-light{
-  --bg-void:      #eef1f6;
-  --bg-deep:      #e6ebf3;
-  --bg-panel:     #e2e7f0;
-  --bg-panel-2:   #d6dce8;
+  --bg-void:      #ced3db;
+  --bg-deep:      #c2c9d5;
+  --bg-panel:     #c3d0e8;
+  --bg-panel-2:   #b6c0d4;
   --bg-card:      rgba(255,255,255,.6);
 
   --violet-900:   #c7cee0;
-  --violet-700:   #55617e;
-  --violet-500:   #55617e;
-  --violet-400:   #55617e;
-  --violet-300:   #414c68;
+  --violet-700:   #4f6398;
+  --violet-500:   #455782;
+  --violet-400:   #4b5d88;
+  --violet-300:   #293a67;
 
-  --pink-500:     #7c435b;
-  --pink-400:     #9c5470;
+  --pink-500:     #7c437d;
+  --pink-400:     #9e419d;
 
   --gold:         #6f5830;
   --gold-soft:    #8a6f3d;
@@ -472,7 +472,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
 /* эти несколько мест задают цвет жёстко, не через переменные —
    переопределяем их отдельно, чтобы текст не терялся на светлом фоне */
-.reader-top.theme-light .chapter-head__title{ color: #1d2438; text-shadow: none; }
+.reader-top.theme-light .chapter-head__title{ color: #291650; text-shadow: none; }
 .reader-top.theme-light .reader strong{ color: #1d2438; }
 .reader-top.theme-light .fx-shout{ color: #1d2438; }
 .reader-top.theme-light .fx-hand-2{ color: #4a3d68; }
