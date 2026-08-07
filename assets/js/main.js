@@ -72,6 +72,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---------- светлая тема читалки (только сама читалка, не весь сайт) ---------- */
+  const themeToggle = document.querySelector('[data-theme-toggle]');
+  const readerArea = document.querySelector('.reader-top');
+  if (themeToggle && readerArea) {
+    const applyReaderTheme = (on) => {
+      readerArea.classList.toggle('theme-light', on);
+      themeToggle.classList.toggle('is-active', on);
+      themeToggle.title = on ? 'Тёмная читалка' : 'Светлая читалка';
+      themeToggle.setAttribute('aria-label', themeToggle.title);
+    };
+    applyReaderTheme(localStorage.getItem('nt-reader-theme') === 'light');
+    themeToggle.addEventListener('click', () => {
+      const on = !readerArea.classList.contains('theme-light');
+      applyReaderTheme(on);
+      if (on) localStorage.setItem('nt-reader-theme', 'light');
+      else localStorage.removeItem('nt-reader-theme');
+    });
+  }
+
   /* ---------- переключатель вкладок "О серии / Об авторах / О сайте" ---------- */
   const infoTabs = document.querySelectorAll('[data-info-tab]');
   const infoPanels = document.querySelectorAll('[data-info-panel]');
