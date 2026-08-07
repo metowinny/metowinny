@@ -436,7 +436,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 .reader-top.theme-light{
   --bg-void:      #ced3db;
   --bg-deep:      #c2c9d5;
-  --bg-panel:     #c3d0e8;
+  --bg-panel:     #cbd2df;
   --bg-panel-2:   #b6c0d4;
   --bg-card:      rgba(255,255,255,.6);
 
@@ -446,8 +446,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   --violet-400:   #4b5d88;
   --violet-300:   #293a67;
 
-  --pink-500:     #7c437d;
-  --pink-400:     #9e419d;
+  --pink-500:     #5e437d;
+  --pink-400:     #4c419e;
 
   --gold:         #6f5830;
   --gold-soft:    #8a6f3d;
