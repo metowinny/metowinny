@@ -305,57 +305,107 @@ a{ color: inherit; text-decoration: none; }
 }
 
 .tome-card:hover .tome-bubble{
-  animation:tome-bubble-rise 3.8s ease-in-out infinite;
+  animation:tome-bubble-rise var(--bubble-duration) cubic-bezier(.37,0,.63,1) infinite;
 }
 
-.tome-card:hover .tome-bubble--2{
-  animation-delay:.45s;
+/* Индивидуальные параметры пузырьков */
+.tome-bubble--1{
+  left:14%;
+  bottom:4px;
+  --bubble-duration:4.8s;
+  --bubble-drift:8px;
+  --bubble-size:1;
+  animation-delay:0s;
 }
 
-.tome-card:hover .tome-bubble--3{
-  animation-delay:.9s;
+.tome-bubble--2{
+  left:31%;
+  bottom:12px;
+  --bubble-duration:5.4s;
+  --bubble-drift:-5px;
+  --bubble-size:.82;
+  animation-delay:.7s;
 }
 
-.tome-card:hover .tome-bubble--4{
+.tome-bubble--3{
+  left:48%;
+  bottom:0;
+  --bubble-duration:4.5s;
+  --bubble-drift:6px;
+  --bubble-size:1.15;
   animation-delay:1.35s;
 }
 
-.tome-card:hover .tome-bubble--5{
-  animation-delay:1.8s;
+.tome-bubble--4{
+  left:67%;
+  bottom:9px;
+  --bubble-duration:5.8s;
+  --bubble-drift:-8px;
+  --bubble-size:.9;
+  animation-delay:.35s;
+}
+
+.tome-bubble--5{
+  left:82%;
+  bottom:2px;
+  --bubble-duration:5.1s;
+  --bubble-drift:4px;
+  --bubble-size:1.05;
+  animation-delay:1.9s;
 }
 
 @keyframes tome-bubble-rise{
   0%{
-    transform:translate(0,0) scale(.65);
+    transform:translate3d(0,0,0) scale(calc(var(--bubble-size) * .65));
     opacity:0;
   }
 
-  10%{
-    opacity:.8;
-  }
-
-  25%{
-    transform:translate(3px,-20px) scale(.85);
+  8%{
     opacity:.75;
   }
 
-  45%{
-    transform:translate(6px,-43px) scale(1);
+  30%{
+    transform:translate3d(
+      calc(var(--bubble-drift) * .25),
+      -28px,
+      0
+    ) scale(calc(var(--bubble-size) * .85));
+    opacity:.78;
+  }
+
+  52%{
+    transform:translate3d(
+      calc(var(--bubble-drift) * -.15),
+      -57px,
+      0
+    ) scale(calc(var(--bubble-size) * 1));
     opacity:.65;
   }
 
-  62%{
-    transform:translate(4px,-62px) scale(.95);
-    opacity:.5;
+  72%{
+    transform:translate3d(
+      calc(var(--bubble-drift) * .55),
+      -82px,
+      0
+    ) scale(calc(var(--bubble-size) * .94));
+    opacity:.42;
   }
 
-  78%{
-    transform:translate(-1px,-82px) scale(.88);
-    opacity:.28;
+  88%{
+    transform:translate3d(
+      calc(var(--bubble-drift) * .8),
+      -99px,
+      0
+    ) scale(calc(var(--bubble-size) * .82));
+    opacity:.18;
   }
 
   100%{
-    transform:translate(-3px,-110px) scale(.72);
+    transform:translate3d(
+      var(--bubble-drift),
+      -115px,
+      0
+    ) scale(calc(var(--bubble-size) * .7));
     opacity:0;
   }
 }
