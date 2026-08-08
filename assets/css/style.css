@@ -237,6 +237,119 @@ a{ color: inherit; text-decoration: none; }
   padding: 6px 12px; border-radius:999px;
 }
 
+/* Пузырьки, возникающие из свечения карточки тома */
+.tome-card{
+  position:relative;
+  overflow:visible;
+}
+
+.tome-card__bubbles{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:8px;
+  height:130px;
+  pointer-events:none;
+  z-index:0;
+}
+
+.tome-bubble{
+  position:absolute;
+  bottom:0;
+  border-radius:50%;
+  opacity:0;
+
+  background:radial-gradient(
+    circle at 32% 28%,
+    rgba(255,255,255,.28),
+    rgba(169,220,255,.16) 40%,
+    rgba(138,79,232,.08) 72%,
+    transparent 100%
+  );
+
+  border:1px solid rgba(169,220,255,.8);
+
+  box-shadow:
+    0 0 7px rgba(169,220,255,.7),
+    0 0 14px rgba(138,79,232,.5);
+}
+
+.tome-bubble--1{
+  width:9px;
+  height:9px;
+  left:18%;
+}
+
+.tome-bubble--2{
+  width:6px;
+  height:6px;
+  left:34%;
+}
+
+.tome-bubble--3{
+  width:12px;
+  height:12px;
+  left:49%;
+}
+
+.tome-bubble--4{
+  width:7px;
+  height:7px;
+  left:66%;
+}
+
+.tome-bubble--5{
+  width:10px;
+  height:10px;
+  left:80%;
+}
+
+.tome-card:hover .tome-bubble{
+  animation:tome-bubble-rise 2s ease-out infinite;
+}
+
+.tome-card:hover .tome-bubble--2{
+  animation-delay:.3s;
+}
+
+.tome-card:hover .tome-bubble--3{
+  animation-delay:.6s;
+}
+
+.tome-card:hover .tome-bubble--4{
+  animation-delay:.9s;
+}
+
+.tome-card:hover .tome-bubble--5{
+  animation-delay:1.2s;
+}
+
+@keyframes tome-bubble-rise{
+  0%{
+    transform:translate(0,0) scale(.65);
+    opacity:0;
+  }
+
+  12%{
+    opacity:.8;
+  }
+
+  45%{
+    transform:translate(7px,-45px) scale(1);
+    opacity:.65;
+  }
+
+  75%{
+    transform:translate(-4px,-80px) scale(.9);
+    opacity:.3;
+  }
+
+  100%{
+    transform:translate(5px,-110px) scale(.75);
+    opacity:0;
+  }
+}
+
 .info-tabs{ display:flex; flex-direction:column; gap:14px; }
 .info-tab{
   padding: 16px 20px; border-radius: 999px; text-align:center;
