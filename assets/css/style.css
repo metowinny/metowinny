@@ -681,7 +681,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
 @keyframes bubble-float{
   0%   { transform: translate(0,0);         opacity:0; }
-  10%  { opacity:.85; }
+  5%  { opacity:.85; }
   50%  { transform: translate(12px,-160px); opacity:.6; }
   90%  { opacity:0; }
   100% { transform: translate(-8px,-320px); opacity:0; }
