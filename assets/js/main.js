@@ -104,4 +104,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  /* ---------- глоссарий: поиск по терминам ---------- */
+  const glossarySearch = document.querySelector('[data-glossary-search]');
+  const glossaryClear = document.querySelector('[data-glossary-clear]');
+  const glossaryCategories = [...document.querySelectorAll('[data-glossary-category]')];
+  const glossaryCount = document.querySelector('[data-glossary-count]');
+  const glossaryNoResults = document.querySelector('[data-glossary-no-results]');
+
+  if (glossarySearch && glossaryCategories.length) {
+    const normalize = (value) => value.toLocaleLowerCase('ru-RU').trim();
+
+    const updateGlossary = () => {
+      const query = normalize(glossarySearch.value);
+      let visibleTerms = 0;
+
+      glossaryCategories.forEach(category => {
+        const terms = [...category.querySelectorAll('[data-glossary-term]')];
+        let categoryVisible = 0;
+
+        terms.forEach(term => {
+          const haystack = normalize(term.textContent);
+          const visible = !query || haystack.includes(query);
+          term.hidden = !visible;
+          if (visible) categoryVisible++;
+        });
+
+        category.hidden = categoryVisible === 0;
+        if (query && categoryVisible > 0) category.open = true;
+        if (!query && category.dataset.defaultOpen === 'true') category.open = true;
+        visibleTerms += categoryVisible;
+      });
+
+      if (glossaryCount) glossaryCount.textContent = `${visibleTerms} термин${visibleTerms === 1 ? '' : (visibleTerms >= 2 && visibleTerms <= 4 ? 'а' : 'ов')}`;
+      if (glossaryNoResults) glossaryNoResults.classList.toggle('is-visible', visibleTerms === 0);
+      if (glossaryClear) glossaryClear.classList.toggle('is-visible', query.length > 0);
+    };
+
+    glossarySearch.addEventListener('input', updateGlossary);
+    glossaryClear?.addEventListener('click', () => {
+      glossarySearch.value = '';
+      glossarySearch.focus();
+      updateGlossary();
+    });
+    updateGlossary();
+  }
+
 });
