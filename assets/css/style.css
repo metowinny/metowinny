@@ -625,6 +625,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   border-left:2px solid var(--violet-500); border-radius:0 var(--radius-sm) var(--radius-sm) 0;
   background:rgba(138,79,232,.055); color:var(--text-dim);
   font-size:16px; line-height:1.65;
+  text-align: justify;
 }
 .glossary-term__body p{ margin:0 0 .8em; }
 .glossary-term__body p:last-child{ margin-bottom:0; }
