@@ -667,8 +667,9 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
 .bubble{
   position:absolute; border-radius:50%;
-  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.9), rgba(169,220,255,.55) 35%, rgba(138,79,232,.35) 70%, transparent 100%);
-  box-shadow: 0 0 12px rgba(138,79,232,.5), 0 0 4px rgba(169,220,255,.6) inset;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.25), rgba(169,220,255,.15) 40%, rgba(138,79,232,.08) 72%, transparent 100%);
+  border: 1.5px solid rgba(169,220,255,.9);
+  box-shadow: 0 0 10px rgba(169,220,255,.85), 0 0 18px rgba(138,79,232,.55);
   opacity:0;
   animation: bubble-float 14s ease-in-out infinite;
 }
