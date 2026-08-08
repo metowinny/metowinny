@@ -275,33 +275,23 @@ a{ color: inherit; text-decoration: none; }
 }
 
 .tome-bubble--1{
-  width:9px;
-  height:9px;
-  left:18%;
+  width:9px; height:9px;
 }
 
 .tome-bubble--2{
-  width:6px;
-  height:6px;
-  left:34%;
+  width:6px;  height:6px;
 }
 
 .tome-bubble--3{
-  width:12px;
-  height:12px;
-  left:49%;
+  width:12px;  height:12px;
 }
 
 .tome-bubble--4{
-  width:7px;
-  height:7px;
-  left:66%;
+  width:7px;  height:7px;
 }
 
 .tome-bubble--5{
-  width:10px;
-  height:10px;
-  left:80%;
+  width:10px;  height:10px;
 }
 
 .tome-card:hover .tome-bubble{
@@ -315,7 +305,7 @@ a{ color: inherit; text-decoration: none; }
   --bubble-duration:4.8s;
   --bubble-drift:8px;
   --bubble-size:1;
-  animation-delay:0s;
+  animation-delay:.2s;
 }
 
 .tome-bubble--2{
