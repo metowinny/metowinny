@@ -524,7 +524,7 @@ position:relative;
 
 @keyframes scene-divider-breathe{
   0%, 100%{
-    opacity:.82;
+    opacity:.90;
     text-shadow:0 0 8px rgba(169,112,255,.55);
   }
 
