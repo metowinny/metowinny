@@ -251,7 +251,6 @@ a{ color: inherit; text-decoration: none; }
   height:130px;
   pointer-events:none;
   z-index:0;
-  overflow:visible;
 }
 
 .tome-bubble{
