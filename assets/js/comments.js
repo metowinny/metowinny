@@ -976,9 +976,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (visibleCount === 0) {
-      marker.remove();
-      return null;
+  marker.remove();
+
+  const highlight =
+    document.querySelector(
+      `.comment-highlight[data-comment-id="${CSS.escape(annotation.id)}"]`
+    );
+
+  if (highlight) {
+    const parent =
+      highlight.parentNode;
+
+    while (highlight.firstChild) {
+      parent.insertBefore(
+        highlight.firstChild,
+        highlight
+      );
     }
+
+    highlight.remove();
+  }
+
+  annotationsById.delete(
+    annotation.id
+  );
+
+  return null;
+}
 
     positionReactionMarker(
       marker,
@@ -1489,34 +1513,91 @@ document.addEventListener('DOMContentLoaded', () => {
    */
 
   function repositionMarkers() {
-    document
-      .querySelectorAll(
-        '.comment-reaction-marker'
-      )
-      .forEach(marker => {
-        const commentId =
-          marker.dataset.commentId;
+  const markers = Array.from(
+    document.querySelectorAll('.comment-reaction-marker')
+  );
 
-        if (!commentId) {
-          return;
+  const placed = [];
+
+  markers.forEach(marker => {
+    const commentId =
+      marker.dataset.commentId;
+
+    if (!commentId) return;
+
+    const highlight =
+      document.querySelector(
+        `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
+      );
+
+    if (!highlight) return;
+
+    const highlightRect =
+      highlight.getBoundingClientRect();
+
+    const readerRect =
+      reader.getBoundingClientRect();
+
+    const gap = 18;
+
+    let left =
+      readerRect.right +
+      window.scrollX +
+      gap;
+
+    let top =
+      highlightRect.top +
+      window.scrollY +
+      highlightRect.height / 2 -
+      marker.offsetHeight / 2;
+
+    /*
+     * Если рядом уже стоит другой маркер,
+     * немного сдвигаем новый вниз.
+     */
+
+    const minGap = 6;
+
+    let changed = true;
+
+    while (changed) {
+      changed = false;
+
+      for (const previous of placed) {
+        const verticalOverlap =
+          top <
+            previous.top +
+            previous.height +
+            minGap &&
+          top +
+            marker.offsetHeight +
+            minGap >
+            previous.top;
+
+        if (verticalOverlap) {
+          top =
+            previous.top +
+            previous.height +
+            minGap;
+
+          changed = true;
         }
+      }
+    }
 
-        const highlight =
-          document.querySelector(
-            `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
-          );
+    marker.style.left =
+      `${left}px`;
 
-        if (!highlight) {
-          return;
-        }
+    marker.style.top =
+      `${top}px`;
 
-        positionReactionMarker(
-          marker,
-          highlight
-        );
-      });
-  }
-
+    placed.push({
+      top,
+      height:
+        marker.offsetHeight
+    });
+  });
+}
   /*
    * ============================================================
    * СОБЫТИЯ
