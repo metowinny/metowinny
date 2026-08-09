@@ -1173,3 +1173,104 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     0 0 0 1px rgba(169,112,255,.08),
     0 0 16px rgba(138,79,232,.10);
 }
+
+/* =====================================================================
+   КОММЕНТАРИИ — плавающий маркер реакции
+   ===================================================================== */
+
+.comment-reaction-marker{
+  position:fixed;
+  z-index:9998;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+
+  min-width:34px;
+  height:28px;
+  padding:0 8px;
+
+  border:1px solid rgba(169,112,255,.18);
+  border-radius:999px;
+
+  background:rgba(35,22,52,.72);
+
+  color:#fff;
+
+  box-shadow:
+    0 0 10px rgba(138,79,232,.10),
+    0 4px 14px rgba(0,0,0,.18);
+
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+
+  cursor:pointer;
+
+  opacity:0;
+  transform:translateX(-5px) scale(.94);
+
+  transition:
+    opacity .3s ease,
+    transform .3s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.comment-reaction-marker.is-visible{
+  opacity:1;
+  transform:translateX(0) scale(1);
+}
+
+.comment-reaction-marker:hover{
+  background:rgba(45,27,66,.9);
+
+  box-shadow:
+    0 0 14px rgba(138,79,232,.20),
+    0 4px 18px rgba(0,0,0,.22);
+
+  transform:translateX(0) scale(1.06);
+}
+
+.comment-reaction-marker__emoji{
+  font-size:14px;
+  line-height:1;
+}
+
+.comment-reaction-marker__count{
+  font-family:var(--font-ui);
+  font-size:11px;
+  font-weight:600;
+  color:rgba(255,255,255,.75);
+  line-height:1;
+}
+
+@media (max-width:900px){
+  .comment-reaction-marker{
+    min-width:30px;
+    height:25px;
+    padding:0 6px;
+  }
+
+  .comment-reaction-marker__emoji{
+    font-size:13px;
+  }
+
+  .comment-reaction-marker__count{
+    font-size:10px;
+  }
+}
+
+@media (max-width:700px){
+  /*
+   * На телефоне справа от текста обычно просто
+   * недостаточно пространства.
+   * Поэтому пока скрываем маркеры.
+   *
+   * Позже сделаем мобильную версию отдельно.
+   */
+
+  .comment-reaction-marker{
+    display:none;
+  }
+}
