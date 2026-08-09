@@ -1004,10 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
   return null;
 }
 
-    positionReactionMarker(
-      marker,
-      highlight
-    );
+repositionMarkers();
 
     return marker;
   }
@@ -1512,12 +1509,17 @@ document.addEventListener('DOMContentLoaded', () => {
    * ============================================================
    */
 
-  function repositionMarkers() {
+function repositionMarkers() {
   const markers = Array.from(
     document.querySelectorAll('.comment-reaction-marker')
   );
 
-  const placed = [];
+  const items = [];
+
+  /*
+   * Сначала собираем маркер + соответствующую
+   * ему подсветку и определяем реальную позицию.
+   */
 
   markers.forEach(marker => {
     const commentId =
@@ -1538,63 +1540,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const readerRect =
       reader.getBoundingClientRect();
 
-    const gap = 18;
-
-    let left =
-      readerRect.right +
-      window.scrollX +
-      gap;
-
-    let top =
+    const baseTop =
       highlightRect.top +
       window.scrollY +
       highlightRect.height / 2 -
       marker.offsetHeight / 2;
 
+    const left =
+      readerRect.right +
+      window.scrollX +
+      18;
+
+    items.push({
+      marker,
+      highlight,
+      left,
+      baseTop,
+      height: marker.offsetHeight
+    });
+  });
+
+  /*
+   * Важный момент:
+   * раскладываем их по реальному положению текста,
+   * а не по порядку появления в DOM.
+   */
+
+  items.sort(
+    (a, b) =>
+      a.baseTop - b.baseTop
+  );
+
+  const GAP = 10;
+
+  const placed = [];
+
+  items.forEach(item => {
+    let top =
+      item.baseTop;
+
     /*
-     * Если рядом уже стоит другой маркер,
-     * немного сдвигаем новый вниз.
+     * Если новый маркер пересекается
+     * с уже размещённым — отправляем его ниже.
      */
 
-    const minGap = 6;
+    for (const previous of placed) {
+      const overlaps =
+        top <
+          previous.top +
+          previous.height +
+          GAP &&
+        top +
+          item.height +
+          GAP >
+          previous.top;
 
-    let changed = true;
-
-    while (changed) {
-      changed = false;
-
-      for (const previous of placed) {
-        const verticalOverlap =
-          top <
-            previous.top +
-            previous.height +
-            minGap &&
-          top +
-            marker.offsetHeight +
-            minGap >
-            previous.top;
-
-        if (verticalOverlap) {
-          top =
-            previous.top +
-            previous.height +
-            minGap;
-
-          changed = true;
-        }
+      if (overlaps) {
+        top =
+          previous.top +
+          previous.height +
+          GAP;
       }
     }
 
-    marker.style.left =
-      `${left}px`;
+    item.marker.style.left =
+      `${item.left}px`;
 
-    marker.style.top =
+    item.marker.style.top =
       `${top}px`;
 
     placed.push({
       top,
-      height:
-        marker.offsetHeight
+      height: item.height
     });
   });
 }
