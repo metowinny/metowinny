@@ -520,7 +520,21 @@ position:relative;
 .epigraph p{ text-indent:0; }
 .epigraph cite{ display:block; margin-top:10px; font-style:normal; font-family: var(--font-ui); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color: var(--text-faint); }
 
-.scene-divider{ text-align:center; margin: 3em auto; letter-spacing: .6em; color: var(--violet-400); font-size:15px; text-shadow: 0 0 10px rgba(169,112,255,.7); }
+.scene-divider{ text-align:center; margin: 3em auto; letter-spacing: .6em; color: var(--violet-400); font-size:15px; text-shadow: 0 0 10px rgba(169,112,255,.7); animation: scene-divider-breathe 5s ease-in-out infinite; }
+
+@keyframes scene-divider-breathe{
+  0%, 100%{
+    opacity:.82;
+    text-shadow:0 0 8px rgba(169,112,255,.55);
+  }
+
+  50%{
+    opacity:1;
+    text-shadow:
+      0 0 10px rgba(169,112,255,.7),
+      0 0 18px rgba(169,112,255,.3);
+  }
+}
 
 .reader-illustration{ margin: 2.4em auto; text-align:center; }
 .reader-illustration img{ margin: 0 auto; border-radius: var(--radius-md); border: 1px solid var(--line); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
