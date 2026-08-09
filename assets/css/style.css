@@ -247,10 +247,11 @@ a{ color: inherit; text-decoration: none; }
   position:absolute;
   left:0;
   right:0;
-  bottom:8px;
+  bottom:0;
   height:130px;
   pointer-events:none;
   z-index:0;
+  overflow:visible;
 }
 
 .tome-bubble{
@@ -275,29 +276,44 @@ a{ color: inherit; text-decoration: none; }
 }
 
 .tome-bubble--1{
-  width:9px; height:9px;
+  left:13%;
+  bottom:0;
+  --bubble-duration:4.8s;
+  --bubble-drift:8px;
+  animation-delay:0s;
 }
 
 .tome-bubble--2{
-  width:6px;  height:6px;
+  left:32%;
+  bottom:5px;
+  --bubble-duration:5.4s;
+  --bubble-drift:-5px;
+  animation-delay:1.1s;
 }
 
 .tome-bubble--3{
-  width:12px;  height:12px;
+  left:49%;
+  bottom:-3px;
+  --bubble-duration:4.5s;
+  --bubble-drift:6px;
+  animation-delay:2.2s;
 }
 
 .tome-bubble--4{
-  width:7px;  height:7px;
+  left:67%;
+  bottom:7px;
+  --bubble-duration:5.8s;
+  --bubble-drift:-8px;
+  animation-delay:.55s;
 }
 
 .tome-bubble--5{
-  width:10px;  height:10px;
+  left:83%;
+  bottom:2px;
+  --bubble-duration:5.1s;
+  --bubble-drift:4px;
+  animation-delay:1.8s;
 }
-
-.tome-card:hover .tome-bubble{
-  animation:tome-bubble-rise var(--bubble-duration) ease-in-out infinite;
-}
-
 /* Индивидуальные параметры пузырьков */
 .tome-bubble--1{
   left:13%;
@@ -341,7 +357,7 @@ a{ color: inherit; text-decoration: none; }
 
 @keyframes tome-bubble-rise{
   0%{
-    transform:translate(0,18px) scale(.65);
+    transform:translate(0,0);
     opacity:0;
   }
 
