@@ -1549,3 +1549,90 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     width:min(360px, calc(100vw - 20px));
   }
 }
+
+/* =====================================================================
+КОММЕНТАРИИ — плавающий комментарий
+===================================================================== */
+
+.comment-comment{
+  position:absolute;
+  z-index:9997;
+
+  width:220px;
+  box-sizing:border-box;
+
+  padding:11px 13px;
+
+  border:1px solid rgba(169,112,255,.16);
+  border-radius:12px;
+
+  background:rgba(25,17,37,.78);
+  color:var(--text-dim);
+
+  box-shadow:
+    0 0 12px rgba(138,79,232,.08),
+    0 5px 18px rgba(0,0,0,.16);
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  font-family:var(--font-serif);
+  font-size:13px;
+  line-height:1.5;
+
+  opacity:0;
+  transform:translateX(-6px);
+
+  transition:
+    opacity .3s ease,
+    transform .3s ease,
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+
+  pointer-events:auto;
+}
+
+.comment-comment.is-visible{
+  opacity:1;
+  transform:translateX(0);
+}
+
+.comment-comment:hover{
+  background:rgba(35,23,50,.9);
+  border-color:rgba(169,112,255,.28);
+
+  box-shadow:
+    0 0 18px rgba(138,79,232,.14),
+    0 6px 22px rgba(0,0,0,.22);
+}
+
+.comment-comment__content{
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.comment-comment__meta{
+  display:flex;
+  align-items:center;
+  gap:7px;
+
+  margin-top:8px;
+
+  font-family:var(--font-ui);
+  font-size:9px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+
+  color:var(--text-faint);
+}
+
+.comment-comment__error{
+  color:var(--violet-400);
+}
+
+@media (max-width:1100px){
+  .comment-comment{
+    display:none;
+  }
+}
