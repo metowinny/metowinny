@@ -1348,6 +1348,8 @@ function createCommentBox(
     annotation.id;
 
   box.innerHTML = `
+    <div class="comment-comment__content"></div>
+
     <div class="comment-comment__meta">
       ${
         annotation.is_error_report
@@ -1355,8 +1357,6 @@ function createCommentBox(
           : `<span>Комментарий</span>`
       }
     </div>
-
-    <div class="comment-comment__content"></div>
   `;
 
   box.querySelector(
@@ -1367,9 +1367,7 @@ function createCommentBox(
   document.body.appendChild(box);
 
   requestAnimationFrame(() => {
-    box.classList.add(
-      'is-visible'
-    );
+    box.classList.add('is-visible');
   });
 
   return box;
@@ -1416,7 +1414,7 @@ function createCommentBox(
 }
 
 
-async function loadSavedComments() {
+  async function loadSavedComments() {
   const comments =
     await getCommentsForChapter();
 
@@ -1444,13 +1442,19 @@ async function loadSavedComments() {
       continue;
     }
 
-    createCommentBox(
-      annotation,
-      highlight
-    );
-  }
+    const box =
+      createCommentBox(
+        annotation,
+        highlight
+      );
 
-  repositionCommentBoxes();
+    if (box) {
+      positionCommentBox(
+        box,
+        highlight
+      );
+    }
+  }
 }
   /*
    * ============================================================
@@ -1797,106 +1801,6 @@ function repositionMarkers() {
     });
   });
 }
-
-function repositionCommentBoxes() {
-  const boxes = Array.from(
-    document.querySelectorAll('.comment-comment')
-  );
-
-  const items = [];
-
-  boxes.forEach(box => {
-    const commentId =
-      box.dataset.commentId;
-
-    if (!commentId) return;
-
-    const highlight =
-      document.querySelector(
-        `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
-      );
-
-    if (!highlight) return;
-
-    const highlightRect =
-      highlight.getBoundingClientRect();
-
-    const readerRect =
-      reader.getBoundingClientRect();
-
-    const baseTop =
-      highlightRect.top +
-      window.scrollY +
-      highlightRect.height / 2 -
-      box.offsetHeight / 2;
-
-    const left =
-      readerRect.right +
-      window.scrollX +
-      18;
-
-    items.push({
-      box,
-      highlight,
-      left,
-      baseTop,
-      height: box.offsetHeight
-    });
-  });
-
-  /*
-   * Сначала располагаем комментарии
-   * в порядке их положения в тексте.
-   */
-
-  items.sort(
-    (a, b) =>
-      a.baseTop - b.baseTop
-  );
-
-  const GAP = 10;
-  const placed = [];
-
-  items.forEach(item => {
-    let top =
-      item.baseTop;
-
-    /*
-     * Если комментарий пересекается
-     * с уже размещённым — двигаем его вниз.
-     */
-
-    for (const previous of placed) {
-      const overlaps =
-        top <
-          previous.top +
-          previous.height +
-          GAP &&
-        top +
-          item.height +
-          GAP >
-          previous.top;
-
-      if (overlaps) {
-        top =
-          previous.top +
-          previous.height +
-          GAP;
-      }
-    }
-
-    item.box.style.left =
-      `${item.left}px`;
-
-    item.box.style.top =
-      `${top}px`;
-
-    placed.push({
-      top,
-      height: item.height
-    });
-  });
-}
   /*
    * ============================================================
    * СОБЫТИЯ
@@ -1997,12 +1901,31 @@ document.addEventListener(
   );
 
   window.addEventListener(
+    'resize',
+    repositionMarkers
+  );
+
+  window.addEventListener(
   'resize',
   () => {
-    repositionMarkers();
-    repositionCommentBoxes();
-  }
-);
+    document
+      .querySelectorAll(
+        '.comment-comment'
+      )
+      .forEach(box => {
+        const commentId =
+          box.dataset.commentId;
+
+        const highlight =
+          document.querySelector(
+            `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
+          );
+
+        if (highlight) {
+          positionCommentBox(
+            box,
+            highlight
+          );
         }
       });
   }
@@ -2454,15 +2377,6 @@ function showCommentForm() {
             highlightSavedText(
               annotation
             );
-
-          if (highlight) {
-  createCommentBox(
-    annotation,
-    highlight
-  );
-
-  repositionCommentBoxes();
-}
 
         }
 
