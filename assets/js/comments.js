@@ -2159,6 +2159,8 @@ function showCommentForm() {
     'click',
     () => {
 
+      const box = createCommentBox(annotation, highlight);
+      if (box) repositionCommentBoxes();
       form.classList.remove(
         'is-visible'
       );
