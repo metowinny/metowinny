@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       console.log('[Comments] Анонимный вход выполнен.');
+
     } catch (error) {
       console.error('[Comments] Ошибка анонимного входа:', error);
     }
@@ -71,13 +72,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*
    * ============================================================
-   * ВСПОМАГАТЕЛЬНЫЕ ФУНКЦИИ
+   * ПУТЬ ГЛАВЫ
    * ============================================================
    */
 
   function getChapterPath() {
     return window.location.pathname;
   }
+
+  /*
+   * ============================================================
+   * КОНТЕКСТ ВОКРУГ ВЫДЕЛЕНИЯ
+   * ============================================================
+   */
 
   function getSelectionContext(range) {
     const container = range.commonAncestorContainer;
@@ -86,10 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ? container
       : container.parentElement;
 
-    if (!element) return {
-      before: '',
-      after: ''
-    };
+    if (!element) {
+      return {
+        before: '',
+        after: ''
+      };
+    }
 
     const paragraph = element.closest(
       'p, blockquote, .epigraph, .scene-divider, li, h2, h3, h4'
@@ -127,7 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function saveCurrentSelection() {
+  /*
+   * ============================================================
+   * СОХРАНЕНИЕ ВЫДЕЛЕНИЯ
+   * ============================================================
+   */
+
+  function updateCurrentSelection() {
     const selection = window.getSelection();
 
     if (!selection || selection.rangeCount === 0) {
@@ -152,17 +167,36 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    const context = getSelectionContext(range);
-
     currentSelection = {
       text,
-      before: context.before,
-      after: context.after,
+      range,
+      ...getSelectionContext(range),
       chapterPath: getChapterPath(),
       rect
     };
 
     return true;
+  }
+
+  /*
+   * ============================================================
+   * ПОДСВЕТКА
+   * ============================================================
+   */
+
+  function highlightSelection(range) {
+    if (!range) return;
+
+    const fragment = range.cloneContents();
+
+    const wrapper = document.createElement('span');
+
+    wrapper.className = 'comment-highlight';
+
+    wrapper.appendChild(fragment);
+
+    range.deleteContents();
+    range.insertNode(wrapper);
   }
 
   /*
@@ -288,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     currentSelection = {
       text,
+      range,
       ...getSelectionContext(range),
       chapterPath: getChapterPath(),
       rect
@@ -300,10 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
    * ============================================================
    * СОЗДАНИЕ АННОТАЦИИ
    * ============================================================
-   *
-   * Даже если пользователь просто поставил реакцию,
-   * в comments создаётся запись самого выделенного фрагмента.
-   * content остаётся null.
    */
 
   async function createAnnotation() {
@@ -372,10 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
     button.classList.add('is-loading');
 
     try {
-      /*
-       * Если человек ещё не вошёл — пытаемся войти.
-       */
-
       if (!accessToken || !currentUserId) {
         await signInAnonymously();
       }
@@ -386,15 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       }
 
-      /*
-       * Создаём запись выбранного фрагмента.
-       */
-
       const annotation = await createAnnotation();
-
-      /*
-       * Добавляем реакцию 💜.
-       */
 
       const response = await fetch(
         `${SUPABASE_URL}/rest/v1/reactions`,
@@ -425,19 +444,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       /*
-       * Маленькая визуальная реакция панели.
+       * Сразу подсвечиваем выбранный текст.
        */
+
+      highlightSelection(currentSelection.range);
 
       button.classList.remove('is-loading');
       button.classList.add('is-selected');
 
       setTimeout(() => {
         removeToolbar();
+        window.getSelection()?.removeAllRanges();
+        currentSelection = null;
       }, 300);
 
       console.log(
         '[Comments] 💜 сохранено:',
-        currentSelection.text
+        annotation.selected_text
       );
 
     } catch (error) {
@@ -450,8 +473,104 @@ document.addEventListener('DOMContentLoaded', () => {
       button.classList.remove('is-loading');
 
       button.title = 'Не удалось сохранить';
+
     } finally {
       isSendingReaction = false;
+    }
+  }
+
+  /*
+   * ============================================================
+   * ЗАГРУЗКА СОХРАНЁННЫХ АННОТАЦИЙ
+   * ============================================================
+   */
+
+  async function loadSavedHighlights() {
+    if (!accessToken) return;
+
+    try {
+      const chapterPath = encodeURIComponent(
+        getChapterPath()
+      );
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/comments?chapter_path=eq.${chapterPath}&status=eq.active&select=id,selected_text,context_before,context_after`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      const annotations = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          annotations.message ||
+          'Не удалось загрузить аннотации.'
+        );
+      }
+
+      annotations.forEach(annotation => {
+        highlightSavedText(annotation);
+      });
+
+    } catch (error) {
+      console.error(
+        '[Comments] Ошибка загрузки подсветок:',
+        error
+      );
+    }
+  }
+
+  /*
+   * ============================================================
+   * ПОИСК СОХРАНЁННОГО ТЕКСТА
+   * ============================================================
+   */
+
+  function highlightSavedText(annotation) {
+    const target = annotation.selected_text;
+
+    if (!target) return;
+
+    const walker = document.createTreeWalker(
+      reader,
+      NodeFilter.SHOW_TEXT
+    );
+
+    let node;
+
+    while (node = walker.nextNode()) {
+      const text = node.nodeValue;
+
+      const index = text.indexOf(target);
+
+      if (index === -1) continue;
+
+      /*
+       * Уже подсвечено.
+       */
+
+      if (
+        node.parentElement &&
+        node.parentElement.closest('.comment-highlight')
+      ) {
+        continue;
+      }
+
+      const range = document.createRange();
+
+      range.setStart(node, index);
+      range.setEnd(
+        node,
+        index + target.length
+      );
+
+      highlightSelection(range);
+
+      break;
     }
   }
 
@@ -468,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener(
     'mousedown',
-    (event) => {
+    event => {
       if (
         selectionToolbar &&
         !selectionToolbar.contains(event.target)
@@ -488,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener(
     'click',
-    (event) => {
+    event => {
       const reactionButton =
         event.target.closest(
           '.comment-selection-toolbar__reaction[data-reaction="heart"]'
@@ -502,24 +621,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener(
     'scroll',
-    () => {
-      removeToolbar();
-    },
+    removeToolbar,
     { passive: true }
   );
 
   window.addEventListener(
     'resize',
-    () => {
-      removeToolbar();
-    }
+    removeToolbar
   );
 
   /*
    * ============================================================
-   * СТАРТ
+   * ЗАПУСК
    * ============================================================
    */
 
-  signInAnonymously();
+  async function init() {
+    await signInAnonymously();
+
+    await loadSavedHighlights();
+  }
+
+  init();
 });
