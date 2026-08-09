@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
 
   function highlightSelection(range) {
-    if (!range) return;
+    if (!range) return null;
 
     const fragment = range.cloneContents();
 
@@ -197,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     range.deleteContents();
     range.insertNode(wrapper);
+
+    return wrapper;
   }
 
   /*
@@ -386,6 +388,250 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*
    * ============================================================
+   * ПОЛУЧЕНИЕ КОЛИЧЕСТВА РЕАКЦИЙ
+   * ============================================================
+   */
+
+  async function getReactionCount(commentId) {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/reactions?comment_id=eq.${encodeURIComponent(commentId)}&reaction_type=eq.heart&select=id`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'count=exact'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Не удалось получить количество реакций.');
+    }
+
+    const contentRange =
+      response.headers.get('Content-Range');
+
+    if (contentRange) {
+      const total = contentRange.split('/')[1];
+
+      if (total !== '*') {
+        return Number(total);
+      }
+    }
+
+    const data = await response.json();
+
+    return Array.isArray(data)
+      ? data.length
+      : 0;
+  }
+
+  /*
+   * ============================================================
+   * МАРКЕР РЕАКЦИИ
+   * ============================================================
+   */
+
+  function createReactionMarker(annotation, count, highlight) {
+    if (!highlight) return;
+
+    const marker = document.createElement('button');
+
+    marker.type = 'button';
+    marker.className = 'comment-reaction-marker';
+
+    marker.dataset.commentId = annotation.id;
+
+    marker.innerHTML = `
+      <span class="comment-reaction-marker__emoji">💜</span>
+      <span class="comment-reaction-marker__count">${count}</span>
+    `;
+
+    marker.title =
+      count === 1
+        ? '1 реакция'
+        : `${count} реакций`;
+
+    /*
+     * Сам marker не вставляем внутрь .reader.
+     * Он будет плавать относительно выделенного текста.
+     */
+
+    document.body.appendChild(marker);
+
+    positionReactionMarker(marker, highlight);
+
+    requestAnimationFrame(() => {
+      marker.classList.add('is-visible');
+    });
+
+    return marker;
+  }
+
+  function positionReactionMarker(marker, highlight) {
+    if (!marker || !highlight) return;
+
+    const rect = highlight.getBoundingClientRect();
+
+    const markerWidth = marker.offsetWidth;
+    const gap = 18;
+
+    let left = rect.right + gap;
+
+    /*
+     * Если справа не хватает места,
+     * ставим маркер слева от текста.
+     */
+
+    if (
+      left + markerWidth >
+      window.innerWidth - 12
+    ) {
+      left = rect.left - markerWidth - gap;
+    }
+
+    let top =
+      rect.top +
+      rect.height / 2 -
+      marker.offsetHeight / 2;
+
+    /*
+     * Не позволяем маркеру уйти за верх/низ экрана.
+     */
+
+    top = Math.max(
+      12,
+      Math.min(
+        top,
+        window.innerHeight -
+        marker.offsetHeight -
+        12
+      )
+    );
+
+    marker.style.left = `${left}px`;
+    marker.style.top = `${top}px`;
+  }
+
+  /*
+   * ============================================================
+   * ПОДСВЕТКА СОХРАНЁННОГО ТЕКСТА
+   * ============================================================
+   */
+
+  function highlightSavedText(annotation) {
+    const target = annotation.selected_text;
+
+    if (!target) return null;
+
+    const walker = document.createTreeWalker(
+      reader,
+      NodeFilter.SHOW_TEXT
+    );
+
+    let node;
+
+    while (node = walker.nextNode()) {
+      const text = node.nodeValue;
+
+      const index = text.indexOf(target);
+
+      if (index === -1) continue;
+
+      if (
+        node.parentElement &&
+        node.parentElement.closest('.comment-highlight')
+      ) {
+        continue;
+      }
+
+      const range = document.createRange();
+
+      range.setStart(node, index);
+      range.setEnd(
+        node,
+        index + target.length
+      );
+
+      return highlightSelection(range);
+    }
+
+    return null;
+  }
+
+  /*
+   * ============================================================
+   * ЗАГРУЗКА СОХРАНЁННЫХ АННОТАЦИЙ
+   * ============================================================
+   */
+
+  async function loadSavedHighlights() {
+    if (!accessToken) return;
+
+    try {
+      const chapterPath =
+        encodeURIComponent(getChapterPath());
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/comments?chapter_path=eq.${chapterPath}&status=eq.active&select=id,selected_text,context_before,context_after`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      const annotations = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          annotations.message ||
+          'Не удалось загрузить аннотации.'
+        );
+      }
+
+      /*
+       * Каждая аннотация превращается
+       * в подсветку + маркер.
+       */
+
+      for (const annotation of annotations) {
+        const highlight =
+          highlightSavedText(annotation);
+
+        if (!highlight) continue;
+
+        try {
+          const count =
+            await getReactionCount(annotation.id);
+
+          if (count > 0) {
+            createReactionMarker(
+              annotation,
+              count,
+              highlight
+            );
+          }
+
+        } catch (error) {
+          console.error(
+            '[Comments] Ошибка загрузки реакции:',
+            error
+          );
+        }
+      }
+
+    } catch (error) {
+      console.error(
+        '[Comments] Ошибка загрузки подсветок:',
+        error
+      );
+    }
+  }
+
+  /*
+   * ============================================================
    * РЕАКЦИЯ 💜
    * ============================================================
    */
@@ -393,9 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function addHeartReaction(button) {
     if (isSendingReaction) return;
 
-    if (!currentSelection) {
-      return;
-    }
+    if (!currentSelection) return;
 
     isSendingReaction = true;
 
@@ -413,7 +657,14 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       }
 
-      const annotation = await createAnnotation();
+      const selection = currentSelection;
+
+      const annotation =
+        await createAnnotation();
+
+      /*
+       * Добавляем 💜.
+       */
 
       const response = await fetch(
         `${SUPABASE_URL}/rest/v1/reactions`,
@@ -444,17 +695,34 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       /*
-       * Сразу подсвечиваем выбранный текст.
+       * Сразу подсвечиваем текст.
        */
 
-      highlightSelection(currentSelection.range);
+      const highlight =
+        highlightSelection(selection.range);
+
+      /*
+       * И сразу создаём маркер.
+       */
+
+      if (highlight) {
+        createReactionMarker(
+          annotation,
+          1,
+          highlight
+        );
+      }
 
       button.classList.remove('is-loading');
       button.classList.add('is-selected');
 
       setTimeout(() => {
         removeToolbar();
-        window.getSelection()?.removeAllRanges();
+
+        window
+          .getSelection()
+          ?.removeAllRanges();
+
         currentSelection = null;
       }, 300);
 
@@ -481,97 +749,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*
    * ============================================================
-   * ЗАГРУЗКА СОХРАНЁННЫХ АННОТАЦИЙ
+   * ОБНОВЛЕНИЕ ПОЗИЦИИ МАРКЕРОВ
    * ============================================================
    */
 
-  async function loadSavedHighlights() {
-    if (!accessToken) return;
+  function repositionMarkers() {
+    document
+      .querySelectorAll('.comment-reaction-marker')
+      .forEach(marker => {
+        const commentId =
+          marker.dataset.commentId;
 
-    try {
-      const chapterPath = encodeURIComponent(
-        getChapterPath()
-      );
+        const highlights =
+          document.querySelectorAll(
+            '.comment-highlight'
+          );
 
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/comments?chapter_path=eq.${chapterPath}&status=eq.active&select=id,selected_text,context_before,context_after`,
-        {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${accessToken}`
+        highlights.forEach(highlight => {
+          /*
+           * Сейчас маркер соответствует ближайшему
+           * выделению. Позже здесь будет более строгая
+           * связь через data-comment-id.
+           */
+
+          if (
+            !highlight.previousElementSibling ||
+            highlight.previousElementSibling !== marker
+          ) {
+            positionReactionMarker(
+              marker,
+              highlight
+            );
           }
-        }
-      );
-
-      const annotations = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          annotations.message ||
-          'Не удалось загрузить аннотации.'
-        );
-      }
-
-      annotations.forEach(annotation => {
-        highlightSavedText(annotation);
+        });
       });
-
-    } catch (error) {
-      console.error(
-        '[Comments] Ошибка загрузки подсветок:',
-        error
-      );
-    }
-  }
-
-  /*
-   * ============================================================
-   * ПОИСК СОХРАНЁННОГО ТЕКСТА
-   * ============================================================
-   */
-
-  function highlightSavedText(annotation) {
-    const target = annotation.selected_text;
-
-    if (!target) return;
-
-    const walker = document.createTreeWalker(
-      reader,
-      NodeFilter.SHOW_TEXT
-    );
-
-    let node;
-
-    while (node = walker.nextNode()) {
-      const text = node.nodeValue;
-
-      const index = text.indexOf(target);
-
-      if (index === -1) continue;
-
-      /*
-       * Уже подсвечено.
-       */
-
-      if (
-        node.parentElement &&
-        node.parentElement.closest('.comment-highlight')
-      ) {
-        continue;
-      }
-
-      const range = document.createRange();
-
-      range.setStart(node, index);
-      range.setEnd(
-        node,
-        index + target.length
-      );
-
-      highlightSelection(range);
-
-      break;
-    }
   }
 
   /*
@@ -592,7 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectionToolbar &&
         !selectionToolbar.contains(event.target)
       ) {
-        const selection = window.getSelection();
+        const selection =
+          window.getSelection();
 
         if (
           !selection ||
@@ -621,13 +833,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener(
     'scroll',
-    removeToolbar,
+    () => {
+      removeToolbar();
+
+      document
+        .querySelectorAll(
+          '.comment-reaction-marker'
+        )
+        .forEach(marker => {
+          /*
+           * Маркеры пока остаются на месте.
+           * На следующем этапе сделаем полноценную
+           * привязку к выделениям.
+           */
+        });
+    },
     { passive: true }
   );
 
   window.addEventListener(
     'resize',
-    removeToolbar
+    repositionMarkers
   );
 
   /*
