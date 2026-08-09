@@ -149,4 +149,50 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlossary();
   }
 
+/* ---------- светящийся след за курсором ---------- */
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
+    let lastX = null, lastY = null, lastT = performance.now();
+    let lastSpawnT = 0;
+    const MAX_PARTICLES = 40;
+    let activeParticles = 0;
+
+    function spawnParticle(x, y) {
+      if (activeParticles >= MAX_PARTICLES) return;
+      activeParticles++;
+      const el = document.createElement('span');
+      const isBlue = Math.random() < 0.5;
+      el.className = 'cursor-particle ' + (isBlue ? 'cursor-particle--blue' : 'cursor-particle--pink');
+      const size = 4 + Math.random() * 5;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.setProperty('--dx', (Math.random() * 50 - 25) + 'px');
+      el.style.setProperty('--dy', (-30 - Math.random() * 35) + 'px');
+      el.style.animationDelay = (Math.random() * 90) + 'ms';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => { el.remove(); activeParticles--; });
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      const now = performance.now();
+      if (lastX === null) { lastX = e.clientX; lastY = e.clientY; lastT = now; return; }
+      const dt = now - lastT;
+      if (dt <= 0) return;
+      const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+      const speed = dist / dt;
+
+      let minInterval, burst = 1;
+      if (speed < 0.25)      { minInterval = 140; }
+      else if (speed < 1)    { minInterval = 45; }
+      else                   { minInterval = 20; burst = 2; }
+
+      if (now - lastSpawnT >= minInterval) {
+        for (let i = 0; i < burst; i++) spawnParticle(e.clientX, e.clientY);
+        lastSpawnT = now;
+      }
+      lastX = e.clientX; lastY = e.clientY; lastT = now;
+    });
+  }
+  
 });
