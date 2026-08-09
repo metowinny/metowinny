@@ -1135,3 +1135,41 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     display:none;
   }
 }
+
+/* =====================================================================
+   КОММЕНТАРИИ — подсветка отмеченного текста
+   ===================================================================== */
+
+.comment-highlight{
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(169,112,255,.04),
+      rgba(169,112,255,.13),
+      rgba(169,112,255,.04)
+    );
+
+  border-radius:3px;
+
+  box-shadow:
+    0 0 0 1px rgba(169,112,255,.025),
+    0 0 12px rgba(138,79,232,.06);
+
+  transition:
+    background .25s ease,
+    box-shadow .25s ease;
+}
+
+.comment-highlight:hover{
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(169,112,255,.07),
+      rgba(169,112,255,.19),
+      rgba(169,112,255,.07)
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(169,112,255,.08),
+    0 0 16px rgba(138,79,232,.10);
+}
