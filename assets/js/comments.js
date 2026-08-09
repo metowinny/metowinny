@@ -470,42 +470,34 @@ function createReactionMarker(annotation, count, highlight) {
   function positionReactionMarker(marker, highlight) {
   if (!marker || !highlight) return;
 
-  const rect = highlight.getBoundingClientRect();
+  const highlightRect = highlight.getBoundingClientRect();
+  const readerRect = reader.getBoundingClientRect();
 
   const scrollX = window.scrollX;
   const scrollY = window.scrollY;
 
   const gap = 18;
 
-  const markerWidth = marker.offsetWidth;
-  const markerHeight = marker.offsetHeight;
+  /*
+   * Маркер всегда находится справа
+   * от ВСЕГО блока чтения, а не от выделения.
+   */
 
   let left =
-    rect.right +
+    readerRect.right +
     scrollX +
     gap;
 
-  let top =
-    rect.top +
-    scrollY +
-    rect.height / 2 -
-    markerHeight / 2;
-
   /*
-   * Если справа от текста недостаточно места,
-   * переносим маркер на левую сторону.
+   * По вертикали сохраняем положение
+   * конкретного выделенного текста.
    */
 
-  if (
-    left + markerWidth >
-    document.documentElement.scrollWidth - 12
-  ) {
-    left =
-      rect.left +
-      scrollX -
-      markerWidth -
-      gap;
-  }
+  let top =
+    highlightRect.top +
+    scrollY +
+    highlightRect.height / 2 -
+    marker.offsetHeight / 2;
 
   marker.style.left = `${left}px`;
   marker.style.top = `${top}px`;
