@@ -1270,6 +1270,192 @@ repositionMarkers();
     return null;
   }
 
+/* =============================================================
+   ЗАГРУЗКА КОММЕНТАРИЕВ
+   ============================================================= */
+
+async function getCommentsForChapter() {
+  if (!accessToken) {
+    return [];
+  }
+
+  try {
+    const chapterPath =
+      encodeURIComponent(
+        getChapterPath()
+      );
+
+    const response =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/comments?chapter_path=eq.${chapterPath}&status=eq.active&content=not.is.null&select=id,selected_text,context_before,context_after,content,is_error_report`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization':
+              `Bearer ${accessToken}`
+          }
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        'Не удалось загрузить комментарии.'
+      );
+    }
+
+    return Array.isArray(data)
+      ? data
+      : [];
+
+  } catch (error) {
+    console.error(
+      '[Comments] Ошибка загрузки комментариев:',
+      error
+    );
+
+    return [];
+  }
+}
+
+function createCommentBox(
+  annotation,
+  highlight
+) {
+  if (!annotation || !highlight) {
+    return null;
+  }
+
+  const oldBox =
+    document.querySelector(
+      `.comment-comment[data-comment-id="${CSS.escape(annotation.id)}"]`
+    );
+
+  if (oldBox) {
+    return oldBox;
+  }
+
+  const box =
+    document.createElement('div');
+
+  box.className =
+    'comment-comment';
+
+  box.dataset.commentId =
+    annotation.id;
+
+  box.innerHTML = `
+    <div class="comment-comment__content"></div>
+
+    <div class="comment-comment__meta">
+      ${
+        annotation.is_error_report
+          ? `<span class="comment-comment__error">Сообщение об ошибке</span>`
+          : `<span>Комментарий</span>`
+      }
+    </div>
+  `;
+
+  box.querySelector(
+    '.comment-comment__content'
+  ).textContent =
+    annotation.content || '';
+
+  document.body.appendChild(box);
+
+  requestAnimationFrame(() => {
+    box.classList.add('is-visible');
+  });
+
+  return box;
+}
+
+  function positionCommentBox(
+  box,
+  highlight
+) {
+  if (!box || !highlight) {
+    return;
+  }
+
+  const highlightRect =
+    highlight.getBoundingClientRect();
+
+  const readerRect =
+    reader.getBoundingClientRect();
+
+  const scrollX =
+    window.scrollX;
+
+  const scrollY =
+    window.scrollY;
+
+  const gap = 12;
+
+  const left =
+    readerRect.right +
+    scrollX +
+    18;
+
+  const top =
+    highlightRect.top +
+    scrollY +
+    highlightRect.height / 2 -
+    box.offsetHeight / 2;
+
+  box.style.left =
+    `${left}px`;
+
+  box.style.top =
+    `${top}px`;
+}
+
+
+  async function loadSavedComments() {
+  const comments =
+    await getCommentsForChapter();
+
+  for (
+    const annotation of comments
+  ) {
+    annotationsById.set(
+      annotation.id,
+      annotation
+    );
+
+    let highlight =
+      document.querySelector(
+        `.comment-highlight[data-comment-id="${CSS.escape(annotation.id)}"]`
+      );
+
+    if (!highlight) {
+      highlight =
+        highlightSavedText(
+          annotation
+        );
+    }
+
+    if (!highlight) {
+      continue;
+    }
+
+    const box =
+      createCommentBox(
+        annotation,
+        highlight
+      );
+
+    if (box) {
+      positionCommentBox(
+        box,
+        highlight
+      );
+    }
+  }
+}
   /*
    * ============================================================
    * ЗАГРУЗКА СОХРАНЁННЫХ АННОТАЦИЙ
@@ -1718,6 +1904,32 @@ document.addEventListener(
     'resize',
     repositionMarkers
   );
+
+  window.addEventListener(
+  'resize',
+  () => {
+    document
+      .querySelectorAll(
+        '.comment-comment'
+      )
+      .forEach(box => {
+        const commentId =
+          box.dataset.commentId;
+
+        const highlight =
+          document.querySelector(
+            `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
+          );
+
+        if (highlight) {
+          positionCommentBox(
+            box,
+            highlight
+          );
+        }
+      });
+  }
+);
 
 /*
  * ============================================================
@@ -2234,16 +2446,17 @@ function showCommentForm() {
    * ============================================================
    */
 
-  async function init() {
-    const signedIn =
-      await signInAnonymously();
+async function init() {
+  const signedIn =
+    await signInAnonymously();
 
-    if (!signedIn) {
-      return;
-    }
-
-    await loadSavedHighlights();
+  if (!signedIn) {
+    return;
   }
 
-  init();
+  await loadSavedHighlights();
+  await loadSavedComments();
+}
+
+init();
 });
