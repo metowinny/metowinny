@@ -337,6 +337,7 @@ a{ color: inherit; text-decoration: none; }
   text-shadow: 0 0 22px rgba(169,112,255,.55);
   text-transform:uppercase;
   letter-spacing:.02em;
+position:relative;
 
   animation: neon-title-flicker 1.2s ease-out 1;
 }
@@ -413,6 +414,84 @@ a{ color: inherit; text-decoration: none; }
   }
 }
 
+.title-spark{
+  position:absolute;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:
+    0 0 5px 1px rgba(169,112,255,.9),
+    0 0 10px rgba(169,112,255,.55);
+
+  opacity:0;
+  pointer-events:none;
+
+  animation:title-spark-burst 1.6s ease-out 1;
+}
+
+.title-spark--1{
+  left:18%;
+  top:45%;
+  --spark-x:-18px;
+  --spark-y:-20px;
+  animation-delay:.08s;
+}
+
+.title-spark--2{
+  left:36%;
+  top:25%;
+  --spark-x:12px;
+  --spark-y:-27px;
+  animation-delay:.16s;
+}
+
+.title-spark--3{
+  left:53%;
+  top:55%;
+  --spark-x:20px;
+  --spark-y:-16px;
+  animation-delay:.04s;
+}
+
+.title-spark--4{
+  left:72%;
+  top:30%;
+  --spark-x:-10px;
+  --spark-y:-24px;
+  animation-delay:.22s;
+}
+
+.title-spark--5{
+  left:87%;
+  top:52%;
+  --spark-x:16px;
+  --spark-y:-13px;
+  animation-delay:.12s;
+}
+
+@keyframes title-spark-burst{
+  0%{
+    opacity:0;
+    transform:translate(0,0) scale(.3);
+  }
+
+  12%{
+    opacity:1;
+    transform:translate(0,0) scale(1.2);
+  }
+
+  45%{
+    opacity:.9;
+  }
+
+  100%{
+    opacity:0;
+    transform:
+      translate(var(--spark-x), var(--spark-y))
+      scale(.2);
+  }
+}
 
 .reader{
   font-family: var(--font-serif); font-size: 20px; line-height: 1.85; color: var(--text-main);
