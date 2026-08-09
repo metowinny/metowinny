@@ -1022,3 +1022,116 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     0 0 18px rgba(169,112,255,.55);
      transform:translateY(1px);
 }
+
+/* =====================================================================
+   КОММЕНТАРИИ — панель выделения текста
+   ===================================================================== */
+
+.comment-selection-toolbar{
+  position:fixed;
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  gap:4px;
+
+  padding:6px;
+
+  background:rgba(20,14,30,.94);
+  border:1px solid rgba(169,112,255,.35);
+  border-radius:12px;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.45),
+    0 0 18px rgba(138,79,232,.18);
+
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+
+  opacity:0;
+  transform:translateY(6px) scale(.97);
+
+  pointer-events:none;
+
+  transition:
+    opacity .16s ease,
+    transform .16s ease;
+}
+
+.comment-selection-toolbar.is-visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+
+.comment-selection-toolbar button{
+  border:0;
+  background:none;
+  cursor:pointer;
+
+  color:var(--text-main);
+  font-family:var(--font-ui);
+
+  transition:
+    transform .15s ease,
+    background .15s ease;
+}
+
+.comment-selection-toolbar__reaction{
+  width:32px;
+  height:32px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:8px !important;
+  font-size:17px;
+}
+
+.comment-selection-toolbar__reaction:hover{
+  background:rgba(169,112,255,.12);
+  transform:scale(1.15);
+}
+
+.comment-selection-toolbar__divider{
+  width:1px;
+  height:22px;
+  margin:0 4px;
+
+  background:var(--line);
+}
+
+.comment-selection-toolbar__comment{
+  display:flex;
+  align-items:center;
+  gap:7px;
+
+  height:32px;
+  padding:0 10px;
+
+  border-radius:8px !important;
+
+  color:var(--text-dim) !important;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.comment-selection-toolbar__comment:hover{
+  background:rgba(169,112,255,.10) !important;
+  color:#fff !important;
+}
+
+.comment-selection-toolbar__comment span:first-child{
+  font-size:15px;
+}
+
+@media (max-width:700px){
+  .comment-selection-toolbar{
+    max-width:calc(100vw - 24px);
+  }
+
+  .comment-selection-toolbar__comment span:last-child{
+    display:none;
+  }
+}
