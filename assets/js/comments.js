@@ -1455,7 +1455,6 @@ function createCommentBox(
       );
     }
   }
-      repositionCommentBoxes(); }
 }
   /*
    * ============================================================
@@ -1800,61 +1799,6 @@ function repositionMarkers() {
       top,
       height: item.height
     });
-  });
-}
-
-  function repositionCommentBoxes() {
-  const boxes = Array.from(
-    document.querySelectorAll('.comment-comment')
-  );
-
-  const items = [];
-
-  boxes.forEach(box => {
-    const commentId = box.dataset.commentId;
-    if (!commentId) return;
-
-    const highlight = document.querySelector(
-      `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
-    );
-    if (!highlight) return;
-
-    const highlightRect = highlight.getBoundingClientRect();
-    const readerRect = reader.getBoundingClientRect();
-
-    const baseTop =
-      highlightRect.top +
-      window.scrollY +
-      highlightRect.height / 2 -
-      box.offsetHeight / 2;
-
-    const left = readerRect.right + window.scrollX + 18;
-
-    items.push({ box, left, baseTop, height: box.offsetHeight });
-  });
-
-  items.sort((a, b) => a.baseTop - b.baseTop);
-
-  const GAP = 14;
-  const placed = [];
-
-  items.forEach(item => {
-    let top = item.baseTop;
-
-    for (const previous of placed) {
-      const overlaps =
-        top < previous.top + previous.height + GAP &&
-        top + item.height + GAP > previous.top;
-
-      if (overlaps) {
-        top = previous.top + previous.height + GAP;
-      }
-    }
-
-    item.box.style.left = `${item.left}px`;
-    item.box.style.top = `${top}px`;
-
-    placed.push({ top, height: item.height });
   });
 }
   /*
@@ -2215,8 +2159,6 @@ function showCommentForm() {
     'click',
     () => {
 
-      const box = createCommentBox(annotation, highlight);
-      if (box) repositionCommentBoxes();
       form.classList.remove(
         'is-visible'
       );
