@@ -1649,37 +1649,62 @@ function repositionMarkers() {
     }
   );
 
-  document.addEventListener(
-    'click',
-    async event => {
-      const selectionReaction =
-        event.target.closest(
-          '.comment-selection-toolbar__reaction'
-        );
+document.addEventListener(
+  'click',
+  async event => {
 
-      if (selectionReaction) {
-        await handleSelectionReaction(
-          selectionReaction
-        );
-        return;
-      }
+    const selectionReaction =
+      event.target.closest(
+        '.comment-selection-toolbar__reaction'
+      );
 
-      const markerReaction =
-        event.target.closest(
-          '.comment-reaction-marker__item'
-        );
-
-      if (markerReaction) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        await handleMarkerClick(
-          markerReaction
-        );
-        return;
-      }
+    if (selectionReaction) {
+      await handleSelectionReaction(
+        selectionReaction
+      );
+      return;
     }
-  );
+
+
+    // ========================================================
+    // КНОПКА «ДОБАВИТЬ КОММЕНТАРИЙ»
+    // ========================================================
+
+    const commentButton =
+      event.target.closest(
+        '.comment-selection-toolbar__comment'
+      );
+
+    if (commentButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!currentSelection) {
+        return;
+      }
+
+      showCommentForm();
+
+      return;
+    }
+
+
+    const markerReaction =
+      event.target.closest(
+        '.comment-reaction-marker__item'
+      );
+
+    if (markerReaction) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      await handleMarkerClick(
+        markerReaction
+      );
+      return;
+    }
+  }
+);
 
   window.addEventListener(
     'scroll',
@@ -1694,6 +1719,515 @@ function repositionMarkers() {
     repositionMarkers
   );
 
+/*
+ * ============================================================
+ * ФОРМА ДОБАВЛЕНИЯ КОММЕНТАРИЯ
+ * ============================================================
+ */
+
+function showCommentForm() {
+
+  if (!currentSelection) {
+    return;
+  }
+
+  /*
+   * Сохраняем выделение отдельно.
+   * removeToolbar() ниже уничтожит только панель,
+   * но само выделение браузера нам ещё понадобится.
+   */
+
+  const selectionData = {
+    text:
+      currentSelection.text,
+
+    before:
+      currentSelection.before,
+
+    after:
+      currentSelection.after,
+
+    chapterPath:
+      currentSelection.chapterPath
+  };
+
+  const selectionRect =
+    currentSelection.rect;
+
+
+  /*
+   * Убираем панель реакций.
+   */
+
+  removeToolbar();
+
+
+  /*
+   * Если форма уже существует —
+   * удаляем старую.
+   */
+
+  const oldForm =
+    document.querySelector(
+      '.comment-form'
+    );
+
+  if (oldForm) {
+    oldForm.remove();
+  }
+
+
+  /*
+   * Создаём форму.
+   */
+
+  const form =
+    document.createElement('div');
+
+  form.className =
+    'comment-form';
+
+  form.innerHTML = `
+    <div class="comment-form__title">
+      Добавить комментарий
+    </div>
+
+    <p class="comment-form__hint">
+      Здесь можно оставить мысль,
+      реакцию или сообщить об ошибке
+      в тексте.
+    </p>
+
+    <textarea
+      class="comment-form__textarea"
+      placeholder="Что вы хотите сказать?"
+      maxlength="2000"
+    ></textarea>
+
+    <div class="comment-form__options">
+      <label class="comment-form__check">
+        <input
+          type="checkbox"
+          class="comment-form__error-check"
+          checked
+        >
+
+        <span>
+          Сообщить об ошибке
+        </span>
+      </label>
+    </div>
+
+    <div class="comment-form__actions">
+
+      <button
+        type="button"
+        class="comment-form__button comment-form__button--cancel"
+      >
+        Отмена
+      </button>
+
+      <button
+        type="button"
+        class="comment-form__button comment-form__button--submit"
+      >
+        Отправить
+      </button>
+
+    </div>
+
+    <div
+      class="comment-form__error"
+      hidden
+    ></div>
+  `;
+
+  document.body.appendChild(form);
+
+
+  /*
+   * Элементы формы.
+   */
+
+  const textarea =
+    form.querySelector(
+      '.comment-form__textarea'
+    );
+
+  const errorBox =
+    form.querySelector(
+      '.comment-form__error'
+    );
+
+  const cancelButton =
+    form.querySelector(
+      '.comment-form__button--cancel'
+    );
+
+  const submitButton =
+    form.querySelector(
+      '.comment-form__button--submit'
+    );
+
+  const errorCheck =
+    form.querySelector(
+      '.comment-form__error-check'
+    );
+
+
+  /*
+   * Позиционирование формы
+   * относительно выделенного текста.
+   */
+
+  const formWidth = 360;
+  const padding = 12;
+
+  let left =
+    selectionRect.left +
+    selectionRect.width / 2 -
+    formWidth / 2;
+
+  let top =
+    selectionRect.bottom + 12;
+
+  left =
+    Math.max(
+      padding,
+      Math.min(
+        left,
+        window.innerWidth -
+        formWidth -
+        padding
+      )
+    );
+
+
+  /*
+   * Если снизу мало места —
+   * показываем форму над выделением.
+   */
+
+  if (
+    top + 300 >
+    window.innerHeight
+  ) {
+    top =
+      selectionRect.top -
+      312;
+  }
+
+  form.style.left =
+    `${left}px`;
+
+  form.style.top =
+    `${Math.max(12, top)}px`;
+
+
+  /*
+   * Плавное появление.
+   */
+
+  requestAnimationFrame(() => {
+
+    form.classList.add(
+      'is-visible'
+    );
+
+    textarea.focus();
+
+  });
+
+
+  /*
+   * ОТМЕНА
+   */
+
+  cancelButton.addEventListener(
+    'click',
+    () => {
+
+      form.classList.remove(
+        'is-visible'
+      );
+
+      setTimeout(
+        () => form.remove(),
+        180
+      );
+
+    }
+  );
+
+
+  /*
+   * ОТПРАВКА
+   */
+
+  submitButton.addEventListener(
+    'click',
+    async () => {
+
+      const content =
+        textarea.value.trim();
+
+      if (!content) {
+        textarea.focus();
+        return;
+      }
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        'Отправка…';
+
+      errorBox.hidden =
+        true;
+
+
+      try {
+
+        /*
+         * На всякий случай проверяем,
+         * что анонимная сессия существует.
+         */
+
+        if (
+          !accessToken ||
+          !currentUserId
+        ) {
+
+          const signedIn =
+            await signInAnonymously();
+
+          if (!signedIn) {
+            throw new Error(
+              'Не удалось подключиться к системе комментариев.'
+            );
+          }
+
+        }
+
+
+        /*
+         * Создаём комментарий.
+         *
+         * Используем ту же REST-схему,
+         * которую уже использует createAnnotation().
+         */
+
+        const response =
+          await fetch(
+            `${SUPABASE_URL}/rest/v1/comments`,
+            {
+              method: 'POST',
+
+              headers: {
+                'apikey':
+                  SUPABASE_KEY,
+
+                'Authorization':
+                  `Bearer ${accessToken}`,
+
+                'Content-Type':
+                  'application/json',
+
+                'Prefer':
+                  'return=representation'
+              },
+
+              body:
+                JSON.stringify({
+
+                  chapter_path:
+                    selectionData.chapterPath,
+
+                  selected_text:
+                    selectionData.text,
+
+                  context_before:
+                    selectionData.before,
+
+                  context_after:
+                    selectionData.after,
+
+                  content:
+                    content,
+
+                  user_id:
+                    currentUserId,
+
+                  status:
+                    'active',
+
+                  is_error_report:
+                    errorCheck.checked
+
+                })
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            data.details ||
+            data.error_description ||
+            'Не удалось сохранить комментарий.'
+          );
+
+        }
+
+
+        /*
+         * Supabase возвращает массив,
+         * потому что мы попросили
+         * return=representation.
+         */
+
+        const annotation =
+          data[0];
+
+
+        if (!annotation) {
+          throw new Error(
+            'Supabase не вернул созданный комментарий.'
+          );
+        }
+
+
+        /*
+         * Сохраняем аннотацию
+         * в локальное состояние.
+         */
+
+        annotationsById.set(
+          annotation.id,
+          annotation
+        );
+
+
+        /*
+         * Подсвечиваем тот же текст,
+         * к которому относится комментарий.
+         */
+
+        const currentRange =
+          window.getSelection();
+
+        let highlight = null;
+
+
+        /*
+         * Если выделение ещё существует —
+         * используем его напрямую.
+         */
+
+        if (
+          currentRange &&
+          currentRange.rangeCount > 0
+        ) {
+
+          const range =
+            currentRange.getRangeAt(0);
+
+          if (
+            reader.contains(
+              range.commonAncestorContainer
+            )
+          ) {
+
+            highlight =
+              highlightSelection(
+                range,
+                annotation.id
+              );
+
+          }
+
+        }
+
+
+        /*
+         * Если браузер уже потерял выделение,
+         * пробуем найти текст заново.
+         */
+
+        if (!highlight) {
+
+          highlight =
+            highlightSavedText(
+              annotation
+            );
+
+        }
+
+
+        console.log(
+          '[Comments] 💬 комментарий сохранён:',
+          annotation
+        );
+
+
+        /*
+         * Закрываем форму.
+         */
+
+        form.classList.remove(
+          'is-visible'
+        );
+
+        setTimeout(
+          () => form.remove(),
+          180
+        );
+
+
+        /*
+         * Очищаем браузерное выделение
+         * и текущее состояние.
+         */
+
+        window
+          .getSelection()
+          ?.removeAllRanges();
+
+        currentSelection =
+          null;
+
+
+      } catch (error) {
+
+        console.error(
+          '[Comments] Ошибка сохранения комментария:',
+          error
+        );
+
+        errorBox.textContent =
+          'Не удалось отправить комментарий. Попробуйте ещё раз.';
+
+        errorBox.hidden =
+          false;
+
+        submitButton.disabled =
+          false;
+
+        submitButton.textContent =
+          'Отправить';
+
+      }
+
+    }
+  );
+
+}
+  
   /*
    * ============================================================
    * ЗАПУСК
