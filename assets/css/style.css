@@ -1179,7 +1179,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ===================================================================== */
 
 .comment-reaction-marker{
-  position:fixed;
+  position:absolute;
   z-index:9998;
 
   display:flex;
