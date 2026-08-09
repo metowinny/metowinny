@@ -184,22 +184,26 @@ document.addEventListener('DOMContentLoaded', () => {
    * ============================================================
    */
 
-  function highlightSelection(range) {
-    if (!range) return null;
+  function highlightSelection(range, commentId = null) {
+  if (!range) return null;
 
-    const fragment = range.cloneContents();
+  const fragment = range.cloneContents();
 
-    const wrapper = document.createElement('span');
+  const wrapper = document.createElement('span');
 
-    wrapper.className = 'comment-highlight';
+  wrapper.className = 'comment-highlight';
 
-    wrapper.appendChild(fragment);
-
-    range.deleteContents();
-    range.insertNode(wrapper);
-
-    return wrapper;
+  if (commentId) {
+    wrapper.dataset.commentId = commentId;
   }
+
+  wrapper.appendChild(fragment);
+
+  range.deleteContents();
+  range.insertNode(wrapper);
+
+  return wrapper;
+}
 
   /*
    * ============================================================
@@ -432,87 +436,80 @@ document.addEventListener('DOMContentLoaded', () => {
    * ============================================================
    */
 
-  function createReactionMarker(annotation, count, highlight) {
-    if (!highlight) return;
+function createReactionMarker(annotation, count, highlight) {
+  if (!highlight) return null;
 
-    const marker = document.createElement('button');
+  const marker = document.createElement('button');
 
-    marker.type = 'button';
-    marker.className = 'comment-reaction-marker';
+  marker.type = 'button';
+  marker.className = 'comment-reaction-marker';
 
-    marker.dataset.commentId = annotation.id;
+  marker.dataset.commentId = annotation.id;
 
-    marker.innerHTML = `
-      <span class="comment-reaction-marker__emoji">💜</span>
-      <span class="comment-reaction-marker__count">${count}</span>
-    `;
+  marker.innerHTML = `
+    <span class="comment-reaction-marker__emoji">💜</span>
+    <span class="comment-reaction-marker__count">${count}</span>
+  `;
 
-    marker.title =
-      count === 1
-        ? '1 реакция'
-        : `${count} реакций`;
+  marker.title =
+    count === 1
+      ? '1 реакция'
+      : `${count} реакций`;
 
-    /*
-     * Сам marker не вставляем внутрь .reader.
-     * Он будет плавать относительно выделенного текста.
-     */
+  document.body.appendChild(marker);
 
-    document.body.appendChild(marker);
+  positionReactionMarker(marker, highlight);
 
-    positionReactionMarker(marker, highlight);
+  requestAnimationFrame(() => {
+    marker.classList.add('is-visible');
+  });
 
-    requestAnimationFrame(() => {
-      marker.classList.add('is-visible');
-    });
-
-    return marker;
-  }
+  return marker;
+}
 
   function positionReactionMarker(marker, highlight) {
-    if (!marker || !highlight) return;
+  if (!marker || !highlight) return;
 
-    const rect = highlight.getBoundingClientRect();
+  const rect = highlight.getBoundingClientRect();
 
-    const markerWidth = marker.offsetWidth;
-    const gap = 18;
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
 
-    let left = rect.right + gap;
+  const gap = 18;
 
-    /*
-     * Если справа не хватает места,
-     * ставим маркер слева от текста.
-     */
+  const markerWidth = marker.offsetWidth;
+  const markerHeight = marker.offsetHeight;
 
-    if (
-      left + markerWidth >
-      window.innerWidth - 12
-    ) {
-      left = rect.left - markerWidth - gap;
-    }
+  let left =
+    rect.right +
+    scrollX +
+    gap;
 
-    let top =
-      rect.top +
-      rect.height / 2 -
-      marker.offsetHeight / 2;
+  let top =
+    rect.top +
+    scrollY +
+    rect.height / 2 -
+    markerHeight / 2;
 
-    /*
-     * Не позволяем маркеру уйти за верх/низ экрана.
-     */
+  /*
+   * Если справа от текста недостаточно места,
+   * переносим маркер на левую сторону.
+   */
 
-    top = Math.max(
-      12,
-      Math.min(
-        top,
-        window.innerHeight -
-        marker.offsetHeight -
-        12
-      )
-    );
-
-    marker.style.left = `${left}px`;
-    marker.style.top = `${top}px`;
+  if (
+    left + markerWidth >
+    document.documentElement.scrollWidth - 12
+  ) {
+    left =
+      rect.left +
+      scrollX -
+      markerWidth -
+      gap;
   }
 
+  marker.style.left = `${left}px`;
+  marker.style.top = `${top}px`;
+}
   /*
    * ============================================================
    * ПОДСВЕТКА СОХРАНЁННОГО ТЕКСТА
@@ -553,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         index + target.length
       );
 
-      return highlightSelection(range);
+      return highlightSelection(range, annotation.id);
     }
 
     return null;
@@ -699,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
        */
 
       const highlight =
-        highlightSelection(selection.range);
+  highlightSelection(selection.range, annotation.id);
 
       /*
        * И сразу создаём маркер.
@@ -754,36 +751,28 @@ document.addEventListener('DOMContentLoaded', () => {
    */
 
   function repositionMarkers() {
-    document
-      .querySelectorAll('.comment-reaction-marker')
-      .forEach(marker => {
-        const commentId =
-          marker.dataset.commentId;
+  document
+    .querySelectorAll('.comment-reaction-marker')
+    .forEach(marker => {
 
-        const highlights =
-          document.querySelectorAll(
-            '.comment-highlight'
-          );
+      const commentId =
+        marker.dataset.commentId;
 
-        highlights.forEach(highlight => {
-          /*
-           * Сейчас маркер соответствует ближайшему
-           * выделению. Позже здесь будет более строгая
-           * связь через data-comment-id.
-           */
+      if (!commentId) return;
 
-          if (
-            !highlight.previousElementSibling ||
-            highlight.previousElementSibling !== marker
-          ) {
-            positionReactionMarker(
-              marker,
-              highlight
-            );
-          }
-        });
-      });
-  }
+      const highlight =
+        document.querySelector(
+          `.comment-highlight[data-comment-id="${CSS.escape(commentId)}"]`
+        );
+
+      if (!highlight) return;
+
+      positionReactionMarker(
+        marker,
+        highlight
+      );
+    });
+}
 
   /*
    * ============================================================
@@ -831,25 +820,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   );
 
-  window.addEventListener(
-    'scroll',
-    () => {
-      removeToolbar();
-
-      document
-        .querySelectorAll(
-          '.comment-reaction-marker'
-        )
-        .forEach(marker => {
-          /*
-           * Маркеры пока остаются на месте.
-           * На следующем этапе сделаем полноценную
-           * привязку к выделениям.
-           */
-        });
-    },
-    { passive: true }
-  );
+window.addEventListener(
+  'scroll',
+  () => {
+    removeToolbar();
+  },
+  { passive: true }
+);
 
   window.addEventListener(
     'resize',
