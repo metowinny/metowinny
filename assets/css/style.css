@@ -2236,14 +2236,14 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    СТИХОТВОРНЫЕ / ПЕСЕННЫЕ СТРОКИ
    ========================================================= */
 
-.verse-epigraph {
+.reader .verse-epigraph {
   display: block;
 
   width: 75%;
   max-width: 75%;
   margin: 2em 0 2em auto;
 
-  text-align: right;
+  text-align: right !important;
 
   font-family: var(--font-body);
   font-size: .95em;
