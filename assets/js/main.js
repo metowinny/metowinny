@@ -197,68 +197,65 @@ document.addEventListener('DOMContentLoaded', () => {
   
 });
 
-/*
-   * ============================================================
-   * НЕСТАБИЛЬНЫЙ ТЕКСТ
-   * ============================================================
-   *
-   * Использование:
-   *
-   * <span class="unstable-slow">текст</span>
-   * <span class="unstable-medium">текст</span>
-   * <span class="unstable-fast">текст</span>
-   *
-   * Скрипт разбивает текст на отдельные буквы,
-   * чтобы каждая буква могла двигаться независимо.
-   */
+/* ============================================================
+   ДРОЖАЩИЙ ТЕКСТ
+   Автоматически разбивает текст внутри .shake-* на буквы.
+   ============================================================ */
 
-  const unstableTexts =
+document.addEventListener('DOMContentLoaded', () => {
+
+  const shakeElements =
     document.querySelectorAll(
-      '.unstable-slow, .unstable-medium, .unstable-fast'
+      '.shake-slow, .shake-medium, .shake-fast'
     );
 
-  unstableTexts.forEach(element => {
+  shakeElements.forEach(element => {
 
-    /*
-     * Не обрабатываем один и тот же элемент повторно.
-     */
-    if (
-      element.dataset.unstableReady === 'true'
-    ) {
-      return;
-    }
+    const text =
+      element.textContent;
 
-    element.dataset.unstableReady = 'true';
-
-    /*
-     * Сохраняем исходный текст.
-     */
-    const text = element.textContent;
-
-    /*
-     * Очищаем элемент.
-     */
     element.textContent = '';
 
-    /*
-     * Создаём отдельный span для каждого символа.
-     */
     [...text].forEach(char => {
 
-      const letter =
+      const span =
         document.createElement('span');
 
-      letter.className =
-        'unstable-letter';
+      span.textContent = char;
+
+      span.style.display = 'inline-block';
 
       /*
-       * Пробелы нельзя оставлять полностью пустыми,
-       * иначе браузер может схлопнуть их.
+       * Небольшая индивидуальная задержка.
+       * Благодаря ей буквы не двигаются
+       * синхронно друг с другом.
        */
-      letter.textContent =
-        char === ' ' ? '\u00A0' : char;
 
-      element.appendChild(letter);
+      const delay =
+        (Math.random() * 0.35).toFixed(2);
+
+      span.style.animationDelay =
+        `-${delay}s`;
+
+      /*
+       * Каждая буква получает тот же
+       * класс скорости, что и родитель.
+       */
+
+      if (element.classList.contains('shake-slow')) {
+        span.classList.add('shake-slow');
+      }
+
+      if (element.classList.contains('shake-medium')) {
+        span.classList.add('shake-medium');
+      }
+
+      if (element.classList.contains('shake-fast')) {
+        span.classList.add('shake-fast');
+      }
+
+      element.appendChild(span);
+
     });
 
   });
