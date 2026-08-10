@@ -199,65 +199,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ============================================================
    ДРОЖАЩИЙ ТЕКСТ
-   Автоматически разбивает текст внутри .shake-* на буквы.
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  const shakeElements =
-    document.querySelectorAll(
+  document
+    .querySelectorAll(
       '.shake-slow, .shake-medium, .shake-fast'
-    );
+    )
+    .forEach(element => {
 
-  shakeElements.forEach(element => {
+      const text =
+        element.textContent;
 
-    const text =
-      element.textContent;
+      element.textContent = '';
 
-    element.textContent = '';
+      [...text].forEach(char => {
 
-    [...text].forEach(char => {
+        const span =
+          document.createElement('span');
 
-      const span =
-        document.createElement('span');
+        span.textContent = char;
 
-      span.textContent = char;
+        /*
+         * Каждая буква начинает цикл
+         * с немного разной точки.
+         */
 
-      span.style.display = 'inline-block';
+        span.style.animationDelay =
+          `-${(Math.random() * 0.35).toFixed(2)}s`;
 
-      /*
-       * Небольшая индивидуальная задержка.
-       * Благодаря ей буквы не двигаются
-       * синхронно друг с другом.
-       */
+        element.appendChild(span);
 
-      const delay =
-        (Math.random() * 0.35).toFixed(2);
-
-      span.style.animationDelay =
-        `-${delay}s`;
-
-      /*
-       * Каждая буква получает тот же
-       * класс скорости, что и родитель.
-       */
-
-      if (element.classList.contains('shake-slow')) {
-        span.classList.add('shake-slow');
-      }
-
-      if (element.classList.contains('shake-medium')) {
-        span.classList.add('shake-medium');
-      }
-
-      if (element.classList.contains('shake-fast')) {
-        span.classList.add('shake-fast');
-      }
-
-      element.appendChild(span);
+      });
 
     });
-
-  });
 
 });
