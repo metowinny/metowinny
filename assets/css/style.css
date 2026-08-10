@@ -860,12 +860,11 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   box-shadow:
     inset 0 0 30px rgba(169,112,255,.06);
 
-  /* лёгкая хроматическая аберрация */
   text-shadow:
-    -1px 0 rgba(255, 70, 180, .32),
-     1px 0 rgba(70, 210, 255, .32);
+    -2px 0 rgba(255, 45, 180, .65),
+     2px 0 rgba(40, 220, 255, .65);
 
-  animation: console-chromatic 5s ease-in-out infinite;
+  animation: console-chromatic 4s ease-in-out infinite;
 }
 
 .console-block p{
@@ -881,34 +880,42 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   text-indent: 0;
 }
 
-/* очень лёгкое "подрагивание" цветовых каналов */
+
+/* Хроматическое "дыхание" консоли */
 @keyframes console-chromatic{
   0%, 100%{
     text-shadow:
-      -1px 0 rgba(255, 70, 180, .28),
-       1px 0 rgba(70, 210, 255, .28);
+      -2px 0 rgba(255, 45, 180, .60),
+       2px 0 rgba(40, 220, 255, .60);
   }
 
-  25%{
+  20%{
     text-shadow:
-      -1.3px .2px rgba(255, 70, 180, .34),
-       .8px -.2px rgba(70, 210, 255, .30);
+      -3px .4px rgba(255, 45, 180, .78),
+       2px -.3px rgba(40, 220, 255, .72);
   }
 
-  50%{
+  40%{
     text-shadow:
-      -.7px -.1px rgba(255, 70, 180, .25),
-       1.2px .1px rgba(70, 210, 255, .36);
+      -1px -.2px rgba(255, 45, 180, .48),
+       3px .2px rgba(40, 220, 255, .80);
   }
 
-  75%{
+  60%{
     text-shadow:
-      -1.1px .1px rgba(255, 70, 180, .31),
-       .7px -.1px rgba(70, 210, 255, .27);
+      -3px .2px rgba(255, 45, 180, .72),
+       1px -.2px rgba(40, 220, 255, .52);
+  }
+
+  80%{
+    text-shadow:
+      -2px -.3px rgba(255, 45, 180, .68),
+       3px .3px rgba(40, 220, 255, .76);
   }
 }
 
-/* мигающий курсор */
+
+/* Курсор */
 .console-block p:last-child::after{
   content:"▌";
   margin-left: 4px;
