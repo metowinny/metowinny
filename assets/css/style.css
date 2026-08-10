@@ -618,6 +618,106 @@ position:relative;
    color:var(--violet-300);
    text-shadow:0 0 14px rgba(169,112,255,.6);
 }
+
+/* =========================================================
+   НЕСТАБИЛЬНЫЙ ТЕКСТ — подрагивающие / качающиеся буквы
+   ========================================================= */
+
+.unstable-text__char {
+  display: inline-block;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+
+/* МЕДЛЕННО — лёгкое покачивание */
+
+.unstable-text--slow .unstable-text__char {
+  animation-name: unstable-letter-slow;
+  animation-duration: 1.8s;
+  animation-delay: var(--delay);
+}
+
+@keyframes unstable-letter-slow {
+  0% {
+    transform:
+      translate(
+        calc(-0.8px * var(--intensity)),
+        calc(-0.5px * var(--intensity))
+      )
+      rotate(calc(-0.3deg * var(--intensity)));
+  }
+
+  100% {
+    transform:
+      translate(
+        calc(0.8px * var(--intensity)),
+        calc(0.5px * var(--intensity))
+      )
+      rotate(calc(0.3deg * var(--intensity)));
+  }
+}
+
+
+/* СРЕДНЕ — заметная нервная нестабильность */
+
+.unstable-text--medium .unstable-text__char {
+  animation-name: unstable-letter-medium;
+  animation-duration: 0.75s;
+  animation-delay: var(--delay);
+}
+
+@keyframes unstable-letter-medium {
+  0% {
+    transform:
+      translate(
+        calc(-1px * var(--intensity)),
+        calc(-0.8px * var(--intensity))
+      )
+      rotate(calc(-0.5deg * var(--intensity)));
+  }
+
+  100% {
+    transform:
+      translate(
+        calc(1px * var(--intensity)),
+        calc(0.8px * var(--intensity))
+      )
+      rotate(calc(0.5deg * var(--intensity)));
+  }
+}
+
+
+/* БЫСТРО — мелкая, почти паническая вибрация */
+
+.unstable-text--fast .unstable-text__char {
+  animation-name: unstable-letter-fast;
+  animation-duration: 0.22s;
+  animation-delay: var(--delay);
+}
+
+@keyframes unstable-letter-fast {
+  0% {
+    transform:
+      translate(
+        calc(-1.2px * var(--intensity)),
+        calc(-0.8px * var(--intensity))
+      )
+      rotate(calc(-0.7deg * var(--intensity)));
+  }
+
+  100% {
+    transform:
+      translate(
+        calc(1.2px * var(--intensity)),
+        calc(0.8px * var(--intensity))
+      )
+      rotate(calc(0.7deg * var(--intensity)));
+  }
+}
+
+
 .reader em{ font-style:italic; }
 .reader strong{ color:#fff; }
 
