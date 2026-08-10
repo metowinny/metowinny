@@ -722,6 +722,244 @@ position:relative;
   }
 }
 
+/* ============================================================
+   ПОТЕРЯ СОЗНАНИЯ / ЗАТУХАНИЕ ВОСПРИЯТИЯ
+   ============================================================ */
+
+/*
+ * Базовый вариант:
+ * текст начинает теряться, но всё ещё читается.
+ */
+.fading-text {
+  color: var(--text-main);
+  opacity: .48;
+  filter: blur(.45px);
+  transition:
+    opacity .5s ease,
+    filter .5s ease;
+}
+
+
+/*
+ * Сильнее:
+ * буквы становятся заметно размытыми.
+ */
+.fading-text--blur {
+  opacity: .32;
+  filter: blur(1.2px);
+}
+
+
+/*
+ * Почти потеря сознания:
+ * текст уже приходится буквально вылавливать глазами.
+ */
+.fading-text--deep {
+  opacity: .18;
+  filter: blur(2px);
+}
+
+
+/*
+ * Текст как будто "проваливается":
+ * можно использовать для отдельных слов/фраз.
+ */
+.fading-text--vanish {
+  opacity: .08;
+  filter: blur(3px);
+}
+
+
+/* ============================================================
+   ПЛАВНОЕ "ПЛЫВУЩЕЕ" ИСЧЕЗНОВЕНИЕ
+   ============================================================ */
+
+.fading-text--breathing {
+  animation: fading-breath 4s ease-in-out infinite;
+}
+
+@keyframes fading-breath {
+  0%, 100% {
+    opacity: .18;
+    filter: blur(1.5px);
+  }
+
+  50% {
+    opacity: .38;
+    filter: blur(.7px);
+  }
+}
+
+
+/* ============================================================
+   ВЕРХНИЙ / НИЖНИЙ "ПРОВАЛ" СТРАНИЦЫ
+   ============================================================ */
+
+/*
+ * Обёртка для фрагмента текста.
+ *
+ * Она создаёт ощущение, будто край зрения
+ * постепенно становится тёмным.
+ */
+.consciousness-fade {
+  position: relative;
+}
+
+
+/*
+ * Затемнение сверху.
+ */
+.consciousness-fade--top::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+
+  left: -5%;
+  right: -5%;
+  top: -1em;
+
+  height: 90px;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 12, .92),
+    rgba(5, 7, 12, .55),
+    transparent
+  );
+}
+
+
+/*
+ * Затемнение снизу.
+ */
+.consciousness-fade--bottom::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+
+  left: -5%;
+  right: -5%;
+  bottom: -1em;
+
+  height: 100px;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    to top,
+    rgba(5, 7, 12, .92),
+    rgba(5, 7, 12, .55),
+    transparent
+  );
+}
+
+
+/*
+ * Если хочется затемнить оба края.
+ */
+.consciousness-fade--both::before,
+.consciousness-fade--both::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+
+  left: -5%;
+  right: -5%;
+
+  pointer-events: none;
+}
+
+.consciousness-fade--both::before {
+  top: -1em;
+  height: 90px;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 12, .92),
+    transparent
+  );
+}
+
+.consciousness-fade--both::after {
+  bottom: -1em;
+  height: 100px;
+
+  background: linear-gradient(
+    to top,
+    rgba(5, 7, 12, .92),
+    transparent
+  );
+}
+
+
+/* ============================================================
+   СИЛЬНАЯ ПОТЕРЯ ВОСПРИЯТИЯ
+   ============================================================ */
+
+/*
+ * Когда персонаж уже практически ничего не воспринимает.
+ */
+.consciousness-fade--heavy::before,
+.consciousness-fade--heavy::after {
+  opacity: .9;
+}
+
+
+/*
+ * Сам текст внутри начинает теряться вместе
+ * с затемнением.
+ */
+.consciousness-fade--heavy {
+  color: rgba(255,255,255,.45);
+}
+
+.consciousness-fade--heavy p {
+  filter: blur(.8px);
+  opacity: .55;
+}
+
+
+/* ============================================================
+   ЛЁГКОЕ "ПЛЫВУЩЕЕ" ВОСПРИЯТИЕ
+   ============================================================ */
+
+.consciousness-fade--unstable {
+  animation: consciousness-pulse 5s ease-in-out infinite;
+}
+
+@keyframes consciousness-pulse {
+  0%, 100% {
+    opacity: .85;
+    filter: blur(0);
+  }
+
+  50% {
+    opacity: .65;
+    filter: blur(.35px);
+  }
+}
+
+
+/* ============================================================
+   СОВСЕМ УЖЕ УХОДИТ В ТЕМНОТУ
+   ============================================================ */
+
+.consciousness-fade--collapse {
+  animation: consciousness-collapse 4s ease-in-out infinite;
+}
+
+@keyframes consciousness-collapse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .45;
+  }
+}
+
 /* "почерки" — рукописные шрифты для реплик/списков персонажей, все с поддержкой кириллицы */
 .fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--text-main); }
 .fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: #B99FDF; display:inline-block; }
