@@ -740,13 +740,117 @@ position:relative;
 .footnote-tip::after{ content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border: 6px solid transparent; border-top-color: var(--violet-400); }
 .footnote.is-open .footnote-tip, .footnote:hover .footnote-tip{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
 
-.chapter-foot-nav{ display:flex; justify-content:space-between; gap:16px; margin-top: 70px; padding-top: 30px; border-top: 1px solid var(--line); flex-wrap:wrap; }
-.chapter-top-nav{ display:flex; justify-content:space-between; gap:16px; margin: 4px 0 44px; padding-bottom: 24px; border-bottom: 1px solid var(--line); flex-wrap:wrap; }
-.chapter-foot-nav__side{ flex:1; min-width:160px; }
-.chapter-foot-nav__side.next{ text-align:right; }
-.chapter-foot-nav__label{ font-family: var(--font-ui); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color: var(--text-faint); display:block; margin-bottom:6px; }
-.chapter-foot-nav__title{ font-family: var(--font-display); font-size:15px; color: var(--violet-300); }
-.chapter-foot-nav a:hover .chapter-foot-nav__title{ color:#fff; }
+/* =========================================================
+   НАВИГАЦИЯ МЕЖДУ ГЛАВАМИ
+   ========================================================= */
+
+.chapter-foot-nav{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  margin-top:70px;
+  padding-top:30px;
+  border-top:1px solid var(--line);
+  flex-wrap:wrap;
+}
+
+.chapter-top-nav{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  margin:4px 0 44px;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+
+.chapter-foot-nav__side{
+  flex:1;
+  min-width:160px;
+}
+
+.chapter-foot-nav__side.next{
+  text-align:right;
+}
+
+.chapter-foot-nav__label{
+  font-family:var(--font-ui);
+  font-size:11px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  display:block;
+  margin-bottom:6px;
+
+  transition:
+    color .25s ease,
+    letter-spacing .25s ease;
+}
+
+.chapter-foot-nav__title{
+  font-family:var(--font-display);
+  font-size:15px;
+  color:var(--violet-300);
+
+  transition:
+    color .25s ease,
+    text-shadow .25s ease;
+}
+
+
+/* =========================================================
+   ССЫЛКИ
+   ========================================================= */
+
+.chapter-top-nav a,
+.chapter-foot-nav a{
+  display:inline-block;
+  text-decoration:none;
+
+  transition:
+    transform .25s ease,
+    opacity .25s ease;
+}
+
+
+/* Наведение */
+
+.chapter-top-nav a:hover,
+.chapter-foot-nav a:hover{
+  transform:translateY(-3px);
+}
+
+
+/* Название главы */
+
+.chapter-top-nav a:hover .chapter-foot-nav__title,
+.chapter-foot-nav a:hover .chapter-foot-nav__title{
+  color:#fff;
+
+  text-shadow:
+    0 0 12px rgba(169,112,255,.3);
+}
+
+
+/* Маленькая подпись "Назад / Далее" */
+
+.chapter-top-nav a:hover .chapter-foot-nav__label,
+.chapter-foot-nav a:hover .chapter-foot-nav__label{
+  color:var(--violet-300);
+  letter-spacing:.19em;
+}
+
+
+/* Нажатие */
+
+.chapter-top-nav a:active,
+.chapter-foot-nav a:active{
+  transform:
+    translateY(1px)
+    scale(.985);
+
+  transition-duration:.08s;
+}
 
 .reader-tools{ position: sticky; top: 78px; z-index: 20; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom: 30px; }
 .reader-tools .icon-btn{ background: var(--bg-panel); }
