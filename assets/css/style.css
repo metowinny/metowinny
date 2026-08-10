@@ -664,6 +664,42 @@ position:relative;
 .fx-small{ font-size:.82em; }
 .fx-large{ font-size:1.25em; }
 
+.fx-echo {
+  color: var(--text-main);
+  font-style: italic;
+
+  animation:
+    fx-echo-breathe 6s ease-in-out infinite;
+}
+
+@keyframes fx-echo-breathe {
+
+  0%,
+  100% {
+    text-shadow:
+      -0.4px 0 rgba(255, 70, 150, 0.25),
+       0.4px 0 rgba(80, 220, 255, 0.25);
+  }
+
+  25% {
+    text-shadow:
+      -0.8px 0 rgba(255, 70, 150, 0.35),
+       0.8px 0 rgba(80, 220, 255, 0.35);
+  }
+
+  50% {
+    text-shadow:
+      -1.5px 0 rgba(255, 70, 150, 0.5),
+       1.5px 0 rgba(80, 220, 255, 0.5);
+  }
+
+  75% {
+    text-shadow:
+      -0.8px 0 rgba(255, 70, 150, 0.35),
+       0.8px 0 rgba(80, 220, 255, 0.35);
+  }
+}
+
 /* "почерки" — рукописные шрифты для реплик/списков персонажей, все с поддержкой кириллицы */
 .fx-hand-1{ font-family: 'Neucha', cursive; font-size: 1.25em; color: var(--text-main); }
 .fx-hand-2{ font-family: 'Marck Script', cursive; font-size: 1.2em; color: #B99FDF; display:inline-block; }
