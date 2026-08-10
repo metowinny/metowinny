@@ -221,11 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         span.textContent = char;
 
-        /*
-         * Каждая буква начинает цикл
-         * с немного разной точки.
-         */
-
         span.style.animationDelay =
           `-${(Math.random() * 0.35).toFixed(2)}s`;
 
