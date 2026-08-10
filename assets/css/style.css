@@ -654,16 +654,16 @@ position:relative;
 
 @keyframes shake-slow {
   0%, 100% {
-    top: 0;
+    top: .1;
     left: 0;
   }
   25% {
     top: .4px;
-    left: -.35px;
+    left: -.44px;
   }
   50% {
     top: -.5px;
-    left: .44px;
+    left: .50px;
   }
   75% {
     top: .35px;
