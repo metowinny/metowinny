@@ -2287,7 +2287,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     text-shadow:
       0 0 6px var(--entity-glow),
       0 0 15px var(--entity-glow),
-      0 0 28px var(--entity-glow);
+      0 0 33px var(--entity-glow);
   }
 }
 
@@ -2298,7 +2298,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ============================================================ */
 
 .entity-dream {
-  --entity-color: #a9cbd8;
+  --entity-color: #7eb5ee;
   --entity-glow: rgba(145, 210, 230, 0.42);
 }
 
