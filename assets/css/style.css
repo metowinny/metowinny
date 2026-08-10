@@ -619,101 +619,106 @@ position:relative;
    text-shadow:0 0 14px rgba(169,112,255,.6);
 }
 
-/* =========================================================
-   НЕСТАБИЛЬНЫЙ ТЕКСТ — подрагивающие / качающиеся буквы
-   ========================================================= */
+/* ============================================================
+   ДРОЖАЩИЙ ТЕКСТ
+   ============================================================ */
 
-.unstable-text__char {
-  display: inline-block;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-  animation-timing-function: ease-in-out;
+.shake-slow,
+.shake-medium,
+.shake-fast{
+  display:inline-block;
+  will-change:transform;
+}
+
+/* Медленное покачивание */
+.shake-slow{
+  animation: shake-slow 2.8s ease-in-out infinite;
+}
+
+/* Среднее */
+.shake-medium{
+  animation: shake-medium .9s ease-in-out infinite;
+}
+
+/* Быстрое дрожание */
+.shake-fast{
+  animation: shake-fast .22s ease-in-out infinite;
 }
 
 
-/* МЕДЛЕННО — лёгкое покачивание */
-
-.unstable-text--slow .unstable-text__char {
-  animation-name: unstable-letter-slow;
-  animation-duration: 1.8s;
-  animation-delay: var(--delay);
-}
-
-@keyframes unstable-letter-slow {
-  0% {
-    transform:
-      translate(
-        calc(-0.8px * var(--intensity)),
-        calc(-0.5px * var(--intensity))
-      )
-      rotate(calc(-0.3deg * var(--intensity)));
+@keyframes shake-slow{
+  0%,100%{
+    transform:translate(0, 0) rotate(0deg);
   }
 
-  100% {
-    transform:
-      translate(
-        calc(0.8px * var(--intensity)),
-        calc(0.5px * var(--intensity))
-      )
-      rotate(calc(0.3deg * var(--intensity)));
-  }
-}
-
-
-/* СРЕДНЕ — заметная нервная нестабильность */
-
-.unstable-text--medium .unstable-text__char {
-  animation-name: unstable-letter-medium;
-  animation-duration: 0.75s;
-  animation-delay: var(--delay);
-}
-
-@keyframes unstable-letter-medium {
-  0% {
-    transform:
-      translate(
-        calc(-1px * var(--intensity)),
-        calc(-0.8px * var(--intensity))
-      )
-      rotate(calc(-0.5deg * var(--intensity)));
+  25%{
+    transform:translate(-0.35px, 0.25px) rotate(-0.35deg);
   }
 
-  100% {
-    transform:
-      translate(
-        calc(1px * var(--intensity)),
-        calc(0.8px * var(--intensity))
-      )
-      rotate(calc(0.5deg * var(--intensity)));
+  50%{
+    transform:translate(0.4px, -0.3px) rotate(0.3deg);
+  }
+
+  75%{
+    transform:translate(-0.2px, 0.35px) rotate(-0.2deg);
   }
 }
 
 
-/* БЫСТРО — мелкая, почти паническая вибрация */
-
-.unstable-text--fast .unstable-text__char {
-  animation-name: unstable-letter-fast;
-  animation-duration: 0.22s;
-  animation-delay: var(--delay);
-}
-
-@keyframes unstable-letter-fast {
-  0% {
-    transform:
-      translate(
-        calc(-1.2px * var(--intensity)),
-        calc(-0.8px * var(--intensity))
-      )
-      rotate(calc(-0.7deg * var(--intensity)));
+@keyframes shake-medium{
+  0%,100%{
+    transform:translate(0, 0) rotate(0deg);
   }
 
-  100% {
-    transform:
-      translate(
-        calc(1.2px * var(--intensity)),
-        calc(0.8px * var(--intensity))
-      )
-      rotate(calc(0.7deg * var(--intensity)));
+  20%{
+    transform:translate(-0.7px, 0.5px) rotate(-0.6deg);
+  }
+
+  40%{
+    transform:translate(0.8px, -0.4px) rotate(0.5deg);
+  }
+
+  60%{
+    transform:translate(-0.6px, -0.6px) rotate(-0.4deg);
+  }
+
+  80%{
+    transform:translate(0.5px, 0.4px) rotate(0.5deg);
+  }
+}
+
+
+@keyframes shake-fast{
+  0%{
+    transform:translate(0,0) rotate(0deg);
+  }
+
+  25%{
+    transform:translate(-1px,0.7px) rotate(-1deg);
+  }
+
+  50%{
+    transform:translate(1px,-0.6px) rotate(1deg);
+  }
+
+  75%{
+    transform:translate(-0.8px,-0.5px) rotate(-.7deg);
+  }
+
+  100%{
+    transform:translate(0,0) rotate(0deg);
+  }
+}
+
+
+/* Если у пользователя отключена анимация —
+   текст остаётся обычным. */
+
+@media (prefers-reduced-motion: reduce){
+  .shake-slow,
+  .shake-medium,
+  .shake-fast{
+    animation:none;
   }
 }
 
