@@ -196,3 +196,71 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
 });
+
+/*
+   * ============================================================
+   * НЕСТАБИЛЬНЫЙ ТЕКСТ
+   * ============================================================
+   *
+   * Использование:
+   *
+   * <span class="unstable-slow">текст</span>
+   * <span class="unstable-medium">текст</span>
+   * <span class="unstable-fast">текст</span>
+   *
+   * Скрипт разбивает текст на отдельные буквы,
+   * чтобы каждая буква могла двигаться независимо.
+   */
+
+  const unstableTexts =
+    document.querySelectorAll(
+      '.unstable-slow, .unstable-medium, .unstable-fast'
+    );
+
+  unstableTexts.forEach(element => {
+
+    /*
+     * Не обрабатываем один и тот же элемент повторно.
+     */
+    if (
+      element.dataset.unstableReady === 'true'
+    ) {
+      return;
+    }
+
+    element.dataset.unstableReady = 'true';
+
+    /*
+     * Сохраняем исходный текст.
+     */
+    const text = element.textContent;
+
+    /*
+     * Очищаем элемент.
+     */
+    element.textContent = '';
+
+    /*
+     * Создаём отдельный span для каждого символа.
+     */
+    [...text].forEach(char => {
+
+      const letter =
+        document.createElement('span');
+
+      letter.className =
+        'unstable-letter';
+
+      /*
+       * Пробелы нельзя оставлять полностью пустыми,
+       * иначе браузер может схлопнуть их.
+       */
+      letter.textContent =
+        char === ' ' ? '\u00A0' : char;
+
+      element.appendChild(letter);
+    });
+
+  });
+
+});
