@@ -665,38 +665,47 @@ position:relative;
 .fx-large{ font-size:1.25em; }
 
 .fx-echo {
-  color: var(--text-main);
-  font-style: italic;
+  position: relative;
+  display: inline;
 
-  animation:
-    fx-echo-breathe 6s ease-in-out infinite;
+  color: var(--text-main);
+  opacity: 0.42;
+
+  text-shadow:
+    -1px 0 rgba(255, 50, 150, 0.55),
+     1px 0 rgba(40, 220, 255, 0.55);
+
+  animation: chromatic-breathe 4s ease-in-out infinite;
 }
 
-@keyframes fx-echo-breathe {
-
+@keyframes chromatic-breathe {
   0%,
   100% {
+    opacity: 0.4;
     text-shadow:
-      -0.4px 0 rgba(255, 70, 150, 0.25),
-       0.4px 0 rgba(80, 220, 255, 0.25);
+      -1px 0 rgba(255, 50, 150, 0.45),
+       1px 0 rgba(40, 220, 255, 0.45);
   }
 
-  25% {
+  20% {
+    opacity: 0.46;
     text-shadow:
-      -0.8px 0 rgba(255, 70, 150, 0.35),
-       0.8px 0 rgba(80, 220, 255, 0.35);
+      -3px 0 rgba(255, 50, 150, 0.85),
+       1px 0 rgba(40, 220, 255, 0.55);
   }
 
   50% {
+    opacity: 0.52;
     text-shadow:
-      -1.5px 0 rgba(255, 70, 150, 0.5),
-       1.5px 0 rgba(80, 220, 255, 0.5);
+      -1px 0 rgba(255, 50, 150, 0.6),
+       3px 0 rgba(40, 220, 255, 0.95);
   }
 
-  75% {
+  80% {
+    opacity: 0.43;
     text-shadow:
-      -0.8px 0 rgba(255, 70, 150, 0.35),
-       0.8px 0 rgba(80, 220, 255, 0.35);
+      -2px 0 rgba(255, 50, 150, 0.7),
+       2px 0 rgba(40, 220, 255, 0.7);
   }
 }
 
