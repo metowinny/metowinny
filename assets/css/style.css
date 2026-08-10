@@ -653,27 +653,15 @@ position:relative;
 
 
 @keyframes shake-slow {
-
-  0%, 100% {
-    top: 0;
-    left: 0;
-  }
-
-  25% {
-    top: .3px;
-    left: -.35px;
-  }
-
-  50% {
-    top: -.3px;
-    left: .4px;
-  }
-
-  75% {
-    top: .35px;
-    left: -.2px;
-  }
-
+  0%   { transform: translate(0.60px, 0px); }
+  12.5%{ transform: translate(0.42px, 0.42px); }
+  25%  { transform: translate(0px, 0.60px); }
+  37.5%{ transform: translate(-0.42px, 0.42px); }
+  50%  { transform: translate(-0.60px, 0px); }
+  62.5%{ transform: translate(-0.42px, -0.42px); }
+  75%  { transform: translate(0px, -0.60px); }
+  87.5%{ transform: translate(0.42px, -0.42px); }
+  100% { transform: translate(0.60px, 0px); }
 }
 
 
