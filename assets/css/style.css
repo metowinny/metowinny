@@ -633,13 +633,10 @@ position:relative;
 
 /* Медленное покачивание */
 
-.shake-slow {
-  display: inline-block;
-  animation:
-    text-shake-slow 4.5s ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-  will-change: transform;
+.shake-slow > span {
+  animation: shake-slow 2.8s ease-in-out infinite;
 }
+
 
 /* Среднее дрожание */
 
@@ -655,44 +652,30 @@ position:relative;
 }
 
 
-@keyframes text-shake-slow {
+@keyframes shake-slow {
 
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-
-  12.5% {
-    transform: translate(4px, -5px) rotate(2deg);
+  0%, 100% {
+    top: 0;
+    left: 0;
   }
 
   25% {
-    transform: translate(6px, -1px) rotate(4deg);
-  }
-
-  37.5% {
-    transform: translate(4px, 5px) rotate(3deg);
+    top: .3px;
+    left: -.35px;
   }
 
   50% {
-    transform: translate(-1px, 6px) rotate(0deg);
-  }
-
-  62.5% {
-    transform: translate(-4px, 4px) rotate(-3deg);
+    top: -.3px;
+    left: .4px;
   }
 
   75% {
-    transform: translate(-6px, -1px) rotate(-4deg);
+    top: .35px;
+    left: -.2px;
   }
 
-  87.5% {
-    transform: translate(-3px, -5px) rotate(-2deg);
-  }
-
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
 }
+
 
 @keyframes shake-medium {
 
