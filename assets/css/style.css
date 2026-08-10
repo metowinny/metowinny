@@ -623,126 +623,124 @@ position:relative;
    ДРОЖАЩИЙ ТЕКСТ
    ============================================================ */
 
-.shake-slow,
-.shake-medium,
-.shake-fast{
-  display:inline-block;
-}
-
 .shake-slow > span,
 .shake-medium > span,
-.shake-fast > span{
-  display:inline-block;
+.shake-fast > span {
+  position: relative;
+  display: inline;
 }
 
 
-/* Медленно */
+/* Медленное покачивание */
 
-.shake-slow > span{
-  animation:
-    shake-slow 2.8s ease-in-out infinite;
+.shake-slow > span {
+  animation: shake-slow 2.8s ease-in-out infinite;
 }
 
 
-/* Средне */
+/* Среднее дрожание */
 
-.shake-medium > span{
-  animation:
-    shake-medium .9s ease-in-out infinite;
+.shake-medium > span {
+  animation: shake-medium .9s ease-in-out infinite;
 }
 
 
-/* Быстро */
+/* Быстрое дрожание */
 
-.shake-fast > span{
-  animation:
-    shake-fast .22s ease-in-out infinite;
+.shake-fast > span {
+  animation: shake-fast .22s ease-in-out infinite;
 }
 
 
-@keyframes shake-slow{
-  0%,100%{
-    transform:translate(0,0) rotate(0deg);
+@keyframes shake-slow {
+
+  0%, 100% {
+    top: 0;
+    left: 0;
   }
 
-  25%{
-    transform:translate(-0.35px,0.25px)
-               rotate(-0.35deg);
+  25% {
+    top: .3px;
+    left: -.35px;
   }
 
-  50%{
-    transform:translate(0.4px,-0.3px)
-               rotate(0.3deg);
+  50% {
+    top: -.3px;
+    left: .4px;
   }
 
-  75%{
-    transform:translate(-0.2px,0.35px)
-               rotate(-0.2deg);
+  75% {
+    top: .35px;
+    left: -.2px;
   }
+
 }
 
 
-@keyframes shake-medium{
-  0%,100%{
-    transform:translate(0,0) rotate(0deg);
+@keyframes shake-medium {
+
+  0%, 100% {
+    top: 0;
+    left: 0;
   }
 
-  20%{
-    transform:translate(-0.7px,0.5px)
-               rotate(-0.6deg);
+  20% {
+    top: .5px;
+    left: -.7px;
   }
 
-  40%{
-    transform:translate(0.8px,-0.4px)
-               rotate(0.5deg);
+  40% {
+    top: -.4px;
+    left: .8px;
   }
 
-  60%{
-    transform:translate(-0.6px,-0.6px)
-               rotate(-0.4deg);
+  60% {
+    top: -.6px;
+    left: -.6px;
   }
 
-  80%{
-    transform:translate(0.5px,0.4px)
-               rotate(0.5deg);
+  80% {
+    top: .4px;
+    left: .5px;
   }
+
 }
 
 
-@keyframes shake-fast{
-  0%{
-    transform:translate(0,0) rotate(0deg);
+@keyframes shake-fast {
+
+  0%, 100% {
+    top: 0;
+    left: 0;
   }
 
-  25%{
-    transform:translate(-1px,0.7px)
-               rotate(-1deg);
+  25% {
+    top: .7px;
+    left: -1px;
   }
 
-  50%{
-    transform:translate(1px,-0.6px)
-               rotate(1deg);
+  50% {
+    top: -.6px;
+    left: 1px;
   }
 
-  75%{
-    transform:translate(-0.8px,-0.5px)
-               rotate(-0.7deg);
+  75% {
+    top: -.5px;
+    left: -.8px;
   }
 
-  100%{
-    transform:translate(0,0) rotate(0deg);
-  }
 }
 
 
-@media (prefers-reduced-motion: reduce){
+@media (prefers-reduced-motion: reduce) {
+
   .shake-slow > span,
   .shake-medium > span,
-  .shake-fast > span{
-    animation:none;
+  .shake-fast > span {
+    animation: none;
   }
-}
 
+}
 
 .reader em{ font-style:italic; }
 .reader strong{ color:#fff; }
