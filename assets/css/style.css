@@ -2286,8 +2286,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   50% {
     text-shadow:
-      0 0 5px var(--entity-glow),
-      0 0 13px var(--entity-glow);
+      0 0 7px var(--entity-glow),
+      0 0 16px var(--entity-glow);
   }
 }
 
