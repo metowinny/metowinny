@@ -2231,3 +2231,21 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     display:none;
   }
 }
+
+.verse-epigraph {
+  margin: 2em 0 2em auto;
+  max-width: 75%;
+
+  text-align: right;
+
+  font-family: var(--font-body);
+  font-size: .95em;
+  line-height: 1.75;
+  font-style: italic;
+
+  color: var(--text-soft);
+
+  text-shadow:
+    1px 0 0 rgba(169,112,255,.12),
+   -1px 0 0 rgba(110,180,255,.08);
+}
