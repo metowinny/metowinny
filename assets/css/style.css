@@ -627,63 +627,84 @@ position:relative;
 .shake-medium,
 .shake-fast{
   display:inline-block;
-  will-change:transform;
 }
 
-/* Медленное покачивание */
-.shake-slow{
-  animation: shake-slow 2.8s ease-in-out infinite;
+.shake-slow > span,
+.shake-medium > span,
+.shake-fast > span{
+  display:inline-block;
 }
 
-/* Среднее */
-.shake-medium{
-  animation: shake-medium .9s ease-in-out infinite;
+
+/* Медленно */
+
+.shake-slow > span{
+  animation:
+    shake-slow 2.8s ease-in-out infinite;
 }
 
-/* Быстрое дрожание */
-.shake-fast{
-  animation: shake-fast .22s ease-in-out infinite;
+
+/* Средне */
+
+.shake-medium > span{
+  animation:
+    shake-medium .9s ease-in-out infinite;
+}
+
+
+/* Быстро */
+
+.shake-fast > span{
+  animation:
+    shake-fast .22s ease-in-out infinite;
 }
 
 
 @keyframes shake-slow{
   0%,100%{
-    transform:translate(0, 0) rotate(0deg);
+    transform:translate(0,0) rotate(0deg);
   }
 
   25%{
-    transform:translate(-0.35px, 0.25px) rotate(-0.35deg);
+    transform:translate(-0.35px,0.25px)
+               rotate(-0.35deg);
   }
 
   50%{
-    transform:translate(0.4px, -0.3px) rotate(0.3deg);
+    transform:translate(0.4px,-0.3px)
+               rotate(0.3deg);
   }
 
   75%{
-    transform:translate(-0.2px, 0.35px) rotate(-0.2deg);
+    transform:translate(-0.2px,0.35px)
+               rotate(-0.2deg);
   }
 }
 
 
 @keyframes shake-medium{
   0%,100%{
-    transform:translate(0, 0) rotate(0deg);
+    transform:translate(0,0) rotate(0deg);
   }
 
   20%{
-    transform:translate(-0.7px, 0.5px) rotate(-0.6deg);
+    transform:translate(-0.7px,0.5px)
+               rotate(-0.6deg);
   }
 
   40%{
-    transform:translate(0.8px, -0.4px) rotate(0.5deg);
+    transform:translate(0.8px,-0.4px)
+               rotate(0.5deg);
   }
 
   60%{
-    transform:translate(-0.6px, -0.6px) rotate(-0.4deg);
+    transform:translate(-0.6px,-0.6px)
+               rotate(-0.4deg);
   }
 
   80%{
-    transform:translate(0.5px, 0.4px) rotate(0.5deg);
+    transform:translate(0.5px,0.4px)
+               rotate(0.5deg);
   }
 }
 
@@ -694,15 +715,18 @@ position:relative;
   }
 
   25%{
-    transform:translate(-1px,0.7px) rotate(-1deg);
+    transform:translate(-1px,0.7px)
+               rotate(-1deg);
   }
 
   50%{
-    transform:translate(1px,-0.6px) rotate(1deg);
+    transform:translate(1px,-0.6px)
+               rotate(1deg);
   }
 
   75%{
-    transform:translate(-0.8px,-0.5px) rotate(-.7deg);
+    transform:translate(-0.8px,-0.5px)
+               rotate(-0.7deg);
   }
 
   100%{
@@ -711,13 +735,10 @@ position:relative;
 }
 
 
-/* Если у пользователя отключена анимация —
-   текст остаётся обычным. */
-
 @media (prefers-reduced-motion: reduce){
-  .shake-slow,
-  .shake-medium,
-  .shake-fast{
+  .shake-slow > span,
+  .shake-medium > span,
+  .shake-fast > span{
     animation:none;
   }
 }
