@@ -658,12 +658,12 @@ position:relative;
     left: 0;
   }
   25% {
-    top: .3px;
+    top: .4px;
     left: -.35px;
   }
   50% {
-    top: -.3px;
-    left: .4px;
+    top: -.5px;
+    left: .44px;
   }
   75% {
     top: .35px;
