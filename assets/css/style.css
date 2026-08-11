@@ -306,92 +306,22 @@ a{ color: inherit; text-decoration: none; }
 }
 
 /* =========================================================
-   СНЕГ НА КАРТОЧКЕ ТОМА
+   СНЕГ НА КАРТОЧКЕ ТОМА — переработано
    ========================================================= */
 
-.tome-hero::before{
-  content: "";
-  position: absolute;
-  inset: -100px;
+.tome-hero{ overflow: hidden; } /* чтобы снег не вылезал за скруглённые углы карточки */
 
-  pointer-events: none;
-  z-index: 1;
-
-  opacity: .55;
-
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,.85) 0 2px, transparent 2.5px),
-    radial-gradient(circle, rgba(210,225,255,.65) 0 1.5px, transparent 2px),
-    radial-gradient(circle, rgba(255,255,255,.8) 0 3px, transparent 3.5px),
-    radial-gradient(circle, rgba(190,215,255,.55) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,255,255,.65) 0 2.5px, transparent 3px);
-
-  background-size:
-    170px 210px,
-    110px 150px,
-    260px 300px,
-    80px 120px,
-    210px 250px;
-
-  background-position:
-    0 0,
-    30px 40px,
-    80px 20px,
-    20px 90px,
-    120px 60px;
-
-  animation: tome-snow 12s linear infinite;
-}
-
-/* лёгкое свечение/дымка поверх снега */
+/* мягкая морозная дымка у верхнего края, без тайлов и повторов */
 .tome-hero::after{
   content: "";
   position: absolute;
   inset: 0;
-
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 
   background:
-    radial-gradient(
-      circle at 20% 10%,
-      rgba(190,215,255,.10),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(138,79,232,.08),
-      transparent 40%
-    );
-}
-
-@keyframes tome-snow{
-  0%{
-    background-position:
-      0 0,
-      30px 40px,
-      80px 20px,
-      20px 90px,
-      120px 60px;
-  }
-
-  50%{
-    background-position:
-      90px 140px,
-      -40px 120px,
-      160px 180px,
-      -30px 170px,
-      220px 150px;
-  }
-
-  100%{
-    background-position:
-      180px 280px,
-      -110px 200px,
-      240px 340px,
-      -80px 250px,
-      320px 240px;
-  }
+    radial-gradient(ellipse 70% 45% at 25% 0%, rgba(210,225,255,.10), transparent 65%),
+    radial-gradient(ellipse 60% 40% at 78% 8%, rgba(138,79,232,.08), transparent 60%);
 }
 
 /* =====================================================================
@@ -401,210 +331,98 @@ a{ color: inherit; text-decoration: none; }
 .tome-snow{
   position: absolute;
   inset: 0;
-
   overflow: hidden;
   pointer-events: none;
-
   z-index: 0;
 }
 
 .tome-snow span{
   position: absolute;
-
-  width: 5px;
-  height: 5px;
-
+  top: -10%;
   border-radius: 50%;
-
-  background: rgba(255,255,255,.72);
-
-  box-shadow:
-    0 0 6px rgba(255,255,255,.35);
-
-  opacity: .65;
-
-  animation:
-    tome-snow-fall linear infinite;
+  background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(220,232,255,.5) 45%, transparent 75%);
+  will-change: transform, opacity;
 }
 
-
-/* маленькие снежинки */
+/* три плана глубины — у каждого свой размер, резкость и своя кривая движения,
+   поэтому снежинки не двигаются "строем" */
 
 .tome-snow span:nth-child(3n){
-  width: 3px;
-  height: 3px;
-
-  opacity: .45;
+  width: 3px; height: 3px;
+  filter: blur(.6px);
+  opacity: .22;
+  animation: snow-drift-a linear infinite;
 }
-
-
-/* средние */
 
 .tome-snow span:nth-child(4n){
-  width: 8px;
-  height: 8px;
-
-  opacity: .3;
-
-  filter: blur(.5px);
+  width: 5px; height: 5px;
+  filter: blur(.25px);
+  opacity: .32;
+  animation: snow-drift-b linear infinite;
 }
-
-
-/* крупные, размытые */
 
 .tome-snow span:nth-child(5n){
-  width: 11px;
-  height: 11px;
-
-  opacity: .18;
-
-  filter: blur(1px);
+  width: 7px; height: 7px;
+  filter: blur(0px);
+  opacity: .42;
+  animation: snow-drift-c linear infinite;
 }
 
-.tome-snow span:nth-child(1){
-  left: 4%;
-  top: -20px;
-  animation-duration: 15s;
-  animation-delay: -4s;
+.tome-snow span:not(:nth-child(3n)):not(:nth-child(4n)):not(:nth-child(5n)){
+  width: 4px; height: 4px;
+  filter: blur(.4px);
+  opacity: .26;
+  animation: snow-drift-a linear infinite;
 }
 
-.tome-snow span:nth-child(2){
-  left: 11%;
-  top: -30px;
-  animation-duration: 20s;
-  animation-delay: -11s;
+.tome-snow span:nth-child(1){  left: 4%;  animation-duration: 26s; animation-delay: -4s;  }
+.tome-snow span:nth-child(2){  left: 11%; animation-duration: 31s; animation-delay: -19s; }
+.tome-snow span:nth-child(3){  left: 19%; animation-duration: 20s; animation-delay: -7s;  }
+.tome-snow span:nth-child(4){  left: 28%; animation-duration: 29s; animation-delay: -23s; }
+.tome-snow span:nth-child(5){  left: 36%; animation-duration: 15s; animation-delay: -8s;  }
+.tome-snow span:nth-child(6){  left: 45%; animation-duration: 33s; animation-delay: -12s; }
+.tome-snow span:nth-child(7){  left: 53%; animation-duration: 23s; animation-delay: -3s;  }
+.tome-snow span:nth-child(8){  left: 61%; animation-duration: 27s; animation-delay: -16s; }
+.tome-snow span:nth-child(9){  left: 69%; animation-duration: 17s; animation-delay: -9s;  }
+.tome-snow span:nth-child(10){ left: 77%; animation-duration: 35s; animation-delay: -5s;  }
+.tome-snow span:nth-child(11){ left: 84%; animation-duration: 19s; animation-delay: -13s; }
+.tome-snow span:nth-child(12){ left: 91%; animation-duration: 30s; animation-delay: -25s; }
+.tome-snow span:nth-child(13){ left: 15%; animation-duration: 32s; animation-delay: -18s; }
+.tome-snow span:nth-child(14){ left: 40%; animation-duration: 22s; animation-delay: -6s;  }
+.tome-snow span:nth-child(15){ left: 72%; animation-duration: 25s; animation-delay: -14s; }
+.tome-snow span:nth-child(16){ left: 96%; animation-duration: 18s; animation-delay: -10s; }
+
+/* три разных траектории: разная амплитуда покачивания и разный ритм,
+   плюс снежинка гаснет через opacity, не долетая до низа карточки */
+
+@keyframes snow-drift-a{
+  0%   { transform: translate(0, 0)        rotate(0deg);   opacity: 0; }
+  10%  { opacity: .28; }
+  50%  { transform: translate(16px, 45%)   rotate(150deg); opacity: .22; }
+  80%  { opacity: .08; }
+  100% { transform: translate(-6px, 80%)   rotate(300deg); opacity: 0; }
 }
 
-.tome-snow span:nth-child(3){
-  left: 19%;
-  top: -40px;
-  animation-duration: 13s;
-  animation-delay: -7s;
+@keyframes snow-drift-b{
+  0%   { transform: translate(0, 0)        rotate(0deg);    opacity: 0; }
+  12%  { opacity: .32; }
+  35%  { transform: translate(-22px, 25%)  rotate(-90deg); }
+  62%  { transform: translate(12px, 50%)   rotate(140deg);  opacity: .3; }
+  85%  { opacity: .1; }
+  100% { transform: translate(-10px, 78%)  rotate(300deg);  opacity: 0; }
 }
 
-.tome-snow span:nth-child(4){
-  left: 28%;
-  top: -20px;
-  animation-duration: 18s;
-  animation-delay: -15s;
+@keyframes snow-drift-c{
+  0%   { transform: translate(0, 0)        rotate(0deg);   opacity: 0; }
+  14%  { opacity: .42; }
+  32%  { transform: translate(18px, 18%)   rotate(70deg); }
+  58%  { transform: translate(-14px, 40%)  rotate(-60deg); opacity: .38; }
+  82%  { transform: translate(18px, 62%)   rotate(200deg); opacity: .12; }
+  100% { transform: translate(0, 82%)      rotate(340deg); opacity: 0; }
 }
 
-.tome-snow span:nth-child(5){
-  left: 36%;
-  top: -30px;
-  animation-duration: 24s;
-  animation-delay: -8s;
-}
-
-.tome-snow span:nth-child(6){
-  left: 45%;
-  top: -40px;
-  animation-duration: 16s;
-  animation-delay: -12s;
-}
-
-.tome-snow span:nth-child(7){
-  left: 53%;
-  top: -30px;
-  animation-duration: 21s;
-  animation-delay: -3s;
-}
-
-.tome-snow span:nth-child(8){
-  left: 61%;
-  top: -50px;
-  animation-duration: 14s;
-  animation-delay: -9s;
-}
-
-.tome-snow span:nth-child(9){
-  left: 69%;
-  top: -20px;
-  animation-duration: 19s;
-  animation-delay: -17s;
-}
-
-.tome-snow span:nth-child(10){
-  left: 77%;
-  top: -40px;
-  animation-duration: 23s;
-  animation-delay: -5s;
-}
-
-.tome-snow span:nth-child(11){
-  left: 84%;
-  top: -30px;
-  animation-duration: 17s;
-  animation-delay: -13s;
-}
-
-.tome-snow span:nth-child(12){
-  left: 91%;
-  top: -50px;
-  animation-duration: 26s;
-  animation-delay: -20s;
-}
-
-.tome-snow span:nth-child(13){
-  left: 15%;
-  top: -50px;
-  animation-duration: 28s;
-  animation-delay: -18s;
-}
-
-.tome-snow span:nth-child(14){
-  left: 40%;
-  top: -30px;
-  animation-duration: 22s;
-  animation-delay: -6s;
-}
-
-.tome-snow span:nth-child(15){
-  left: 72%;
-  top: -40px;
-  animation-duration: 25s;
-  animation-delay: -14s;
-}
-
-.tome-snow span:nth-child(16){
-  left: 96%;
-  top: -20px;
-  animation-duration: 18s;
-  animation-delay: -10s;
-}
-
-@keyframes tome-snow-fall{
-
-  0%{
-    transform:
-      translate3d(0, -30px, 0)
-      rotate(0deg);
-  }
-
-  25%{
-    transform:
-      translate3d(35px, 25%, 0)
-      rotate(90deg);
-  }
-
-  50%{
-    transform:
-      translate3d(-10px, 50%, 0)
-      rotate(180deg);
-  }
-
-  75%{
-    transform:
-      translate3d(45px, 75%, 0)
-      rotate(270deg);
-  }
-
-  100%{
-    transform:
-      translate3d(10px, 110%, 0)
-      rotate(360deg);
-  }
-
+@media (prefers-reduced-motion: reduce){
+  .tome-snow span{ animation: none; opacity: 0; }
 }
 
 .tome-hero__side,
