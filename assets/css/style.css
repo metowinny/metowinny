@@ -1685,8 +1685,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   background: var(--bg-void);
   border-radius: var(--radius-lg);
-  margin: 20px auto 40px;
-  padding: 32px 30px 46px;
+  margin: 10px auto 20px;
+  padding: 10px 10px 20px;
   box-shadow: 0 0 0 1px rgba(255,255,255,.5) inset, 0 24px 60px rgba(10,7,19,.5);
 }
 
@@ -2862,7 +2862,6 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     word-wrap: break-word;
   }
 
-  /* Примените паддинги ТОЛЬКО к заголовку и текст */
   .chapter-head,
   .reader p,
   .reader blockquote,
@@ -2871,16 +2870,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     padding-right: 4px;
   }
 
-  .reader p{
-    line-height: 1.8;
-  }
-   
-  body.font-xs .reader{ font-size: 15px !important; }
-  body.font-sm .reader{ font-size: 18px !important; }
-  body.font-lg .reader{ font-size: 25px !important; }
-  body.font-xl .reader{ font-size: 33px !important; }
-
-     /* В светлой теме .reader-top уже имеет собственные отступы */
+  /* В светлой теме .reader-top уже имеет собственные отступы */
   .reader-top.theme-light .chapter-head,
   .reader-top.theme-light .reader p,
   .reader-top.theme-light .reader blockquote,
@@ -2889,5 +2879,15 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     padding-right: 0;
   }
 
+  .reader p{
+    line-height: 1.8;
+  }
+
+  body.font-xs .reader{ font-size: 15px !important; }
+  body.font-sm .reader{ font-size: 18px !important; }
+  body.font-lg .reader{ font-size: 25px !important; }
+  body.font-xl .reader{ font-size: 33px !important; }
+
+}
 
 }
