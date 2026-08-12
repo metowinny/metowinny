@@ -2846,3 +2846,46 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   }
 
 }
+
+/* =========================================================
+   МОБИЛЬНАЯ ЧИТАЛКА
+   ========================================================= */
+
+@media (max-width: 700px){
+
+  /* Сам контейнер чтения */
+  .reader{
+    width: auto;
+    max-width: none;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  /* Верхняя часть главы */
+  .reader-top{
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  /* Сам текст */
+  .reader p,
+  .reader blockquote,
+  .reader .epigraph{
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  /* Чтобы длинные слова/ссылки/странные конструкции
+     не разрывали мобильную ширину */
+  .reader{
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  /* Немного более комфортная типографика */
+  .reader p{
+    font-size: 17px;
+    line-height: 1.8;
+  }
+
+}
