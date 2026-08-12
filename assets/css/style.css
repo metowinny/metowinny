@@ -2876,9 +2876,9 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     line-height: 1.8;
   }
    
-  body.font-xs .reader{ font-size: 15px; }
-  body.font-sm .reader{ font-size: 18px; }
-  body.font-lg .reader{ font-size: 25px; }
-  body.font-xl .reader{ font-size: 33px; }
+  body.font-xs .reader{ font-size: 15px !important; }
+  body.font-sm .reader{ font-size: 18px !important; }
+  body.font-lg .reader{ font-size: 25px !important; }
+  body.font-xl .reader{ font-size: 33px !important; }
 
 }
