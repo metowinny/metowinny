@@ -2792,3 +2792,57 @@ body.font-readable .reader{ font-family: var(--font-readable); }
       0 0 23px rgba(255, 255, 255, 0.45);
   }
 }
+
+/* =========================================================
+   МОБИЛЬНАЯ ШАПКА — ПОКАЗЫВАЕМ ВСЮ ИЛЛЮСТРАЦИЮ
+   ========================================================= */
+
+@media (max-width: 700px){
+
+  .hero{
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 12px 0 0;
+  }
+
+  .hero__frame{
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .hero__bg{
+    inset: 0;
+
+    /*
+     * НЕ обрезаем изображение.
+     * Вся картинка помещается целиком.
+     */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    filter:
+      saturate(1.05)
+      contrast(1.02);
+
+    /*
+     * Маска тоже должна исчезнуть:
+     * иначе края картинки будут дополнительно
+     * растворяться.
+     */
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .hero__content{
+    min-height: 0;
+    height: 100%;
+    padding: 0 18px 24px;
+
+    justify-content: flex-end;
+  }
+
+}
