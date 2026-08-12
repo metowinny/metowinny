@@ -2872,7 +2872,6 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   }
 
   .reader p{
-    font-size: 17px;
     line-height: 1.8;
   }
    
