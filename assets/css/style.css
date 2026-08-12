@@ -2875,5 +2875,10 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     font-size: 17px;
     line-height: 1.8;
   }
+   
+  body.font-xs .reader{ font-size: 15px; }
+  body.font-sm .reader{ font-size: 18px; }
+  body.font-lg .reader{ font-size: 25px; }
+  body.font-xl .reader{ font-size: 33px; }
 
 }
