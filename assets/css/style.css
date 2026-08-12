@@ -2880,4 +2880,14 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   body.font-lg .reader{ font-size: 25px !important; }
   body.font-xl .reader{ font-size: 33px !important; }
 
+     /* В светлой теме .reader-top уже имеет собственные отступы */
+  .reader-top.theme-light .chapter-head,
+  .reader-top.theme-light .reader p,
+  .reader-top.theme-light .reader blockquote,
+  .reader-top.theme-light .reader .epigraph{
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+
 }
