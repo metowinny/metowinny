@@ -2831,7 +2831,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     /*
      * Маска тоже должна исчезнуть:
      * иначе края картинки будут дополнительно
-     * растворяться.
+     * растворяться
      */
     -webkit-mask-image: none;
     mask-image: none;
