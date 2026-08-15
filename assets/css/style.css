@@ -3655,6 +3655,46 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ЛИЧНЫЕ ДАННЫЕ
    ============================================================ */
 
+.character-meta-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+
+  overflow:hidden;
+
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+
+  background:var(--line);
+}
+
+.character-meta-grid > div{
+  padding:18px;
+
+  background:var(--bg-card);
+}
+
+.character-meta-grid span{
+  display:block;
+
+  margin-bottom:7px;
+
+  font-family:var(--font-ui);
+  font-size:9px;
+  letter-spacing:.15em;
+
+  color:var(--text-faint);
+}
+
+.character-meta-grid strong{
+  display:block;
+
+  font-family:var(--font-ui);
+  font-size:13px;
+
+  color:var(--text-main);
+}
+
 
 /* ============================================================
    НИЖНЯЯ НАВИГАЦИЯ
