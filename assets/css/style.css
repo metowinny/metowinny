@@ -3012,16 +3012,16 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ------------------------------------------------------------ */
 
 .character-hero__portrait{
-  position:relative;
+  position:absolute;
+  inset:0;
   z-index:2;
-
-  min-height:700px;
 
   display:flex;
   align-items:flex-end;
   justify-content:center;
 
   overflow:hidden;
+  pointer-events:none;
 }
 
 .character-hero__portrait::before{
@@ -3042,7 +3042,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   position:relative;
   z-index:2;
 
-  width:100%;
+  width:70%;
   height:100%;
 
   object-fit:contain;
@@ -3052,7 +3052,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     drop-shadow(0 20px 35px rgba(0,0,0,.45))
     drop-shadow(0 0 35px rgba(169,112,255,.14));
 
-  transform:scale(1.03);
+  transform:scale(1.08);
 }
 
 
@@ -3104,8 +3104,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   margin:6px 0 2px;
 
   font-family:var(--font-display);
-  font-size:clamp(34px,4vw,54px);
-  line-height:1;
+  font-size:clamp(26px,3vw,42px);
+  line-height:1.05;
 
   color:#fff;
 
@@ -3113,13 +3113,17 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   text-shadow:
     0 0 24px rgba(169,112,255,.5);
+
+  overflow-wrap:anywhere;
 }
 
 .character-hero__fullname{
-  color:var(--text-faint);
+  color:var(--text-main);
   font-family:var(--font-ui);
-  font-size:13px;
-  margin-top:10px;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.02em;
+  margin-top:8px;
 }
 
 .character-name-row{
@@ -3152,12 +3156,13 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   font-family:var(--font-ui);
   font-size:11px;
+  white-space:nowrap;
 }
 
 .character-codifier__icon{
   font-size:16px;
-  color:var(--gold);
-  text-shadow:0 0 10px rgba(232,194,122,.5);
+  color:var(--violet-300);
+  text-shadow:0 0 10px rgba(169,112,255,.55);
 }
 
 
