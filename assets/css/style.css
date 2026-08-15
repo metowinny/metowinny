@@ -3176,7 +3176,7 @@ box-sizing:border-box;
    ------------------------------------------------------------ */
 
 .character-hero__aliases{
-  margin:14px 0 28px;
+  margin:11px 0 20px;
 
   color:var(--text-dim);
   font-family:var(--font-ui);
@@ -3244,11 +3244,9 @@ box-sizing:border-box;
 
 .character-stat__label{
   display:block;
-
   margin-bottom:3px;
-
   font-family:var(--font-ui);
-  font-size:9px;
+  font-size:11px;
   letter-spacing:.15em;
   color:var(--text-faint);
 }
@@ -3306,7 +3304,7 @@ box-sizing:border-box;
 
 .sonar-panel__title{
   font-family:var(--font-ui);
-  font-size:10px;
+  font-size:13px;
   letter-spacing:.16em;
   color:var(--violet-300);
 }
@@ -3318,7 +3316,7 @@ box-sizing:border-box;
 
 .sonar-rank{
   font-family:'JetBrains Mono',monospace;
-  font-size:10px;
+  font-size:13px;
   color:var(--text-faint);
 }
 
@@ -3372,7 +3370,7 @@ box-sizing:border-box;
   display:block;
 
   font-family:var(--font-ui);
-  font-size:8px;
+  font-size:10px;
   letter-spacing:.14em;
   color:var(--text-faint);
 }
