@@ -2963,6 +2963,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 .character-hero{
   position:relative;
   min-height:700px;
+padding:36px;
+box-sizing:border-box;
   display:grid;
   grid-template-columns:minmax(400px, .95fr) minmax(460px, 1.05fr);
   align-items:stretch;
@@ -3061,14 +3063,13 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ------------------------------------------------------------ */
 
 .character-hero__info{
-  position:absolute;
+  position:relative;
   z-index:4;
 
-  top:36px;
-  right:36px;
-  bottom:36px;
+  grid-column:2;
+  align-self:start;
 
-  width:42%;
+  width:100%;
   box-sizing:border-box;
 
   padding:34px;
@@ -3089,7 +3090,6 @@ body.font-readable .reader{ font-family: var(--font-readable); }
     0 20px 60px rgba(0,0,0,.28),
     inset 0 0 30px rgba(169,112,255,.035);
 }
-
 
 /* ------------------------------------------------------------
    ЗАГОЛОВОК
