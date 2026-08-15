@@ -101,12 +101,37 @@
 
     <div class="character-hero__portrait">
 
-      <img
-        src="../assets/img/characters/kenneth1.png"
-        alt="Кеннет Хилл"
-      >
+  <div class="character-hero__reference">
+    <img
+      src="../assets/img/characters/kenneth1.png"
+      alt="Кеннет Хилл — основной референс"
+    >
+  </div>
 
-    </div>
+  <div class="character-hero__reference-nav">
+
+    <button
+      type="button"
+      class="is-active"
+      data-reference="kenneth1"
+      aria-label="Основной референс"
+    ></button>
+
+    <button
+      type="button"
+      data-reference="kenneth2"
+      aria-label="Референс 2"
+    ></button>
+
+    <button
+      type="button"
+      data-reference="kenneth3"
+      aria-label="Референс 3"
+    ></button>
+
+  </div>
+
+</div>
 
 
     <div class="character-hero__info">
@@ -155,122 +180,59 @@
 
       <!-- ОСНОВНЫЕ ДАННЫЕ -->
 
-      <div class="character-stats">
+<div class="character-stats">
 
-        <div class="character-stat">
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4"/>
-              <path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/>
-            </svg>
-          </span>
+  <div class="character-stat">
+    ...
+    РАСА
+    Человек
+  </div>
 
-          <div>
-            <span class="character-stat__label">
-              РАСА
-            </span>
-            <strong>Человек</strong>
-          </div>
-        </div>
+  <div class="character-stat">
+    ...
+    ПОЛ
+    Мужской
+  </div>
 
+  <div class="character-stat">
+    ...
+    ДАТА РОЖДЕНИЯ
+    29.02.1988
+  </div>
 
-        <div class="character-stat character-stat--pair">
+  <div class="character-stat">
+    ...
+    РОСТ
+    168 см
+  </div>
 
-          <div>
-            <span class="character-stat__label">
-              ПОЛ
-            </span>
-            <strong>Мужской</strong>
-          </div>
+  <div class="character-stat">
+    ...
+    ОРГАНИЗАЦИЯ
+    Звёздное Предлуние
+    ранее
+  </div>
 
-          <div>
-            <span class="character-stat__label">
-              ГЕНДЕР
-            </span>
-            <strong>Мужской · он/его</strong>
-          </div>
+  <div class="character-stat">
+    ...
+    ТИТУЛ
+    Принц эньерский
+    де-гент
+  </div>
 
-        </div>
+  <div class="character-stat">
+    ...
+    МЕСТО РОЖДЕНИЯ
+    Хайхилл, Англия, Азора Юрико
+  </div>
 
+  <div class="character-stat">
+    ...
+    МЕСТО ЖИТЕЛЬСТВА
+    Путешествует по Деройсити
+  </div>
 
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M12 7v5l3 2"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              ВОЗРАСТ
-            </span>
-            <strong>20 лет</strong>
-          </div>
-
-        </div>
-
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3l2.7 5.5 6.3.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.4l6.3-.9z"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              ТИТУЛ
-            </span>
-            <strong>Принц эньерский</strong>
-          </div>
-
-        </div>
-
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="8"/>
-              <path d="M8 12h8M12 8v8"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              ОРГАНИЗАЦИЯ
-            </span>
-            <strong>Звёздное Предлуние</strong>
-            <small>ранее</small>
-          </div>
-
-        </div>
-
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 19V5h16v14z"/>
-              <path d="M8 9h8M8 13h5"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              РЕЛИГИЯ
-            </span>
-            <strong>
-              Католицизм · Божественный Пантеон
-            </strong>
-          </div>
-
-        </div>
-
-      </div>
+</div>
 
 
       <!-- SONAR -->
@@ -592,55 +554,6 @@
     </article>
 
   </section>
-
-
-  <!-- =========================================================
-       БИОГРАФИЧЕСКИЕ ДАННЫЕ
-       ========================================================= -->
-
-  <section class="character-section">
-
-    <div class="character-section__heading">
-
-      <span class="character-section__eyebrow">
-        PERSONAL DATA
-      </span>
-
-      <h2>Личные сведения</h2>
-
-    </div>
-
-
-    <div class="character-meta-grid">
-
-      <div>
-        <span>ДАТА РОЖДЕНИЯ</span>
-        <strong>29.02.1988</strong>
-      </div>
-
-      <div>
-        <span>МЕСТО РОЖДЕНИЯ</span>
-        <strong>
-          Хайхилл, Англия, Азора Юрико
-        </strong>
-      </div>
-
-      <div>
-        <span>МЕСТО ЖИТЕЛЬСТВА</span>
-        <strong>
-          Путешествует по Деройсити
-        </strong>
-      </div>
-
-      <div>
-        <span>РОСТ</span>
-        <strong>168 см</strong>
-      </div>
-
-    </div>
-
-  </section>
-
 
   <div class="character-page__footer">
 
