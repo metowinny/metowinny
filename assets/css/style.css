@@ -152,7 +152,7 @@ a{ color: inherit; text-decoration: none; }
 }
 .mobile-nav__platforms a svg{ width:17px; height:17px; flex:0 0 auto; opacity:.75; }
 
-/* на широких экранах список страниц дублирует то, что уже видно в шапке — прячем его,
+/* на широких экранах список дублирует то, что уже видно в шапке — прячем его,
    в выпадающем окне остаются только ссылки на другие площадки */
 @media (min-width: 880px){
   .mobile-nav__pages{ display:none; }
@@ -3061,10 +3061,15 @@ body.font-readable .reader{ font-family: var(--font-readable); }
    ------------------------------------------------------------ */
 
 .character-hero__info{
-  position:relative;
+  position:absolute;
   z-index:4;
 
-  margin:36px;
+  top:36px;
+  right:36px;
+  bottom:36px;
+
+  width:42%;
+  box-sizing:border-box;
 
   padding:34px;
 
