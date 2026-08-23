@@ -80,3 +80,17 @@
 @media (max-width:1099px){
   .editor-page{overflow-x:auto}
 }
+
+/* Заголовки групп в палитре */
+.style-group + .style-group{
+  margin-top:18px;
+}
+
+.style-group__title{
+  margin:0 0 7px;
+  padding-left:3px;
+  font:700 9px var(--font-ui);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+}
