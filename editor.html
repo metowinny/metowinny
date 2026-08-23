@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нулевой Трибунал — Конструктор главы</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/editor.css">
+</head>
+<body class="editor-page">
+
+<main class="editor-shell">
+  <header class="editor-header">
+    <div>
+      <div class="editor-eyebrow">Нулевой Трибунал</div>
+      <h1>Конструктор главы</h1>
+      <p>Собирай HTML главы, проверяй оформление и копируй готовый блок в страницу GitHub.</p>
+    </div>
+    <div class="editor-header__actions">
+      <button type="button" class="editor-button editor-button--ghost" data-editor-load-demo>Загрузить пример</button>
+      <button type="button" class="editor-button editor-button--primary" data-editor-copy>Копировать HTML</button>
+    </div>
+  </header>
+
+  <section class="editor-meta">
+    <label><span>Акт</span><input type="text" data-meta-act value="Акт I. Валтасаров пир"></label>
+    <label><span>Номер главы</span><input type="text" data-meta-number value="Глава 1.7."></label>
+    <label class="editor-meta__wide"><span>Название</span><input type="text" data-meta-title value="О вере и доверии"></label>
+    <label class="editor-meta__wide"><span>Эпиграф</span><input type="text" data-meta-epigraph placeholder="Необязательно"></label>
+    <label><span>Источник эпиграфа</span><input type="text" data-meta-cite placeholder="Необязательно"></label>
+  </section>
+
+  <section class="editor-workspace">
+    <div class="editor-main">
+      <div class="editor-modebar">
+        <div class="editor-tabs" role="tablist">
+          <button type="button" class="editor-tab is-active" data-editor-mode="code">Код</button>
+          <button type="button" class="editor-tab" data-editor-mode="visual">Визуал</button>
+        </div>
+        <div class="editor-status">
+          <span data-editor-wordcount>0 слов</span>
+          <span class="editor-status__dot"></span>
+          <span data-editor-mode-label>HTML</span>
+        </div>
+      </div>
+
+      <div class="editor-panel editor-panel--code is-active" data-editor-panel="code">
+        <textarea class="editor-code" data-editor-input spellcheck="false" aria-label="HTML главы"><p>Кеннет остановился у двери.</p>
+
+<p>Он медленно поднял голову.</p>
+
+<p>— Ты здесь?</p>
+
+<div class="scene-divider">✦ ✧ ✦</div>
+
+<p><span class="fx-echo">Кто ты такой?</span></p></textarea>
+      </div>
+
+      <div class="editor-panel editor-panel--visual" data-editor-panel="visual">
+        <div class="editor-preview">
+          <div class="reader" data-editor-preview></div>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <button type="button" class="editor-button editor-button--ghost" data-editor-clear>Очистить</button>
+        <div class="editor-footer__hint">Выдели текст в визуальном редакторе → выбери стиль справа.</div>
+        <button type="button" class="editor-button editor-button--primary" data-editor-copy>Копировать HTML</button>
+      </div>
+    </div>
+
+    <aside class="editor-sidebar">
+      <div class="style-sidebar__header">
+        <div>
+          <div class="editor-eyebrow">Палитра</div>
+          <h2>Стили текста</h2>
+        </div>
+        <span class="style-count" data-style-count>0</span>
+      </div>
+      <p class="style-sidebar__intro">В кодовом режиме стиль вставляется вокруг выделения. В визуальном — применяется к выделенному тексту.</p>
+      <div class="style-list" data-style-list></div>
+      <details class="style-help">
+        <summary>Как это работает?</summary>
+        <p>Строчные стили оборачивают выделение в <code>&lt;span&gt;</code>. Блочные стили работают с абзацем целиком. Внизу каждой карточки можно открыть точный HTML-код.</p>
+      </details>
+    </aside>
+  </section>
+
+  <section class="editor-output">
+    <div class="editor-output__head">
+      <div>
+        <div class="editor-eyebrow">Результат</div>
+        <h2>HTML для GitHub</h2>
+      </div>
+      <button type="button" class="editor-button editor-button--small" data-editor-copy>Копировать</button>
+    </div>
+    <pre class="editor-output__code"><code data-editor-output></code></pre>
+  </section>
+</main>
+
+<div class="editor-toast" data-editor-toast aria-live="polite"></div>
+<script src="assets/js/editor.js"></script>
+</body>
+</html>
