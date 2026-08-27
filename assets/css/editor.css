@@ -94,3 +94,29 @@
   text-transform:uppercase;
   color:var(--text-faint);
 }
+
+/* ============================================================
+   ИНСТРУМЕНТЫ АБЗАЦА
+   ============================================================ */
+
+.paragraph-tools{
+  margin-top:14px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  background:rgba(169,112,255,.025);
+}
+
+.paragraph-tools__title{
+  margin-bottom:8px;
+  color:var(--text-faint);
+  font:9px var(--font-ui);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+
+.paragraph-tools__apply{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 10px;
+}
