@@ -463,34 +463,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function normalizePlainText(value) {
 
-    const trimmed = value.trim();
+  if (!html) return '';
 
-    if (!trimmed) return '';
+  const lines = html
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n');
 
-    /*
-     Если пользователь уже пишет HTML,
-     ничего не преобразуем.
-    */
-    if (/<\/?[a-z][^>]*>/i.test(trimmed)) {
-      return replaceTripleDash(value);
+  const result = [];
+
+  for (let line of lines) {
+    line = line.trim();
+
+    // Пустые строки просто пропускаем.
+    if (!line) continue;
+
+    // Уже готовый HTML-блок не трогаем.
+    if (
+      /^<p[\s>]/i.test(line) ||
+      /^<\/p>/i.test(line) ||
+      /^<div[\s>]/i.test(line) ||
+      /^<\/div>/i.test(line) ||
+      /^<blockquote[\s>]/i.test(line) ||
+      /^<\/blockquote>/i.test(line) ||
+      /^<ul[\s>]/i.test(line) ||
+      /^<ol[\s>]/i.test(line) ||
+      /^<li[\s>]/i.test(line) ||
+      /^<figure[\s>]/i.test(line) ||
+      /^<hr[\s>]/i.test(line)
+    ) {
+      result.push(line);
+      continue;
     }
 
-    /*
-     Если это обычный текст:
-     каждая непустая строка превращается в <p>.
-    */
+    // Строки, которые явно являются закрывающими тегами.
+    if (/^<\//.test(line)) {
+      result.push(line);
+      continue;
+    }
 
-    const paragraphs = replaceTripleDash(trimmed)
-      .split(/\n\s*\n/)
-      .map(text => text.trim())
-      .filter(Boolean);
-
-    return paragraphs
-      .map(text => `<p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>`)
-      .join('\n\n');
+    // Обычная строка текста становится абзацем.
+    result.push(`<p>${line}</p>`);
   }
 
-
+  return result.join('\n');
+}
   /* ==========================================================
      ПОДГОТОВКА HTML
      ========================================================== */
@@ -1164,3 +1181,4 @@ document.addEventListener('DOMContentLoaded', () => {
   makePreviewEditable();
 
 });
+
