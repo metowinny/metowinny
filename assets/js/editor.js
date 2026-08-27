@@ -458,51 +458,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   /* ==========================================================
-     НОРМАЛИЗАЦИЯ ОБЫЧНОГО ТЕКСТА
-     ========================================================== */
+   НОРМАЛИЗАЦИЯ ОБЫЧНОГО ТЕКСТА
+   ========================================================== */
 
-  function normalizePlainText(value) {
+function normalizePlainText(value) {
 
-  if (!html) return '';
+  if (!value) return '';
 
-  const lines = html
+  /*
+   * Приводим переносы к единому виду.
+   */
+  const normalized = value
     .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .split('\n');
+    .replace(/\r/g, '\n');
+
+  /*
+   * Смотрим именно на строки.
+   *
+   * Это важно:
+   * абзацы могут быть написаны подряд,
+   * без пустой строки между ними.
+   *
+   * Например:
+   *
+   * Первый абзац.
+   * Второй абзац.
+   * Третий абзац.
+   *
+   * Каждая строка становится отдельным <p>.
+   */
+
+  const lines = normalized.split('\n');
 
   const result = [];
 
   for (let line of lines) {
+
     line = line.trim();
 
-    // Пустые строки просто пропускаем.
-    if (!line) continue;
+    /*
+     * Пустые строки игнорируем.
+     */
+    if (!line) {
+      continue;
+    }
 
-    // Уже готовый HTML-блок не трогаем.
+    /*
+     * Если строка уже является HTML-блоком,
+     * не заворачиваем её ещё раз в <p>.
+     *
+     * Это позволяет писать:
+     *
+     * <div class="scene-divider">...</div>
+     *
+     * <blockquote>...</blockquote>
+     *
+     * и т.д.
+     */
+
     if (
-      /^<p[\s>]/i.test(line) ||
-      /^<\/p>/i.test(line) ||
-      /^<div[\s>]/i.test(line) ||
-      /^<\/div>/i.test(line) ||
-      /^<blockquote[\s>]/i.test(line) ||
-      /^<\/blockquote>/i.test(line) ||
-      /^<ul[\s>]/i.test(line) ||
-      /^<ol[\s>]/i.test(line) ||
-      /^<li[\s>]/i.test(line) ||
-      /^<figure[\s>]/i.test(line) ||
-      /^<hr[\s>]/i.test(line)
+      /^<(p|div|blockquote|figure|section|article|hr)\b/i.test(line)
     ) {
       result.push(line);
       continue;
     }
 
-    // Строки, которые явно являются закрывающими тегами.
-    if (/^<\//.test(line)) {
-      result.push(line);
-      continue;
-    }
-
-    // Обычная строка текста становится абзацем.
+    /*
+     * Обычная строка → абзац.
+     */
     result.push(`<p>${line}</p>`);
   }
 
