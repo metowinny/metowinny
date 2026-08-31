@@ -463,33 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function normalizePlainText(value) {
 
-  if (!value) return '';
-
-  /*
-   * Приводим переносы к единому виду.
-   */
-  const normalized = value
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n');
-
-  /*
-   * Смотрим именно на строки.
-   *
-   * Это важно:
-   * абзацы могут быть написаны подряд,
-   * без пустой строки между ними.
-   *
-   * Например:
-   *
-   * Первый абзац.
-   * Второй абзац.
-   * Третий абзац.
-   *
-   * Каждая строка становится отдельным <p>.
-   */
-
-  const lines = normalized.split('\n');
-
+  const lines = value.split(/\r?\n/);
   const result = [];
 
   for (let line of lines) {
@@ -497,7 +471,7 @@ function normalizePlainText(value) {
     line = line.trim();
 
     /*
-     * Пустые строки игнорируем.
+     * Пустые строки просто пропускаем.
      */
     if (!line) {
       continue;
@@ -505,17 +479,8 @@ function normalizePlainText(value) {
 
     /*
      * Если строка уже является HTML-блоком,
-     * не заворачиваем её ещё раз в <p>.
-     *
-     * Это позволяет писать:
-     *
-     * <div class="scene-divider">...</div>
-     *
-     * <blockquote>...</blockquote>
-     *
-     * и т.д.
+     * оставляем её как есть.
      */
-
     if (
       /^<(p|div|blockquote|figure|section|article|hr)\b/i.test(line)
     ) {
@@ -524,7 +489,15 @@ function normalizePlainText(value) {
     }
 
     /*
-     * Обычная строка → абзац.
+     * Любая обычная строка становится отдельным <p>.
+     *
+     * При этом HTML внутри строки сохраняется:
+     *
+     * Текст <em>с курсивом</em>
+     *
+     * превратится в:
+     *
+     * <p>Текст <em>с курсивом</em></p>
      */
     result.push(`<p>${line}</p>`);
   }
@@ -535,21 +508,31 @@ function normalizePlainText(value) {
      ПОДГОТОВКА HTML
      ========================================================== */
 
-  function prepareHtml(value) {
+ function prepareHtml(value) {
 
-    let html = replaceTripleDash(value);
+  /*
+   * Сначала заменяем --- на длинное тире.
+   */
+  let html = replaceTripleDash(value);
 
-    /*
-     Если пользователь случайно вставил чистый текст,
-     превращаем его в абзацы.
-    */
-    if (!/<\/?[a-z][^>]*>/i.test(html.trim())) {
-      html = normalizePlainText(html);
-    }
+  /*
+   * Каждая новая строка рассматривается отдельно.
+   *
+   * Поэтому теперь можно спокойно смешивать:
+   *
+   * Обычный текст
+   * <p>Уже готовый абзац</p>
+   * Текст <em>с курсивом</em>
+   * <div class="scene-divider">✦ ✧ ✦</div>
+   * Ещё один обычный абзац
+   *
+   * и редактор не будет считать весь текст
+   * уже размеченным только из-за одного тега.
+   */
+  html = normalizePlainText(html);
 
-    return html.trim();
-  }
-
+  return html.trim();
+}
 
   /* ==========================================================
      МЕТАДАННЫЕ
