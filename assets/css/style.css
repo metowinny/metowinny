@@ -2675,6 +2675,110 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   text-shadow:
     1px 0 0 rgba(169,112,255,.12),
    -1px 0 0 rgba(110,180,255,.08);
+
+  position: relative;
+
+  animation: verse-sway 13s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   ОЧЕНЬ МЕДЛЕННОЕ "КАЧАНИЕ" ПЕНИЯ
+   ========================================================= */
+
+@keyframes verse-sway {
+
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate3d(-1.5px, -.5px, 0) rotate(-.12deg);
+  }
+
+  50% {
+    transform: translate3d(0, .8px, 0) rotate(.10deg);
+  }
+
+  75% {
+    transform: translate3d(1.2px, -.3px, 0) rotate(.05deg);
+  }
+
+}
+
+
+/* =========================================================
+   "ПЫЛЬ" / ЧАСТИЦЫ, УЛЕТАЮЩИЕ ОТ ПЕСНИ
+   ========================================================= */
+
+.reader .verse-epigraph::before,
+.reader .verse-epigraph::after {
+  content: "";
+  position: absolute;
+
+  pointer-events: none;
+
+  right: -8px;
+  top: 50%;
+
+  width: 3px;
+  height: 3px;
+
+  border-radius: 50%;
+
+  background: rgba(169,112,255,.45);
+
+  box-shadow:
+    18px -9px 0 rgba(169,112,255,.22),
+    35px  5px 0 rgba(110,180,255,.18),
+    51px -15px 0 rgba(169,112,255,.16);
+
+  opacity: 0;
+
+  animation: verse-particles 9s ease-in-out infinite;
+}
+
+
+/* вторая "волна" частиц */
+
+.reader .verse-epigraph::after {
+  right: 5px;
+  top: 35%;
+
+  width: 2px;
+  height: 2px;
+
+  background: rgba(110,180,255,.35);
+
+  box-shadow:
+    22px  8px 0 rgba(169,112,255,.20),
+    42px -6px 0 rgba(110,180,255,.16),
+    64px 11px 0 rgba(169,112,255,.13);
+
+  animation-delay: -4.5s;
+}
+
+
+@keyframes verse-particles {
+
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(.6);
+  }
+
+  12% {
+    opacity: .65;
+  }
+
+  45% {
+    opacity: .35;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-55px, -14px, 0) scale(1.15);
+  }
+
 }
 
 /* ============================================================
