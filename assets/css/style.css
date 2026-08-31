@@ -2717,21 +2717,23 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   position: absolute;
 
   pointer-events: none;
+  z-index: 2;
 
-  right: -8px;
+  right: 0;
   top: 50%;
 
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 
   border-radius: 50%;
 
-  background: rgba(169,112,255,.45);
+  background: rgba(190, 145, 255, .75);
 
   box-shadow:
-    18px -9px 0 rgba(169,112,255,.22),
-    35px  5px 0 rgba(110,180,255,.18),
-    51px -15px 0 rgba(169,112,255,.16);
+    14px -8px 0 rgba(169,112,255,.45),
+    28px  4px 0 rgba(110,180,255,.35),
+    43px -13px 0 rgba(169,112,255,.30),
+    58px  7px 0 rgba(110,180,255,.22);
 
   opacity: 0;
 
@@ -2739,21 +2741,22 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 }
 
 
-/* вторая "волна" частиц */
+/* вторая волна — появляется в другом месте и в другое время */
 
 .reader .verse-epigraph::after {
-  right: 5px;
+  right: 18px;
   top: 35%;
 
-  width: 2px;
-  height: 2px;
+  width: 3px;
+  height: 3px;
 
-  background: rgba(110,180,255,.35);
+  background: rgba(150, 200, 255, .65);
 
   box-shadow:
-    22px  8px 0 rgba(169,112,255,.20),
-    42px -6px 0 rgba(110,180,255,.16),
-    64px 11px 0 rgba(169,112,255,.13);
+    16px  9px 0 rgba(169,112,255,.38),
+    32px -5px 0 rgba(110,180,255,.30),
+    49px 12px 0 rgba(169,112,255,.22),
+    67px -8px 0 rgba(110,180,255,.18);
 
   animation-delay: -4.5s;
 }
@@ -2763,20 +2766,24 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   0% {
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(.6);
+    transform: translate3d(0, 0, 0) scale(.5);
   }
 
-  12% {
-    opacity: .65;
+  10% {
+    opacity: 1;
   }
 
-  45% {
-    opacity: .35;
+  30% {
+    opacity: .75;
+  }
+
+  55% {
+    opacity: .45;
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(-55px, -14px, 0) scale(1.15);
+    transform: translate3d(-65px, -18px, 0) scale(1.2);
   }
 
 }
