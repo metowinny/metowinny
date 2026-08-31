@@ -2678,7 +2678,7 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 
   position: relative;
 
-  animation: verse-sway 13s ease-in-out infinite;
+  animation: verse-sway 11s ease-in-out infinite;
 }
 
 
@@ -2722,8 +2722,8 @@ body.font-readable .reader{ font-family: var(--font-readable); }
   right: 0;
   top: 50%;
 
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 
   border-radius: 50%;
 
@@ -2744,11 +2744,11 @@ body.font-readable .reader{ font-family: var(--font-readable); }
 /* вторая волна — появляется в другом месте и в другое время */
 
 .reader .verse-epigraph::after {
-  right: 18px;
-  top: 35%;
+  right: 13px;
+  top: 30%;
 
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 
   background: rgba(150, 200, 255, .65);
 
