@@ -887,52 +887,87 @@ function normalizePlainText(value) {
   }
 
 
-  /* ==========================================================
-     BLOCK-СТИЛЬ В CODE
-     ========================================================== */
+/* ==========================================================
+   BLOCK-СТИЛЬ В CODE
+   Оформляет весь <p>, в котором находится курсор/выделение
+   ========================================================== */
 
-  function applyBlockStyleCode(style) {
+function applyBlockStyleCode(style) {
 
-    if (!input) return;
+  if (!input) return;
 
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const value = input.value;
 
-    if (start === end) {
-      showToast('Выдели абзац или его часть.');
-      return;
-    }
+  /*
+   * Ищем последний открывающий <p...>
+   * перед курсором/выделением.
+   */
 
-    const selected = input.value.slice(start, end);
+  const beforeCursor = value.slice(0, start);
+  const match = beforeCursor.match(/<p(?:\s[^>]*)?>/gi);
 
-    let replacement;
-
-    if (style.name === 'Разделитель') {
-
-      replacement =
-        `${style.open}${style.defaultText}${style.close}`;
-
-    } else {
-
-      replacement =
-        `${style.open}\n${selected}\n${style.close}`;
-
-    }
-
-    input.setRangeText(
-      replacement,
-      start,
-      end,
-      'select'
-    );
-
-    input.dispatchEvent(new Event('input', {
-      bubbles:true
-    }));
-
-    showToast(`Блок «${style.name}» добавлен`);
+  if (!match) {
+    showToast('Не удалось найти абзац.');
+    return;
   }
 
+  const openingTag = match[match.length - 1];
+  const paragraphStart =
+    beforeCursor.lastIndexOf(openingTag);
+
+  /*
+   * Ищем соответствующий </p>.
+   */
+
+  const paragraphEndTag = '</p>';
+  const paragraphEnd =
+    value.indexOf(paragraphEndTag, end);
+
+  if (paragraphEnd === -1) {
+    showToast('Не удалось найти конец абзаца.');
+    return;
+  }
+
+  const paragraphEndPosition =
+    paragraphEnd + paragraphEndTag.length;
+
+  const paragraph =
+    value.slice(
+      paragraphStart,
+      paragraphEndPosition
+    );
+
+  let replacement;
+
+  if (style.name === 'Разделитель') {
+
+    replacement =
+      `${style.open}${style.defaultText}${style.close}`;
+
+  } else {
+
+    replacement =
+      `${style.open}\n${paragraph}\n${style.close}`;
+
+  }
+
+  input.setRangeText(
+    replacement,
+    paragraphStart,
+    paragraphEndPosition,
+    'select'
+  );
+
+  input.dispatchEvent(
+    new Event('input', {
+      bubbles: true
+    })
+  );
+
+  showToast(`Блок «${style.name}» добавлен`);
+}
 
   /* ==========================================================
      BLOCK-СТИЛЬ В VISUAL
