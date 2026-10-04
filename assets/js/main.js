@@ -330,6 +330,8 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     if (!raf) raf = requestAnimationFrame(frame);
   });
 }
+
+});
   
 /* ============================================================
    ДРОЖАЩИЙ ТЕКСТ
