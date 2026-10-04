@@ -149,12 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlossary();
   }
 
-/* ---------- «рассекающий» след за курсором ---------- */
+/* ---------- след из пузырьков за курсором ---------- */
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
   const CYAN = [140, 232, 255];
   const VIOLET = [150, 92, 245];
-  const MAX_PARTICLES = 100;
-  const K = 32 / 18; // масштаб спрайта: радиус кольца 18 из 64
+  const MAX_PARTICLES = 60;
+  const STEP = 18;        // расстояние (px) между возможными пузырьками
+  const CHANCE = 0.55;    // шанс, что на шаге вообще появится пузырёк
+  const K = 32 / 18;
 
   const cv = document.createElement('canvas');
   cv.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999';
@@ -169,50 +171,41 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
   resize();
   window.addEventListener('resize', resize);
 
-  // заранее рисуем «пузырёк» один раз, потом только масштабируем
   function makeSprite(c) {
     const s = document.createElement('canvas');
     s.width = s.height = 64;
     const g = s.getContext('2d');
     const rgb = c[0] + ',' + c[1] + ',' + c[2];
-        const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
-    grad.addColorStop(0, 'rgba(255,255,255,.10)');
-    grad.addColorStop(.5, 'rgba(' + rgb + ',.07)');
-    grad.addColorStop(1, 'rgba(' + rgb + ',.03)');
+    const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
+    grad.addColorStop(0, 'rgba(255,255,255,.18)');
+    grad.addColorStop(.5, 'rgba(' + rgb + ',.10)');
+    grad.addColorStop(1, 'rgba(' + rgb + ',.04)');
     g.beginPath(); g.arc(32, 32, 18, 0, Math.PI * 2);
     g.fillStyle = grad; g.fill();
-    g.shadowColor = 'rgba(' + rgb + ',.45)';
-    g.shadowBlur = 5;
-    g.lineWidth = 3.5;
-    g.strokeStyle = 'rgba(' + rgb + ',.7)';
+    g.shadowColor = 'rgba(' + rgb + ',.7)';
+    g.shadowBlur = 8;
+    g.lineWidth = 4;
+    g.strokeStyle = 'rgba(' + rgb + ',.9)';
     g.stroke();
     return s;
   }
-  const SPR_CYAN = makeSprite(CYAN);
-  const SPR_VIOLET = makeSprite(VIOLET);
+  const SPR = [makeSprite(CYAN), makeSprite(VIOLET)];
 
   const particles = [];
   let running = false;
 
-  function spawn(x, y, ux, uy, speed, side) {
+  function spawn(x, y) {
     if (particles.length >= MAX_PARTICLES) return;
-    const sat = Math.random() < 0.03; // одиночный «отлетевший» пузырь
-    const baseW = 7 + Math.min(speed, 1.6) * 13;
-    let spr = side > 0 ? SPR_CYAN : SPR_VIOLET;
-    if (Math.random() < 0.1) spr = spr === SPR_CYAN ? SPR_VIOLET : SPR_CYAN; // чуть смешения для пены
+    const big = Math.random() < 0.15;
     particles.push({
-      x: x, y: y,
-      dx: ux, dy: uy,
-      nx: -uy, ny: ux,
-      side: side,
-      w: baseW * (0.7 + Math.random() * 0.6) * (sat ? 1.4 + Math.random() : 1),
+      x: x + (Math.random() - 0.5) * 6,
+      y: y + (Math.random() - 0.5) * 6,
+      vx: (Math.random() - 0.5) * 0.03,   // лёгкий дрейф в стороны
+      vy: -0.01 - Math.random() * 0.025,  // и вверх
+      r: big ? 5 + Math.random() * 2.5 : 3 + Math.random() * 2.5,
       born: performance.now(),
-      life: sat ? 1000 + Math.random() * 600 : 450 + Math.random() * 650,
-      r: sat ? 3 + Math.random() * 3.5 : 3.5 + Math.random() * 2.5,
-      ph: Math.random() * 6.28,
-      fr: 0.004 + Math.random() * 0.006,
-      sat: sat,
-      spr: spr
+      life: 600 + Math.random() * 600,
+      spr: SPR[Math.random() < 0.5 ? 0 : 1]
     });
   }
 
@@ -221,24 +214,17 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     ctx.clearRect(0, 0, W, H);
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      const age = Math.max(0, now - p.born);
+      const age = now - p.born;
       if (age >= p.life) {
         particles[i] = particles[particles.length - 1];
         particles.pop();
         continue;
       }
       const t = age / p.life;
-      const e = 1 - Math.pow(1 - t, 2.2);             // края расходятся и замедляются
-      const off = (1.5 + p.w * e) * p.side;
-      const amp = p.sat ? 4 : 1.5 + 9 * t * t;        // чем старше — тем сильнее «болтает»
-      const wob = Math.sin(p.ph + age * p.fr) * amp;
-      const wob2 = Math.cos(p.ph * 1.3 + age * p.fr * 0.8) * amp;
-      const px = p.x + p.nx * (off + wob) + p.dx * wob2 * 0.8;
-      const py = p.y + p.ny * (off + wob) + p.dy * wob2 * 0.8 - age * 0.012;
-      const rr = p.r * (1 - (p.sat ? 0.2 : 0.45) * t);
-      const a = Math.min(1, age / 50) * (1 - Math.pow(t, 1.6)) * 0.35;
-      ctx.globalAlpha = a;
-      const size = rr * 2 * K;
+      ctx.globalAlpha = Math.min(1, age / 60) * (1 - t * t) * 0.6;
+      const size = p.r * (1 - 0.4 * t) * 2 * K;
+      const px = p.x + p.vx * age;
+      const py = p.y + p.vy * age;
       ctx.drawImage(p.spr, px - size / 2, py - size / 2, size, size);
     }
     ctx.globalAlpha = 1;
@@ -246,33 +232,20 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     else running = false;
   }
 
-  let lx = null, ly = null, lt = 0, sx = 0, sy = 0;
+  let lx = null, ly = null, acc = 0;
   document.addEventListener('mousemove', (e) => {
-    const x = e.clientX, y = e.clientY, now = performance.now();
-    if (lx === null) { lx = x; ly = y; lt = now; return; }
+    const x = e.clientX, y = e.clientY;
+    if (lx === null) { lx = x; ly = y; return; }
     const dx = x - lx, dy = y - ly;
     const dist = Math.hypot(dx, dy);
-    if (dist < 2.5) return;                          // копим расстояние, чтобы направление не дрожало
-    if (dist > 250) { lx = x; ly = y; lt = now; return; } // «телепорт» мыши — пропускаем
-    const speed = dist / Math.max(now - lt, 1);
-
-    // сглаженное направление движения
-    let ux = dx / dist, uy = dy / dist;
-    if (sx === 0 && sy === 0) { sx = ux; sy = uy; }
-    sx = sx * 0.6 + ux * 0.4; sy = sy * 0.6 + uy * 0.4;
-    const sl = Math.hypot(sx, sy) || 1;
-    sx /= sl; sy /= sl;
-
-    // пузырьки вдоль всего отрезка, плотно — чтобы у курсора контур был сплошным
-    const n = Math.min(30, Math.ceil(dist / 10));
-    for (let i = 1; i <= n; i++) {
-      const k = i / n;
-      const px = lx + dx * k - sx * 4;               // чуть позади острия курсора
-      const py = ly + dy * k - sy * 4;
-      spawn(px, py, sx, sy, speed, 1);
-      spawn(px, py, sx, sy, speed, -1);
+    if (dist > 250) { lx = x; ly = y; return; }   // «телепорт» мыши — пропускаем
+    acc += dist;
+    while (acc >= STEP) {
+      acc -= STEP;
+      const k = 1 - acc / (dist || 1);
+      if (Math.random() < CHANCE) spawn(lx + dx * k, ly + dy * k);
     }
-    lx = x; ly = y; lt = now;
+    lx = x; ly = y;
     if (!running && particles.length) { running = true; requestAnimationFrame(tick); }
   });
 }
