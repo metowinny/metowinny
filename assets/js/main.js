@@ -186,6 +186,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     g.lineWidth = 3.5;
     g.strokeStyle = 'rgba(' + rgb + ',.7)';
     g.stroke();
+    return s;
   }
   const SPR_CYAN = makeSprite(CYAN);
   const SPR_VIOLET = makeSprite(VIOLET);
