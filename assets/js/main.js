@@ -149,106 +149,51 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlossary();
   }
 
-/* ---------- след из пузырьков за курсором ---------- */
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
-  const CYAN = [140, 232, 255];
-  const VIOLET = [150, 92, 245];
-  const MAX_PARTICLES = 60;
-  const STEP = 25;        // расстояние (px) между возможными пузырьками
-  const CHANCE = 0.35;    // шанс, что на шаге вообще появится пузырёк
-  const K = 32 / 18;
+/* ---------- светящийся след за курсором ---------- */
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
+    let lastX = null, lastY = null, lastT = performance.now();
+    let lastSpawnT = 0;
+    const MAX_PARTICLES = 40;
+    let activeParticles = 0;
 
-  const cv = document.createElement('canvas');
-  cv.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999';
-  document.body.appendChild(cv);
-  const ctx = cv.getContext('2d');
-  let dpr = 1, W = 0, H = 0;
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
-    cv.width = W * dpr; cv.height = H * dpr;
-  }
-  resize();
-  window.addEventListener('resize', resize);
+    function spawnParticle(x, y) {
+      if (activeParticles >= MAX_PARTICLES) return;
+      activeParticles++;
+      const el = document.createElement('span');
+      const isBlue = Math.random() < 0.5;
+      el.className = 'cursor-particle ' + (isBlue ? 'cursor-particle--blue' : 'cursor-particle--pink');
+      const size = 4 + Math.random() * 5;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.setProperty('--dx', (Math.random() * 50 - 25) + 'px');
+      el.style.setProperty('--dy', (-30 - Math.random() * 35) + 'px');
+      el.style.animationDelay = (Math.random() * 90) + 'ms';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => { el.remove(); activeParticles--; });
+    }
 
-  function makeSprite(c) {
-    const s = document.createElement('canvas');
-    s.width = s.height = 64;
-    const g = s.getContext('2d');
-    const rgb = c[0] + ',' + c[1] + ',' + c[2];
-    const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
-    grad.addColorStop(0, 'rgba(255,255,255,.18)');
-    grad.addColorStop(.5, 'rgba(' + rgb + ',.10)');
-    grad.addColorStop(1, 'rgba(' + rgb + ',.04)');
-    g.beginPath(); g.arc(32, 32, 18, 0, Math.PI * 2);
-    g.fillStyle = grad; g.fill();
-    g.shadowColor = 'rgba(' + rgb + ',.7)';
-    g.shadowBlur = 8;
-    g.lineWidth = 4;
-    g.strokeStyle = 'rgba(' + rgb + ',.9)';
-    g.stroke();
-    return s;
-  }
-  const SPR = [makeSprite(CYAN), makeSprite(VIOLET)];
+    document.addEventListener('mousemove', (e) => {
+      const now = performance.now();
+      if (lastX === null) { lastX = e.clientX; lastY = e.clientY; lastT = now; return; }
+      const dt = now - lastT;
+      if (dt <= 0) return;
+      const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+      const speed = dist / dt;
 
-  const particles = [];
-  let running = false;
+      let minInterval, burst = 1;
+      if (speed < 0.25)      { minInterval = 140; }
+      else if (speed < 1)    { minInterval = 45; }
+      else                   { minInterval = 20; burst = 2; }
 
-  function spawn(x, y) {
-    if (particles.length >= MAX_PARTICLES) return;
-    const big = Math.random() < 0.15;
-    particles.push({
-      x: x + (Math.random() - 0.5) * 6,
-      y: y + (Math.random() - 0.5) * 6,
-      vx: (Math.random() - 0.5) * 0.03,   // лёгкий дрейф в стороны
-      vy: -0.01 - Math.random() * 0.025,  // и вверх
-      r: big ? 5 + Math.random() * 2.5 : 3 + Math.random() * 2.5,
-      born: performance.now(),
-      life: 600 + Math.random() * 600,
-      spr: SPR[Math.random() < 0.5 ? 0 : 1]
+      if (now - lastSpawnT >= minInterval) {
+        for (let i = 0; i < burst; i++) spawnParticle(e.clientX, e.clientY);
+        lastSpawnT = now;
+      }
+      lastX = e.clientX; lastY = e.clientY; lastT = now;
     });
   }
-
-  function tick(now) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      const age = now - p.born;
-      if (age >= p.life) {
-        particles[i] = particles[particles.length - 1];
-        particles.pop();
-        continue;
-      }
-      const t = age / p.life;
-      ctx.globalAlpha = Math.min(1, age / 60) * (1 - t * t) * 0.6;
-      const size = p.r * (1 - 0.4 * t) * 2 * K;
-      const px = p.x + p.vx * age;
-      const py = p.y + p.vy * age;
-      ctx.drawImage(p.spr, px - size / 2, py - size / 2, size, size);
-    }
-    ctx.globalAlpha = 1;
-    if (particles.length) requestAnimationFrame(tick);
-    else running = false;
-  }
-
-  let lx = null, ly = null, acc = 0;
-  document.addEventListener('mousemove', (e) => {
-    const x = e.clientX, y = e.clientY;
-    if (lx === null) { lx = x; ly = y; return; }
-    const dx = x - lx, dy = y - ly;
-    const dist = Math.hypot(dx, dy);
-    if (dist > 250) { lx = x; ly = y; return; }   // «телепорт» мыши — пропускаем
-    acc += dist;
-    while (acc >= STEP) {
-      acc -= STEP;
-      const k = 1 - acc / (dist || 1);
-      if (Math.random() < CHANCE) spawn(lx + dx * k, ly + dy * k);
-    }
-    lx = x; ly = y;
-    if (!running && particles.length) { running = true; requestAnimationFrame(tick); }
-  });
-}
   });
 /* ============================================================
    ДРОЖАЩИЙ ТЕКСТ
