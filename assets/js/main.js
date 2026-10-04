@@ -149,54 +149,188 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlossary();
   }
 
-/* ---------- светящийся след за курсором ---------- */
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
-    let lastX = null, lastY = null, lastT = performance.now();
-    let lastSpawnT = 0;
-    const MAX_PARTICLES = 40;
-    let activeParticles = 0;
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'cursor-wake';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-    function spawnParticle(x, y) {
-      if (activeParticles >= MAX_PARTICLES) return;
-      activeParticles++;
-      const el = document.createElement('span');
-      const isBlue = Math.random() < 0.5;
-      el.className = 'cursor-particle ' + (isBlue ? 'cursor-particle--blue' : 'cursor-particle--pink');
-      const size = 4 + Math.random() * 5;
-      el.style.width = size + 'px';
-      el.style.height = size + 'px';
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      el.style.setProperty('--dx', (Math.random() * 50 - 25) + 'px');
-      el.style.setProperty('--dy', (-30 - Math.random() * 35) + 'px');
-      el.style.animationDelay = (Math.random() * 90) + 'ms';
-      document.body.appendChild(el);
-      el.addEventListener('animationend', () => { el.remove(); activeParticles--; });
-    }
+  const STEP = 3;
+  const HALF_WIDTH = 13;
+  const WIDTH_RAMP = 260;
+  const CONTOUR_LIFE = 420;
+  const MAX_BUBBLES = 260;
+  const MAX_STEPS = 30;
+  const JUMP = 300;
 
-    document.addEventListener('mousemove', (e) => {
-      const now = performance.now();
-      if (lastX === null) { lastX = e.clientX; lastY = e.clientY; lastT = now; return; }
-      const dt = now - lastT;
-      if (dt <= 0) return;
-      const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-      const speed = dist / dt;
+  let points = [];
+  let bubbles = [];
+  let raf = 0;
+  let lastX = null, lastY = null;
+  let prevNx = 0, prevNy = 0;
 
-      let minInterval, burst = 1;
-      if (speed < 0.25)      { minInterval = 140; }
-      else if (speed < 1)    { minInterval = 45; }
-      else                   { minInterval = 20; burst = 2; }
+  function resize() {
+    const w = document.documentElement.clientWidth;
+    const h = window.innerHeight;
+    canvas.width = w * DPR;
+    canvas.height = h * DPR;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-      if (now - lastSpawnT >= minInterval) {
-        for (let i = 0; i < burst; i++) spawnParticle(e.clientX, e.clientY);
-        lastSpawnT = now;
-      }
-      lastX = e.clientX; lastY = e.clientY; lastT = now;
+  function ease(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function mix(a, b, t) {
+    return Math.round(a + (b - a) * t);
+  }
+
+  function addBubble(p, side, now) {
+    if (bubbles.length >= MAX_BUBBLES) bubbles.shift();
+    bubbles.push({
+      x: p.x, y: p.y, nx: p.nx, ny: p.ny, side: side,
+      born: now,
+      life: 700 + Math.random() * 700,
+      size: 1.8 + Math.random() * 3.4,
+      spread: (Math.random() - 0.5) * 0.08,
+      slide: (Math.random() - 0.5) * 0.03,
+      rise: 0.01 + Math.random() * 0.035,
+      wob: Math.random() * 6.28,
+      wobAmp: 0.4 + Math.random() * 1.4,
+      tone: Math.random() * 0.25
     });
   }
-  
-});
 
+  function bubblePos(b, age) {
+    const ramp = ease(Math.min(age / WIDTH_RAMP, 1));
+    const off = b.side * HALF_WIDTH * ramp + b.spread * age;
+    const wob = Math.sin(age * 0.008 + b.wob) * b.wobAmp * Math.min(age / 300, 1);
+    return {
+      x: b.x + b.nx * off - b.ny * b.slide * age + wob,
+      y: b.y + b.ny * off + b.nx * b.slide * age - b.rise * age
+    };
+  }
+
+  function drawContour(now) {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    ctx.shadowColor = 'rgba(138, 79, 232, .85)';
+    ctx.shadowBlur = 10;
+    for (let side = -1; side <= 1; side += 2) {
+      for (let i = 1; i < points.length; i++) {
+        const a = points[i - 1];
+        const b = points[i];
+        const frac = (now - b.t) / CONTOUR_LIFE;
+        if (frac >= 1) continue;
+        const ageA = now - a.t;
+        const ageB = now - b.t;
+        const offA = side * HALF_WIDTH * ease(Math.min(ageA / WIDTH_RAMP, 1));
+        const offB = side * HALF_WIDTH * ease(Math.min(ageB / WIDTH_RAMP, 1));
+        const alpha = Math.pow(1 - frac, 1.6);
+        ctx.strokeStyle = 'rgba(' + mix(200, 150, frac) + ', ' + mix(235, 120, frac) + ', 255, ' + (alpha * 0.9) + ')';
+        ctx.lineWidth = 0.6 + 2.2 * (1 - frac);
+        ctx.beginPath();
+        ctx.moveTo(a.x + a.nx * offA, a.y + a.ny * offA);
+        ctx.lineTo(b.x + b.nx * offB, b.y + b.ny * offB);
+        ctx.stroke();
+      }
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawBubbles(now) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < bubbles.length; i++) {
+      const b = bubbles[i];
+      const age = now - b.born;
+      const frac = age / b.life;
+      const alpha = Math.min(age / 50, 1) * (1 - frac);
+      const pos = bubblePos(b, age);
+      const r = b.size * (0.85 + 0.5 * frac);
+      const col = mix(205, 165, Math.min(frac + b.tone, 1)) + ', ' + mix(235, 115, Math.min(frac + b.tone, 1)) + ', 255';
+
+      ctx.fillStyle = 'rgba(' + col + ', ' + (alpha * 0.07) + ')';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, r * 2.2, 0, 6.2832);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(' + col + ', ' + (alpha * 0.16) + ')';
+      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.9) + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, r, 0, 6.2832);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + (alpha * 0.55) + ')';
+      ctx.beginPath();
+      ctx.arc(pos.x - r * 0.3, pos.y - r * 0.3, Math.max(r * 0.22, 0.4), 0, 6.2832);
+      ctx.fill();
+    }
+  }
+
+  function frame(now) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
+
+    points = points.filter(p => now - p.t < CONTOUR_LIFE);
+    bubbles = bubbles.filter(b => now - b.born < b.life);
+
+    drawContour(now);
+    drawBubbles(now);
+
+    if (points.length || bubbles.length) {
+      raf = requestAnimationFrame(frame);
+    } else {
+      raf = 0;
+    }
+  }
+
+  document.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (lastX === null) { lastX = e.clientX; lastY = e.clientY; return; }
+
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    const dist = Math.hypot(dx, dy);
+    if (dist < STEP) return;
+
+    if (dist > JUMP) {
+      points = [];
+      lastX = e.clientX; lastY = e.clientY;
+      return;
+    }
+
+    let nx = -dy / dist;
+    let ny = dx / dist;
+    if (prevNx || prevNy) {
+      nx = prevNx * 0.5 + nx * 0.5;
+      ny = prevNy * 0.5 + ny * 0.5;
+      const len = Math.hypot(nx, ny) || 1;
+      nx /= len; ny /= len;
+    }
+    prevNx = nx; prevNy = ny;
+
+    const n = Math.min(Math.floor(dist / STEP), MAX_STEPS);
+    for (let i = 1; i <= n; i++) {
+      const f = i / n;
+      const p = { x: lastX + dx * f, y: lastY + dy * f, nx: nx, ny: ny, t: now - (n - i) };
+      points.push(p);
+      if (Math.random() < 0.85) addBubble(p, -1, now);
+      if (Math.random() < 0.85) addBubble(p, 1, now);
+      if (Math.random() < 0.2) addBubble(p, 0, now);
+    }
+
+    lastX = e.clientX; lastY = e.clientY;
+    if (!raf) raf = requestAnimationFrame(frame);
+  });
+}
+  
 /* ============================================================
    ДРОЖАЩИЙ ТЕКСТ
    ============================================================ */
