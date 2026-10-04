@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.matchMedia('(hover: none)').matches) {
         e.preventDefault();
         const wasOpen = fn.classList.contains('is-open');
-        document.querySelectorAll('.footnote.is-open').forEach(o => o.classList.remove('is-open'));
+        document.querySelectorAll('.footnote.is-op5en').forEach(o => o.classList.remove('is-open'));
         if (!wasOpen) fn.classList.add('is-open');
       }
     });
@@ -156,19 +156,26 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
   const ctx = canvas.getContext('2d');
   const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
-  const STEP = 4;
-  const MAX_STEPS = 12;
+  const STEP = 6;
+  const MAX_STEPS = 10;
   const JUMP = 300;
-  const CONTOUR_LIFE = 380;
-  const BUCKETS = 5;
-  const MAX_POINTS = 90;
+  const MAX_POINTS = 160;
   const MAX_BUBBLES = 70;
-  const BUBBLE_CHANCE = 0.35;
+  const EDGE_LIFE = 620;
+  const BUCKETS = 6;
+  const BUBBLE_CHANCE = 0.16;
+  const SPREAD_BY_DIST = 0.22;
+  const SPREAD_BY_AGE = 0.012;
+  const MAX_SPREAD = 36;
+  const WAVE_AMP = 9;
 
+  const seed = Math.random() * 6.28;
   let points = [];
   let bubbles = [];
+  let pos = [];
   let raf = 0;
   let lastX = null, lastY = null;
+  let pathLen = 0;
   let viewW = 0, viewH = 0;
 
   function resize() {
@@ -187,49 +194,117 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     return Math.round(a + (b - a) * t);
   }
 
-  function addBubble(p, now) {
+  function makePoint(x, y, t) {
+    const chunk = 0.5 + 0.5 * Math.sin(pathLen * 0.09 + seed);
+    return {
+      x: x, y: y, t: t, s: pathLen,
+      breakL: 250 + 190 * chunk + Math.random() * 120,
+      breakR: 250 + 190 * (1 - chunk) + Math.random() * 120,
+      bubL: Math.random() < BUBBLE_CHANCE ? 2.5 + Math.pow(Math.random(), 2) * 8 : 0,
+      bubR: Math.random() < BUBBLE_CHANCE ? 2.5 + Math.pow(Math.random(), 2) * 8 : 0
+    };
+  }
+
+  function spawnBubble(x, y, nx, ny, side, r, now) {
     if (bubbles.length >= MAX_BUBBLES) bubbles.shift();
+    const out = 0.012 + Math.random() * 0.02;
     bubbles.push({
-      x: p.x, y: p.y,
-      born: now,
-      life: 600 + Math.random() * 500,
-      size: 1.5 + Math.random() * 2.5,
-      lat: Math.random() * 2 - 1,
-      latX: p.nx, latY: p.ny,
-      rise: 0.012 + Math.random() * 0.03,
-      drift: (Math.random() - 0.5) * 0.02,
-      wob: Math.random() * 6.28,
-      wobAmp: 0.3 + Math.random() * 1.1
+      x: x, y: y, born: now,
+      life: 550 + Math.random() * 450,
+      r: r,
+      vx: nx * side * out + (Math.random() - 0.5) * 0.01,
+      vy: ny * side * out - 0.012 - Math.random() * 0.02,
+      sw: 1.5 + Math.random() * 3,
+      w: 0.004 + Math.random() * 0.004,
+      ph: Math.random() * 6.28
     });
   }
 
-  function drawContour(now) {
+  function edgePos(p, side, age, dist, nx, ny, tx, ty) {
+    const spread = Math.min(2 + SPREAD_BY_DIST * dist + SPREAD_BY_AGE * age, MAX_SPREAD);
+    const amp = Math.min(age / 400, 1) * WAVE_AMP;
+    const ph = side * 1.9 + seed;
+    const dn = side * spread + amp * Math.sin(p.s * 0.05 + age * 0.004 + ph);
+    const dt = amp * 0.8 * Math.sin(p.s * 0.031 - age * 0.003 + ph * 1.7 + 1.3);
+    return {
+      x: p.x + nx * dn + tx * dt,
+      y: p.y + ny * dn + ty * dt - age * 0.006
+    };
+  }
+
+  function computeEdges(now) {
+    const n = points.length;
+    pos.length = n;
+    const head = n ? points[n - 1].s : 0;
+    for (let i = 0; i < n; i++) {
+      const p = points[i];
+      const a = points[Math.max(0, i - 3)];
+      const b = points[Math.min(n - 1, i + 3)];
+      let tx = b.x - a.x, ty = b.y - a.y;
+      const len = Math.hypot(tx, ty);
+      if (len < 0.001) { tx = 1; ty = 0; } else { tx /= len; ty /= len; }
+      const nx = -ty, ny = tx;
+      const age = now - p.t;
+      const dist = head - p.s;
+      const L = edgePos(p, -1, age, dist, nx, ny, tx, ty);
+      const R = edgePos(p, 1, age, dist, nx, ny, tx, ty);
+      const brokenL = age >= p.breakL;
+      const brokenR = age >= p.breakR;
+      if (brokenL && p.bubL) { spawnBubble(L.x, L.y, nx, ny, -1, p.bubL, now); p.bubL = 0; }
+      if (brokenR && p.bubR) { spawnBubble(R.x, R.y, nx, ny, 1, p.bubR, now); p.bubR = 0; }
+      pos[i] = {
+        lx: L.x, ly: L.y, rx: R.x, ry: R.y,
+        bl: brokenL, br: brokenR,
+        k: Math.min(Math.floor(age / (EDGE_LIFE / BUCKETS)), BUCKETS - 1),
+        age: age
+      };
+    }
+  }
+
+  function drawCloth() {
+    const n = pos.length;
+    let start = -1;
+    for (let i = 0; i < n; i++) {
+      if (pos[i].age < 250) { start = i; break; }
+    }
+    if (start < 0 || n - start < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(pos[start].lx, pos[start].ly);
+    for (let i = start + 1; i < n; i++) ctx.lineTo(pos[i].lx, pos[i].ly);
+    for (let i = n - 1; i >= start; i--) ctx.lineTo(pos[i].rx, pos[i].ry);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(150, 130, 255, .05)';
+    ctx.fill();
+  }
+
+  function drawEdges() {
+    const n = pos.length;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    const bucketLife = CONTOUR_LIFE / BUCKETS;
     for (let k = 0; k < BUCKETS; k++) {
-      const lo = k * bucketLife;
-      const hi = lo + bucketLife;
       const frac = (k + 0.5) / BUCKETS;
-      const alpha = Math.pow(1 - frac, 1.5);
-      const col = mix(190, 150, frac) + ', ' + mix(225, 115, frac) + ', 255';
+      const alpha = Math.pow(1 - frac, 1.2);
+      const col = mix(190, 150, frac) + ', ' + mix(235, 115, frac) + ', 255';
 
       ctx.beginPath();
-      let open = false;
-      for (let i = 1; i < points.length; i++) {
-        const age = now - points[i].t;
-        if (age < lo || age >= hi) { open = false; continue; }
-        const a = points[i - 1];
-        const b = points[i];
-        if (!open) { ctx.moveTo(a.x, a.y); open = true; }
-        ctx.lineTo(b.x, b.y);
+      for (let side = 0; side < 2; side++) {
+        let open = false;
+        for (let i = 1; i < n; i++) {
+          const a = pos[i - 1], b = pos[i];
+          const broken = side === 0 ? (a.bl || b.bl) : (a.br || b.br);
+          if (broken || b.k !== k) { open = false; continue; }
+          const ax = side === 0 ? a.lx : a.rx, ay = side === 0 ? a.ly : a.ry;
+          const bx = side === 0 ? b.lx : b.rx, by = side === 0 ? b.ly : b.ry;
+          if (!open) { ctx.moveTo(ax, ay); open = true; }
+          ctx.lineTo(bx, by);
+        }
       }
 
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.12) + ')';
-      ctx.lineWidth = 7 * (1 - frac) + 2;
+      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.1) + ')';
+      ctx.lineWidth = 6 * (1 - frac) + 2;
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.55) + ')';
-      ctx.lineWidth = 1.8 * (1 - frac) + 0.6;
+      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.5) + ')';
+      ctx.lineWidth = 1.6 * (1 - frac) + 0.6;
       ctx.stroke();
     }
   }
@@ -239,17 +314,15 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
       const b = bubbles[i];
       const age = now - b.born;
       const frac = age / b.life;
-      const alpha = Math.min(age / 60, 1) * (1 - frac);
-      const spread = (1.5 + age * 0.018) * b.lat;
-      const wob = Math.sin(age * 0.008 + b.wob) * b.wobAmp * Math.min(age / 300, 1);
-      const x = b.x + b.latX * spread + b.drift * age + wob;
-      const y = b.y + b.latY * spread - b.rise * age;
-      const r = b.size * (0.85 + 0.4 * frac);
-      const col = mix(195, 160, frac) + ', ' + mix(230, 120, frac) + ', 255';
+      const alpha = Math.min(age / 80, 1) * (1 - frac);
+      const x = b.x + b.vx * age + b.sw * (Math.cos(b.w * age + b.ph) - Math.cos(b.ph));
+      const y = b.y + b.vy * age + b.sw * (Math.sin(b.w * age + b.ph) - Math.sin(b.ph));
+      const r = b.r * (0.9 + 0.3 * frac);
+      const col = mix(195, 160, frac) + ', ' + mix(232, 120, frac) + ', 255';
 
-      ctx.fillStyle = 'rgba(' + col + ', ' + (alpha * 0.07) + ')';
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.5) + ')';
-      ctx.lineWidth = 0.8;
+      ctx.fillStyle = 'rgba(' + col + ', ' + (alpha * 0.05) + ')';
+      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.55) + ')';
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, 6.2832);
       ctx.fill();
@@ -258,12 +331,10 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
   }
 
   function prune(now) {
+    let cut = 0;
+    while (cut < points.length && now - points[cut].t >= EDGE_LIFE) cut++;
+    if (cut) points.splice(0, cut);
     let w = 0;
-    for (let i = 0; i < points.length; i++) {
-      if (now - points[i].t < CONTOUR_LIFE) points[w++] = points[i];
-    }
-    points.length = w;
-    w = 0;
     for (let i = 0; i < bubbles.length; i++) {
       if (now - bubbles[i].born < bubbles[i].life) bubbles[w++] = bubbles[i];
     }
@@ -273,7 +344,9 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
   function frame(now) {
     ctx.clearRect(0, 0, viewW, viewH);
     prune(now);
-    drawContour(now);
+    computeEdges(now);
+    drawCloth();
+    drawEdges();
     drawBubbles(now);
     raf = (points.length || bubbles.length) ? requestAnimationFrame(frame) : 0;
   }
@@ -293,22 +366,19 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
       return;
     }
 
-    const nx = -dy / dist;
-    const ny = dx / dist;
     const n = Math.min(Math.floor(dist / STEP), MAX_STEPS);
+    const seg = dist / n;
     for (let i = 1; i <= n; i++) {
       const f = i / n;
-      const p = { x: lastX + dx * f, y: lastY + dy * f, nx: nx, ny: ny, t: now - (n - i) };
+      pathLen += seg;
       if (points.length >= MAX_POINTS) points.shift();
-      points.push(p);
-      if (Math.random() < BUBBLE_CHANCE) addBubble(p, now);
+      points.push(makePoint(lastX + dx * f, lastY + dy * f, now - (n - i)));
     }
 
     lastX = e.clientX; lastY = e.clientY;
     if (!raf) raf = requestAnimationFrame(frame);
   });
 }
-
   });
 /* ============================================================
    ДРОЖАЩИЙ ТЕКСТ
