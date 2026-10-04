@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
   const CYAN = [140, 232, 255];
   const VIOLET = [150, 92, 245];
-  const MAX_PARTICLES = 800;
+  const MAX_PARTICLES = 100;
   const K = 32 / 18; // масштаб спрайта: радиус кольца 18 из 64
 
   const cv = document.createElement('canvas');
@@ -175,18 +175,17 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     s.width = s.height = 64;
     const g = s.getContext('2d');
     const rgb = c[0] + ',' + c[1] + ',' + c[2];
-    const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
-    grad.addColorStop(0, 'rgba(255,255,255,.30)');
-    grad.addColorStop(.5, 'rgba(' + rgb + ',.14)');
-    grad.addColorStop(1, 'rgba(' + rgb + ',.05)');
+        const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
+    grad.addColorStop(0, 'rgba(255,255,255,.10)');
+    grad.addColorStop(.5, 'rgba(' + rgb + ',.07)');
+    grad.addColorStop(1, 'rgba(' + rgb + ',.03)');
     g.beginPath(); g.arc(32, 32, 18, 0, Math.PI * 2);
     g.fillStyle = grad; g.fill();
-    g.shadowColor = 'rgba(' + rgb + ',.9)';
-    g.shadowBlur = 11;
-    g.lineWidth = 5;
-    g.strokeStyle = 'rgba(' + rgb + ',.95)';
+    g.shadowColor = 'rgba(' + rgb + ',.45)';
+    g.shadowBlur = 5;
+    g.lineWidth = 3.5;
+    g.strokeStyle = 'rgba(' + rgb + ',.7)';
     g.stroke();
-    return s;
   }
   const SPR_CYAN = makeSprite(CYAN);
   const SPR_VIOLET = makeSprite(VIOLET);
@@ -196,7 +195,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
 
   function spawn(x, y, ux, uy, speed, side) {
     if (particles.length >= MAX_PARTICLES) return;
-    const sat = Math.random() < 0.07; // одиночный «отлетевший» пузырь
+    const sat = Math.random() < 0.03; // одиночный «отлетевший» пузырь
     const baseW = 7 + Math.min(speed, 1.6) * 13;
     let spr = side > 0 ? SPR_CYAN : SPR_VIOLET;
     if (Math.random() < 0.1) spr = spr === SPR_CYAN ? SPR_VIOLET : SPR_CYAN; // чуть смешения для пены
@@ -236,7 +235,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
       const px = p.x + p.nx * (off + wob) + p.dx * wob2 * 0.8;
       const py = p.y + p.ny * (off + wob) + p.dy * wob2 * 0.8 - age * 0.012;
       const rr = p.r * (1 - (p.sat ? 0.2 : 0.45) * t);
-      const a = Math.min(1, age / 50) * (1 - Math.pow(t, 1.6)) * 0.7;
+      const a = Math.min(1, age / 50) * (1 - Math.pow(t, 1.6)) * 0.35;
       ctx.globalAlpha = a;
       const size = rr * 2 * K;
       ctx.drawImage(p.spr, px - size / 2, py - size / 2, size, size);
@@ -264,7 +263,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
     sx /= sl; sy /= sl;
 
     // пузырьки вдоль всего отрезка, плотно — чтобы у курсора контур был сплошным
-    const n = Math.min(30, Math.ceil(dist / 3));
+    const n = Math.min(30, Math.ceil(dist / 10));
     for (let i = 1; i <= n; i++) {
       const k = i / n;
       const px = lx + dx * k - sx * 4;               // чуть позади острия курсора
