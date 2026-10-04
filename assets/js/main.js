@@ -149,261 +149,131 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlossary();
   }
 
+/* ---------- «рассекающий» след за курсором ---------- */
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(hover: hover)').matches) {
-  const canvas = document.createElement('canvas');
-  canvas.className = 'cursor-wake';
-  document.body.appendChild(canvas);
-  const ctx = canvas.getContext('2d');
-  const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+  const CYAN = [140, 232, 255];
+  const VIOLET = [150, 92, 245];
+  const MAX_PARTICLES = 800;
+  const K = 32 / 18; // масштаб спрайта: радиус кольца 18 из 64
 
-  const STEP = 4;
-  const MAX_STEPS = 40;
-  const JUMP = 400;
-  const MAX_POINTS = 140;
-  const MAX_BUBBLES = 50;
-  const EDGE_LIFE = 380;
-  const MAX_LEN = 110;
-  const BUCKETS = 12;
-  const BUBBLE_CHANCE = 0.06;
-  const SPREAD_BY_DIST = 0.12;
-  const SPREAD_BY_AGE = 0.006;
-  const MAX_SPREAD = 11;
-  const WAVE_AMP = 7;
-  const WAVE_FREQ = 0.17;
-
-  const seed = Math.random() * 6.28;
-  let points = [];
-  let bubbles = [];
-  let pos = [];
-  let raf = 0;
-  let lastX = null, lastY = null;
-  let pathLen = 0;
-  let viewW = 0, viewH = 0;
-
+  const cv = document.createElement('canvas');
+  cv.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d');
+  let dpr = 1, W = 0, H = 0;
   function resize() {
-    viewW = document.documentElement.clientWidth;
-    viewH = window.innerHeight;
-    canvas.width = viewW * DPR;
-    canvas.height = viewH * DPR;
-    canvas.style.width = viewW + 'px';
-    canvas.style.height = viewH + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
   }
   resize();
   window.addEventListener('resize', resize);
 
-  function mix(a, b, t) {
-    return Math.round(a + (b - a) * t);
+  // заранее рисуем «пузырёк» один раз, потом только масштабируем
+  function makeSprite(c) {
+    const s = document.createElement('canvas');
+    s.width = s.height = 64;
+    const g = s.getContext('2d');
+    const rgb = c[0] + ',' + c[1] + ',' + c[2];
+    const grad = g.createRadialGradient(26, 24, 2, 32, 32, 18);
+    grad.addColorStop(0, 'rgba(255,255,255,.30)');
+    grad.addColorStop(.5, 'rgba(' + rgb + ',.14)');
+    grad.addColorStop(1, 'rgba(' + rgb + ',.05)');
+    g.beginPath(); g.arc(32, 32, 18, 0, Math.PI * 2);
+    g.fillStyle = grad; g.fill();
+    g.shadowColor = 'rgba(' + rgb + ',.9)';
+    g.shadowBlur = 11;
+    g.lineWidth = 5;
+    g.strokeStyle = 'rgba(' + rgb + ',.95)';
+    g.stroke();
+    return s;
   }
+  const SPR_CYAN = makeSprite(CYAN);
+  const SPR_VIOLET = makeSprite(VIOLET);
 
-  function bubbleSize() {
-    return 1.8 + Math.pow(Math.random(), 2) * 5;
-  }
+  const particles = [];
+  let running = false;
 
-  function makePoint(x, y, t) {
-    const chunk = 0.5 + 0.5 * Math.sin(pathLen * 0.09 + seed);
-    return {
-      x: x, y: y, t: t, s: pathLen,
-      breakL: 150 + 110 * chunk + Math.random() * 70,
-      breakR: 150 + 110 * (1 - chunk) + Math.random() * 70,
-      bubL: Math.random() < BUBBLE_CHANCE ? bubbleSize() : 0,
-      bubR: Math.random() < BUBBLE_CHANCE ? bubbleSize() : 0
-    };
-  }
-
-  function spawnBubble(x, y, nx, ny, side, r, now) {
-    if (bubbles.length >= MAX_BUBBLES) bubbles.shift();
-    const out = 0.01 + Math.random() * 0.016;
-    bubbles.push({
-      x: x, y: y, born: now,
-      life: 450 + Math.random() * 350,
-      r: r,
-      vx: nx * side * out + (Math.random() - 0.5) * 0.008,
-      vy: ny * side * out - 0.01 - Math.random() * 0.02,
-      sw: 1 + Math.random() * 2.5,
-      w: 0.004 + Math.random() * 0.004,
-      ph: Math.random() * 6.28
+  function spawn(x, y, ux, uy, speed, side) {
+    if (particles.length >= MAX_PARTICLES) return;
+    const sat = Math.random() < 0.07; // одиночный «отлетевший» пузырь
+    const baseW = 7 + Math.min(speed, 1.6) * 13;
+    let spr = side > 0 ? SPR_CYAN : SPR_VIOLET;
+    if (Math.random() < 0.1) spr = spr === SPR_CYAN ? SPR_VIOLET : SPR_CYAN; // чуть смешения для пены
+    particles.push({
+      x: x, y: y,
+      dx: ux, dy: uy,
+      nx: -uy, ny: ux,
+      side: side,
+      w: baseW * (0.7 + Math.random() * 0.6) * (sat ? 1.4 + Math.random() : 1),
+      born: performance.now(),
+      life: sat ? 1000 + Math.random() * 600 : 450 + Math.random() * 650,
+      r: sat ? 3 + Math.random() * 3.5 : 3.5 + Math.random() * 2.5,
+      ph: Math.random() * 6.28,
+      fr: 0.004 + Math.random() * 0.006,
+      sat: sat,
+      spr: spr
     });
   }
 
-  function edgePos(bx, by, s, side, age, dist, nx, ny, tx, ty) {
-    const spread = Math.min(1.5 + SPREAD_BY_DIST * dist + SPREAD_BY_AGE * age, MAX_SPREAD);
-    const amp = Math.min(age / 220, 1) * WAVE_AMP;
-    const ph = side * 1.9 + seed;
-    const a1 = s * WAVE_FREQ + age * 0.009 + ph;
-    const a2 = s * WAVE_FREQ * 1.8 - age * 0.006 + ph * 2.3;
-    const dn = side * spread + amp * (0.7 * Math.sin(a1) + 0.4 * Math.sin(a2));
-    const dt = amp * (0.5 * Math.cos(a1) + 0.2 * Math.cos(a2));
-    return {
-      x: bx + nx * dn + tx * dt,
-      y: by + ny * dn + ty * dt - age * 0.005
-    };
-  }
-
-  function computeEdges(now) {
-    const n = points.length;
-    pos.length = n;
-    const head = n ? points[n - 1].s : 0;
-    for (let i = 0; i < n; i++) {
-      const p = points[i];
-      const a = points[Math.max(0, i - 3)];
-      const b = points[Math.min(n - 1, i + 3)];
-      let tx = b.x - a.x, ty = b.y - a.y;
-      const len = Math.hypot(tx, ty);
-      if (len < 0.001) { tx = 1; ty = 0; } else { tx /= len; ty /= len; }
-      const nx = -ty, ny = tx;
-
-      let sx = 0, sy = 0;
-      for (let j = -2; j <= 2; j++) {
-        const q = points[Math.min(n - 1, Math.max(0, i + j))];
-        sx += q.x; sy += q.y;
+  function tick(now) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      const age = Math.max(0, now - p.born);
+      if (age >= p.life) {
+        particles[i] = particles[particles.length - 1];
+        particles.pop();
+        continue;
       }
-      sx /= 5; sy /= 5;
-
-      const age = now - p.t;
-      const dist = head - p.s;
-      const L = edgePos(sx, sy, p.s, -1, age, dist, nx, ny, tx, ty);
-      const R = edgePos(sx, sy, p.s, 1, age, dist, nx, ny, tx, ty);
-      const brokenL = age >= p.breakL;
-      const brokenR = age >= p.breakR;
-      if (brokenL && p.bubL) { spawnBubble(L.x, L.y, nx, ny, -1, p.bubL, now); p.bubL = 0; }
-      if (brokenR && p.bubR) { spawnBubble(R.x, R.y, nx, ny, 1, p.bubR, now); p.bubR = 0; }
-      const f = Math.max(age / EDGE_LIFE, dist / MAX_LEN);
-      pos[i] = {
-        lx: L.x, ly: L.y, rx: R.x, ry: R.y,
-        bl: brokenL, br: brokenR,
-        f: f,
-        k: Math.min(Math.floor(f * BUCKETS), BUCKETS)
-      };
+      const t = age / p.life;
+      const e = 1 - Math.pow(1 - t, 2.2);             // края расходятся и замедляются
+      const off = (1.5 + p.w * e) * p.side;
+      const amp = p.sat ? 4 : 1.5 + 9 * t * t;        // чем старше — тем сильнее «болтает»
+      const wob = Math.sin(p.ph + age * p.fr) * amp;
+      const wob2 = Math.cos(p.ph * 1.3 + age * p.fr * 0.8) * amp;
+      const px = p.x + p.nx * (off + wob) + p.dx * wob2 * 0.8;
+      const py = p.y + p.ny * (off + wob) + p.dy * wob2 * 0.8 - age * 0.012;
+      const rr = p.r * (1 - (p.sat ? 0.2 : 0.45) * t);
+      const a = Math.min(1, age / 50) * (1 - Math.pow(t, 1.6)) * 0.7;
+      ctx.globalAlpha = a;
+      const size = rr * 2 * K;
+      ctx.drawImage(p.spr, px - size / 2, py - size / 2, size, size);
     }
+    ctx.globalAlpha = 1;
+    if (particles.length) requestAnimationFrame(tick);
+    else running = false;
   }
 
-  function smoothEdges() {
-    const n = pos.length;
-    for (let pass = 0; pass < 2; pass++) {
-      let pl = pos[0];
-      let px = pl ? pl.lx : 0, py = pl ? pl.ly : 0, qx = pl ? pl.rx : 0, qy = pl ? pl.ry : 0;
-      for (let i = 1; i < n - 1; i++) {
-        const c = pos[i], nx = pos[i + 1];
-        const cl = c.lx, cly = c.ly, cr = c.rx, cry = c.ry;
-        c.lx = (px + 2 * cl + nx.lx) / 4;
-        c.ly = (py + 2 * cly + nx.ly) / 4;
-        c.rx = (qx + 2 * cr + nx.rx) / 4;
-        c.ry = (qy + 2 * cry + nx.ry) / 4;
-        px = cl; py = cly; qx = cr; qy = cry;
-      }
-    }
-  }
-
-  function tracePath(run) {
-    const n = run.length / 2;
-    if (n < 2) return;
-    ctx.moveTo(run[0], run[1]);
-    for (let i = 1; i < n; i++) ctx.lineTo(run[i * 2], run[i * 2 + 1]);
-  }
-
-  function drawEdges() {
-    const n = pos.length;
-    ctx.lineCap = 'butt';
-    ctx.lineJoin = 'round';
-    for (let k = 0; k < BUCKETS; k++) {
-      const frac = (k + 0.5) / BUCKETS;
-      const alpha = Math.pow(1 - frac, 1.3);
-      const col = mix(190, 150, frac) + ', ' + mix(235, 115, frac) + ', 255';
-
-      ctx.beginPath();
-      for (let side = 0; side < 2; side++) {
-        let run = null;
-        for (let i = 1; i < n; i++) {
-          const a = pos[i - 1], b = pos[i];
-          const broken = side === 0 ? (a.bl || b.bl) : (a.br || b.br);
-          if (broken || b.k !== k) {
-            if (run) { tracePath(run); run = null; }
-            continue;
-          }
-          if (!run) run = side === 0 ? [a.lx, a.ly] : [a.rx, a.ry];
-          if (side === 0) run.push(b.lx, b.ly); else run.push(b.rx, b.ry);
-        }
-        if (run) tracePath(run);
-      }
-
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.07) + ')';
-      ctx.lineWidth = 4 * (1 - frac) + 1.5;
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.38) + ')';
-      ctx.lineWidth = 1.2 * (1 - frac) + 0.5;
-      ctx.stroke();
-    }
-  }
-
-  function drawBubbles(now) {
-    for (let i = 0; i < bubbles.length; i++) {
-      const b = bubbles[i];
-      const age = now - b.born;
-      const frac = age / b.life;
-      const alpha = Math.min(age / 80, 1) * (1 - frac);
-      const x = b.x + b.vx * age + b.sw * (Math.cos(b.w * age + b.ph) - Math.cos(b.ph));
-      const y = b.y + b.vy * age + b.sw * (Math.sin(b.w * age + b.ph) - Math.sin(b.ph));
-      const r = b.r * (0.9 + 0.3 * frac);
-      const col = mix(195, 160, frac) + ', ' + mix(232, 120, frac) + ', 255';
-
-      ctx.fillStyle = 'rgba(' + col + ', ' + (alpha * 0.04) + ')';
-      ctx.strokeStyle = 'rgba(' + col + ', ' + (alpha * 0.42) + ')';
-      ctx.lineWidth = 0.9;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 6.2832);
-      ctx.fill();
-      ctx.stroke();
-    }
-  }
-
-  function prune(now) {
-    let cut = 0;
-    while (cut < points.length && now - points[cut].t >= EDGE_LIFE) cut++;
-    if (cut) points.splice(0, cut);
-    let w = 0;
-    for (let i = 0; i < bubbles.length; i++) {
-      if (now - bubbles[i].born < bubbles[i].life) bubbles[w++] = bubbles[i];
-    }
-    bubbles.length = w;
-  }
-
-  function frame(now) {
-    ctx.clearRect(0, 0, viewW, viewH);
-    prune(now);
-    computeEdges(now);
-    smoothEdges();
-    drawEdges();
-    drawBubbles(now);
-    raf = (points.length || bubbles.length) ? requestAnimationFrame(frame) : 0;
-  }
-
+  let lx = null, ly = null, lt = 0, sx = 0, sy = 0;
   document.addEventListener('mousemove', (e) => {
-    const now = performance.now();
-    if (lastX === null) { lastX = e.clientX; lastY = e.clientY; return; }
-
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
+    const x = e.clientX, y = e.clientY, now = performance.now();
+    if (lx === null) { lx = x; ly = y; lt = now; return; }
+    const dx = x - lx, dy = y - ly;
     const dist = Math.hypot(dx, dy);
-    if (dist < STEP) return;
+    if (dist < 2.5) return;                          // копим расстояние, чтобы направление не дрожало
+    if (dist > 250) { lx = x; ly = y; lt = now; return; } // «телепорт» мыши — пропускаем
+    const speed = dist / Math.max(now - lt, 1);
 
-    if (dist > JUMP) {
-      points.length = 0;
-      lastX = e.clientX; lastY = e.clientY;
-      return;
-    }
+    // сглаженное направление движения
+    let ux = dx / dist, uy = dy / dist;
+    if (sx === 0 && sy === 0) { sx = ux; sy = uy; }
+    sx = sx * 0.6 + ux * 0.4; sy = sy * 0.6 + uy * 0.4;
+    const sl = Math.hypot(sx, sy) || 1;
+    sx /= sl; sy /= sl;
 
-    const n = Math.min(Math.floor(dist / STEP), MAX_STEPS);
-    const seg = dist / n;
+    // пузырьки вдоль всего отрезка, плотно — чтобы у курсора контур был сплошным
+    const n = Math.min(30, Math.ceil(dist / 3));
     for (let i = 1; i <= n; i++) {
-      const f = i / n;
-      pathLen += seg;
-      if (points.length >= MAX_POINTS) points.shift();
-      points.push(makePoint(lastX + dx * f, lastY + dy * f, now - (n - i)));
+      const k = i / n;
+      const px = lx + dx * k - sx * 4;               // чуть позади острия курсора
+      const py = ly + dy * k - sy * 4;
+      spawn(px, py, sx, sy, speed, 1);
+      spawn(px, py, sx, sy, speed, -1);
     }
-
-    lastX = e.clientX; lastY = e.clientY;
-    if (!raf) raf = requestAnimationFrame(frame);
+    lx = x; ly = y; lt = now;
+    if (!running && particles.length) { running = true; requestAnimationFrame(tick); }
   });
 }
   });
