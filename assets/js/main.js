@@ -154,8 +154,8 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.mat
   const CYAN = [140, 232, 255];
   const VIOLET = [150, 92, 245];
   const MAX_PARTICLES = 60;
-  const STEP = 18;        // расстояние (px) между возможными пузырьками
-  const CHANCE = 0.55;    // шанс, что на шаге вообще появится пузырёк
+  const STEP = 25;        // расстояние (px) между возможными пузырьками
+  const CHANCE = 0.35;    // шанс, что на шаге вообще появится пузырёк
   const K = 32 / 18;
 
   const cv = document.createElement('canvas');
