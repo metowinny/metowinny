@@ -2569,7 +2569,7 @@ body.font-readable .reader { font-family: var(--font-readable); }
   }
   50% {
     opacity: 1;
-    transform: scale(1.3);
+    transform: scale(1.6);
   }
 }
 
