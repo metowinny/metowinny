@@ -3383,7 +3383,7 @@ body.font-readable .reader { font-family: var(--font-readable); }
   height: auto;
   object-fit: contain;
   object-position: center bottom;
-transform: scale(2.2) translateX(6%);
+transform: scale(1.8) translateX(6%);
 transform-origin: center bottom;
   filter: drop-shadow(0 20px 35px rgba(0, 0, 0, .45)) drop-shadow(0 0 35px rgba(169, 112, 255, .14));
   -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
@@ -3391,7 +3391,7 @@ transform-origin: center bottom;
   transition: opacity .3s ease, transform .3s ease;
 }
 
-.character-hero__reference.is-switching img { opacity: 0; transform: scale(2.2) translateX(6%); }
+.character-hero__reference.is-switching img { opacity: 0; transform: scale(1.8) translateX(6%); }
 
 .character-hero__reference.is-missing img { display: none; }
 
