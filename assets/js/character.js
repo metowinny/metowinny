@@ -20,7 +20,9 @@
     heart: '<path d="M12 20s-8-4.7-8-10.2A4.3 4.3 0 0112 7a4.3 4.3 0 018 2.8C20 15.3 12 20 12 20z"/>',
     eye: '<path d="M2 12s3.7-7 10-7 10 7 10 7-3.7 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
     quote: '<path d="M9.5 7H6a2 2 0 00-2 2v3.5a2 2 0 002 2h2.5c0 2.5-1 3.5-3 4.5M20 7h-3.5a2 2 0 00-2 2v3.5a2 2 0 002 2H19c0 2.5-1 3.5-3 4.5"/>',
-    expand: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'
+    expand: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    book: '<path d="M3 5.5c3-1.2 6-1 9 1 3-2 6-2.2 9-1V19c-3-1.2-6-1-9 1-3-2-6-2.2-9-1z"/><path d="M12 6.5V20"/>',
+    link: '<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>'
   };
 
   function injectIcons(root) {
@@ -212,10 +214,273 @@
     });
   }
 
+
+  const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="life__shape" d="M12 20.5s-8-4.7-8-10.3A4.5 4.5 0 0112 7.3a4.5 4.5 0 018 2.9c0 5.6-8 10.3-8 10.3z"/><path class="life__crack" d="M12.4 7.8l-2 3.4 2.6 1.7-2 3.8"/></svg>';
+
+  function initLives() {
+    document.querySelectorAll('[data-lives]').forEach(box => {
+      const raw = box.dataset.lives;
+      const status = box.parentElement.querySelector('[data-lives-status]');
+      const fixed = box.hasAttribute('data-lives-static');
+
+      if (raw === 'immortal') {
+        box.classList.add('lives--immortal');
+        box.innerHTML = '<span class="life life--immortal" title="Бессмертие">' + HEART + '<span class="life__mark">∞</span></span>';
+        if (status) status.textContent = box.dataset.livesNote || 'Бессмертие';
+        return;
+      }
+
+      const total = Math.max(1, parseInt(raw, 10) || 1);
+      let alive = box.dataset.alive === undefined ? total : Math.max(0, Math.min(total, parseInt(box.dataset.alive, 10) || 0));
+      const states = Array.from({ length: total }, (_, i) => i < alive);
+
+      function paint() {
+        box.innerHTML = '';
+        states.forEach((on, i) => {
+          const el = document.createElement(fixed ? 'span' : 'button');
+          if (!fixed) el.type = 'button';
+          el.className = 'life ' + (on ? 'is-alive' : 'is-dead');
+          el.title = on ? 'Жизнь' : 'Жизнь потеряна';
+          el.innerHTML = HEART;
+          if (!fixed) {
+            el.setAttribute('aria-pressed', on ? 'true' : 'false');
+            el.addEventListener('click', () => { states[i] = !states[i]; paint(); });
+          }
+          box.appendChild(el);
+        });
+        alive = states.filter(Boolean).length;
+        if (status) status.textContent = box.dataset.livesNote || (alive + ' из ' + total);
+        box.classList.toggle('lives--all-dead', alive === 0);
+      }
+
+      paint();
+    });
+  }
+
+  function initRelations() {
+    const grid = document.querySelector('[data-relations]');
+    if (!grid) return;
+    const labels = { friend: 'Друзья', love: 'Любовь', enemy: 'Враги', ally: 'Союзники', mentor: 'Наставники', rival: 'Соперники', neutral: 'Прочие' };
+    const cards = [...grid.querySelectorAll('.relation-card')];
+
+    cards.forEach(card => {
+      const avatar = card.querySelector('.relation-card__avatar');
+      const name = card.querySelector('.relation-card__name');
+      if (avatar && !avatar.firstElementChild && !avatar.textContent.trim() && name) {
+        avatar.innerHTML = '<span>' + name.textContent.trim().charAt(0) + '</span>';
+      }
+    });
+
+    const bar = document.querySelector('[data-relations-filter]');
+    if (!bar) return;
+    const counts = {};
+    cards.forEach(card => { counts[card.dataset.tone] = (counts[card.dataset.tone] || 0) + 1; });
+    const tones = Object.keys(counts);
+    if (tones.length < 2) return;
+
+    function addButton(tone, text, count) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'relations-filter__btn' + (tone === 'all' ? ' is-active' : '');
+      button.dataset.tone = tone;
+      button.innerHTML = text + '<span>' + count + '</span>';
+      button.addEventListener('click', () => {
+        bar.querySelectorAll('.relations-filter__btn').forEach(b => b.classList.toggle('is-active', b === button));
+        cards.forEach(card => { card.hidden = tone !== 'all' && card.dataset.tone !== tone; });
+      });
+      bar.appendChild(button);
+    }
+
+    addButton('all', 'Все', cards.length);
+    tones.forEach(tone => addButton(tone, labels[tone] || tone, counts[tone]));
+  }
+
+  function initFamily() {
+    document.querySelectorAll('[data-family]').forEach(root => {
+      const dataEl = root.querySelector('script[type="application/json"]');
+      if (!dataEl) return;
+      let people;
+      try {
+        people = JSON.parse(dataEl.textContent).people;
+      } catch (error) {
+        root.insertAdjacentHTML('beforeend', '<p class="character-wip">Ошибка в данных семейного древа.</p>');
+        return;
+      }
+      if (!Array.isArray(people) || !people.length) return;
+
+      const byId = {};
+      people.forEach(p => { byId[p.id] = p; });
+
+      const partnerOf = {};
+      people.forEach(p => {
+        if (p.partner && byId[p.partner]) {
+          partnerOf[p.id] = p.partner;
+          partnerOf[p.partner] = p.id;
+        }
+      });
+
+      const gen = {};
+      people.forEach(p => { if (typeof p.gen === 'number') gen[p.id] = p.gen; });
+      const parentsOf = p => (p.parents || []).filter(id => byId[id]);
+      people.forEach(p => {
+        if (gen[p.id] !== undefined || parentsOf(p).length) return;
+        const mate = partnerOf[p.id] && byId[partnerOf[p.id]];
+        if (!mate || !parentsOf(mate).length) gen[p.id] = 0;
+      });
+      for (let pass = 0; pass < 12; pass++) {
+        people.forEach(p => {
+          if (gen[p.id] !== undefined) return;
+          const par = parentsOf(p);
+          if (par.length && par.every(id => gen[id] !== undefined)) {
+            gen[p.id] = Math.max(...par.map(id => gen[id])) + 1;
+          } else if (!par.length && partnerOf[p.id] && gen[partnerOf[p.id]] !== undefined && parentsOf(byId[partnerOf[p.id]]).length) {
+            gen[p.id] = gen[partnerOf[p.id]];
+          }
+        });
+      }
+      people.forEach(p => { if (gen[p.id] === undefined) gen[p.id] = 0; });
+      people.forEach(p => {
+        if (partnerOf[p.id] && gen[partnerOf[p.id]] > gen[p.id] && !parentsOf(p).length) gen[p.id] = gen[partnerOf[p.id]];
+      });
+
+      const canvas = document.createElement('div');
+      canvas.className = 'family-tree__canvas';
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'family-tree__svg');
+      canvas.appendChild(svg);
+
+      const nodes = {};
+
+      function makeNode(p) {
+        const el = document.createElement(p.href ? 'a' : 'div');
+        if (p.href) el.href = p.href;
+        el.className = 'fam-node' + (p.current ? ' is-current' : '') + (p.status === 'dead' ? ' is-dead' : '') + (p.status === 'unknown' ? ' is-unknown' : '');
+        const avatar = document.createElement('div');
+        avatar.className = 'fam-node__avatar';
+        if (p.img) {
+          const img = document.createElement('img');
+          img.src = p.img;
+          img.alt = p.name || '';
+          avatar.appendChild(img);
+        } else {
+          avatar.textContent = p.status === 'unknown' ? '?' : (p.name || '?').charAt(0);
+        }
+        const name = document.createElement('div');
+        name.className = 'fam-node__name';
+        name.textContent = p.name || '';
+        el.append(avatar, name);
+        if (p.relation) {
+          const rel = document.createElement('div');
+          rel.className = 'fam-node__rel';
+          rel.textContent = p.relation;
+          el.appendChild(rel);
+        }
+        nodes[p.id] = el;
+        return el;
+      }
+
+      const levels = [...new Set(people.map(p => gen[p.id]))].sort((a, b) => a - b);
+      const couples = [];
+      levels.forEach(level => {
+        const row = document.createElement('div');
+        row.className = 'family-tree__row';
+        const placed = new Set();
+        people.filter(p => gen[p.id] === level).forEach(p => {
+          if (placed.has(p.id)) return;
+          placed.add(p.id);
+          const mate = partnerOf[p.id] && gen[partnerOf[p.id]] === level && !placed.has(partnerOf[p.id]) ? byId[partnerOf[p.id]] : null;
+          if (mate) {
+            placed.add(mate.id);
+            const wrap = document.createElement('div');
+            wrap.className = 'family-tree__couple';
+            wrap.append(makeNode(p), makeNode(mate));
+            row.appendChild(wrap);
+            couples.push([p.id, mate.id]);
+          } else {
+            row.appendChild(makeNode(p));
+          }
+        });
+        canvas.appendChild(row);
+      });
+
+      root.appendChild(canvas);
+
+      function rect(id, box) {
+        const r = nodes[id].getBoundingClientRect();
+        return { cx: r.left - box.left + r.width / 2, left: r.left - box.left, right: r.right - box.left, top: r.top - box.top, bottom: r.bottom - box.top, cy: r.top - box.top + r.height / 2 };
+      }
+
+      function path(d, cls) {
+        const el = document.createElementNS(svgNS, 'path');
+        el.setAttribute('d', d);
+        el.setAttribute('class', 'fam-link' + (cls ? ' ' + cls : ''));
+        svg.appendChild(el);
+      }
+
+      function drawGroup(groupKey, parentIds, kids, cls, offset, box) {
+        const pr = parentIds.map(id => rect(id, box));
+        const ax = pr.reduce((sum, r) => sum + r.cx, 0) / pr.length;
+        const together = parentIds.length === 2 && partnerOf[parentIds[0]] === parentIds[1];
+        const ay = together ? pr[0].cy : Math.max(...pr.map(r => r.bottom));
+        const kr = kids.map(id => rect(id, box));
+        const parentBottom = Math.max(...pr.map(r => r.bottom));
+        const childTop = Math.min(...kr.map(r => r.top));
+        const busY = parentBottom + (childTop - parentBottom) / 2 + offset;
+        const xs = kr.map(r => r.cx).concat(ax);
+        path('M' + ax + ' ' + ay + 'V' + busY, cls);
+        path('M' + Math.min(...xs) + ' ' + busY + 'H' + Math.max(...xs), cls);
+        kr.forEach(r => path('M' + r.cx + ' ' + busY + 'V' + r.top, cls));
+      }
+
+      function draw() {
+        svg.innerHTML = '';
+        const box = canvas.getBoundingClientRect();
+        svg.setAttribute('width', box.width);
+        svg.setAttribute('height', box.height);
+        svg.setAttribute('viewBox', '0 0 ' + box.width + ' ' + box.height);
+
+        couples.forEach(([a, b]) => {
+          const ra = rect(a, box);
+          const rb = rect(b, box);
+          const [l, r] = ra.cx < rb.cx ? [ra, rb] : [rb, ra];
+          path('M' + l.right + ' ' + l.cy + 'H' + r.left, 'fam-link--couple');
+          const ring = document.createElementNS(svgNS, 'circle');
+          ring.setAttribute('cx', (l.right + r.left) / 2);
+          ring.setAttribute('cy', l.cy);
+          ring.setAttribute('r', 4);
+          ring.setAttribute('class', 'fam-ring');
+          svg.appendChild(ring);
+        });
+
+        const groups = {};
+        const guardians = {};
+        people.forEach(p => {
+          const par = parentsOf(p);
+          if (par.length) (groups[par.slice().sort().join('|')] = groups[par.slice().sort().join('|')] || { parents: par, kids: [] }).kids.push(p.id);
+          const gu = (p.guardians || []).filter(id => byId[id]);
+          if (gu.length) (guardians[gu.slice().sort().join('|')] = guardians[gu.slice().sort().join('|')] || { parents: gu, kids: [] }).kids.push(p.id);
+        });
+        Object.keys(groups).forEach(k => drawGroup(k, groups[k].parents, groups[k].kids, '', 0, box));
+        Object.keys(guardians).forEach(k => drawGroup(k, guardians[k].parents, guardians[k].kids, 'fam-link--guardian', 10, box));
+      }
+
+      draw();
+      if (window.ResizeObserver) new ResizeObserver(draw).observe(canvas);
+      window.addEventListener('resize', draw);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+      canvas.querySelectorAll('img').forEach(img => img.addEventListener('load', draw));
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     injectIcons(document);
     initReferences();
     initGenesis();
+    initLives();
+    initRelations();
+    initFamily();
+    injectIcons(document);
     fitTitles();
     window.addEventListener('resize', fitTitles);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitles);
