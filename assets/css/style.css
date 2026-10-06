@@ -4652,3 +4652,13 @@ a.relation-card__name:hover { color: #fff; border-bottom: 1px dotted var(--tone)
 
   .relations-grid { grid-template-columns: 1fr; }
 }
+
+.character-tech .character-more { margin-top: 12px; }
+
+.character-tech .character-more__body p {
+  color: var(--text-dim);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.character-tech-grid { align-items: start; }
