@@ -178,6 +178,13 @@
         <div class="info-rows">
 
           <div class="info-row">
+            <span class="info-label"><span class="info-icon" data-icon="book"></span>Религия</span>
+            <div class="info-value">
+              <div class="info-item"><strong>Католицизм</strong></div>
+            </div>
+          </div>
+
+          <div class="info-row">
             <span class="info-label"><span class="info-icon" data-icon="users"></span>Организации</span>
             <div class="info-value">
               <ul class="info-list">
@@ -240,6 +247,12 @@
             </div>
           </div>
 
+        </div>
+
+        <div class="sonar-panel__lives">
+          <span class="lives-label" title="Сонары переживают первый смертельный удар по телу">ЖИЗНИ</span>
+          <div class="lives" data-lives="2" data-alive="2"></div>
+          <span class="lives-status" data-lives-status></span>
         </div>
 
       </div>
@@ -352,6 +365,12 @@
         речь идёт о судьбах мира, но теряется, когда нужно
         ответить на простое «как дела?».
       </p>
+      <details class="character-more">
+        <summary><span class="more-open">Подробнее</span><span class="more-close">Свернуть</span></summary>
+        <div class="character-more__body">
+          <p class="character-wip">В разработке</p>
+        </div>
+      </details>
     </article>
 
     <article class="character-detail">
@@ -404,6 +423,117 @@
         </li>
       </ul>
     </article>
+
+  </section>
+
+  <section class="character-section">
+
+    <div class="character-section__heading">
+      <span class="character-section__eyebrow">РОДСТВО</span>
+      <h2>Семья</h2>
+    </div>
+
+    <div class="family-tree" data-family>
+      <script type="application/json">
+      {
+        "people": [
+          { "id": "father", "name": "В разработке", "relation": "Отец", "status": "unknown", "partner": "mother" },
+          { "id": "mother", "name": "В разработке", "relation": "Мать", "status": "unknown" },
+          { "id": "vits", "name": "Витс Беллех'Тет", "relation": "Опекунша", "gen": 0 },
+          { "id": "ernest", "name": "Эрнест Хилл", "relation": "Старший брат", "parents": ["father", "mother"] },
+          { "id": "kenneth", "name": "Кеннет Хилл", "relation": "Персонаж", "current": true, "parents": ["father", "mother"], "guardians": ["vits"] }
+        ]
+      }
+      </script>
+    </div>
+
+    <div class="family-tree__legend">
+      <span><i></i>родитель и ребёнок</span>
+      <span><i class="is-couple"></i>супруги</span>
+      <span><i class="is-guardian"></i>опекун</span>
+    </div>
+
+  </section>
+
+
+  <section class="character-section">
+
+    <div class="character-section__heading">
+      <span class="character-section__eyebrow">СВЯЗИ</span>
+      <h2>Отношения</h2>
+    </div>
+
+    <div class="relations-filter" data-relations-filter></div>
+
+    <div class="relations-grid" data-relations>
+
+      <article class="relation-card" data-tone="mentor">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Рэнди Рубенштайн</span>
+            <span class="relation-card__tag">Наставник</span>
+          </div>
+          <p>Кузнец-ричин из Самено. Взял Кеннета в подмастерья в Тойочибе и отпустил его в Анталу.</p>
+        </div>
+      </article>
+
+      <article class="relation-card" data-tone="mentor">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Кохал Кан’Сар</span>
+            <span class="relation-card__tag">Бывший куратор</span>
+          </div>
+          <p>Оберст Клятвенной армии. Предупредил Кеннета в Тойочибе и скрыл его планы от Жрицы.</p>
+        </div>
+      </article>
+
+      <article class="relation-card" data-tone="neutral">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Витс Беллех’Тет</span>
+            <span class="relation-card__tag">Опекунша</span>
+          </div>
+          <p>Высшая Жрица эньерская. Воспитала Кеннета и объявила его де-гент Принцем.</p>
+        </div>
+      </article>
+
+      <article class="relation-card" data-tone="ally">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Винсент Лонгфедер</span>
+            <span class="relation-card__tag">Союзник</span>
+          </div>
+          <p>Арматель палаты Фронтьер. Сначала преследовал Кеннета как шпиона, позже стал его союзником.</p>
+        </div>
+      </article>
+
+      <article class="relation-card" data-tone="ally">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Ял’Ксандр Эай’Фрейен</span>
+            <span class="relation-card__tag">Спутник</span>
+          </div>
+          <p>Бывший капрал Клятвенной армии. Отправился с Кеннетом в Тойочибу.</p>
+        </div>
+      </article>
+
+      <article class="relation-card" data-tone="enemy">
+        <div class="relation-card__avatar"></div>
+        <div class="relation-card__body">
+          <div class="relation-card__head">
+            <span class="relation-card__name">Лоранно Суэнно</span>
+            <span class="relation-card__tag">Недоброжелатель</span>
+          </div>
+          <p>Антальский физик. Открыто враждебен к Кеннету, но объяснил ему природу дуальной синхронизации.</p>
+        </div>
+      </article>
+
+    </div>
 
   </section>
 
