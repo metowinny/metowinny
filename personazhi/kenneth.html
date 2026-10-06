@@ -85,15 +85,8 @@
 <main class="character-page">
 
   <div class="character-page__back">
-    <a href="index.html">
-      ← Вернуться к персонажам
-    </a>
+    <a href="index.html">← Вернуться к персонажам</a>
   </div>
-
-
-  <!-- =========================================================
-       HERO
-       ========================================================= -->
 
   <section class="character-hero character-hero--kenneth">
 
@@ -101,477 +94,238 @@
 
     <div class="character-hero__portrait">
 
-  <div class="character-hero__reference">
-    <img
-      src="../assets/img/characters/kenneth1.png"
-      alt="Кеннет Хилл — основной референс"
-    >
-  </div>
+      <button type="button" class="character-hero__reference" data-ref-frame aria-label="Открыть референс в полном размере">
+        <img data-ref-image src="../assets/img/characters/kenneth1.png" alt="Кеннет Хилл — основной референс">
+        <span class="character-hero__reference-empty">Референс скоро появится</span>
+        <span class="character-hero__zoom"><span data-icon="expand"></span>Открыть</span>
+      </button>
 
-  <div class="character-hero__reference-nav">
+      <div class="reference-nav">
+        <button type="button" class="reference-nav__arrow" data-ref-prev aria-label="Предыдущий референс">‹</button>
 
-    <button
-      type="button"
-      class="is-active"
-      data-reference="kenneth1"
-      aria-label="Основной референс"
-    ></button>
+        <div class="reference-nav__dots">
+          <button type="button" class="is-active" data-ref-src="../assets/img/characters/kenneth1.png" data-ref-label="Основной референс" aria-label="Основной референс"></button>
+          <button type="button" data-ref-src="../assets/img/characters/kenneth2.png" data-ref-label="Референс 2" aria-label="Референс 2"></button>
+          <button type="button" data-ref-src="../assets/img/characters/kenneth3.png" data-ref-label="Референс 3" aria-label="Референс 3"></button>
+        </div>
 
-    <button
-      type="button"
-      data-reference="kenneth2"
-      aria-label="Референс 2"
-    ></button>
+        <button type="button" class="reference-nav__arrow" data-ref-next aria-label="Следующий референс">›</button>
+      </div>
 
-    <button
-      type="button"
-      data-reference="kenneth3"
-      aria-label="Референс 3"
-    ></button>
+      <div class="reference-caption" data-ref-caption>Основной референс</div>
 
-  </div>
-
-</div>
+    </div>
 
 
     <div class="character-hero__info">
 
-      <div class="character-hero__eyebrow">
-        ПЕРСОНАЖ · ТОМ I
-      </div>
+      <div class="character-hero__eyebrow">ПЕРСОНАЖ · ТОМ I</div>
 
       <div class="character-name-row">
 
-        <div>
-
-          <h1 class="character-hero__title">
-            Кеннет Хилл
-          </h1>
-
-          <div class="character-hero__fullname">
-            Кеннет Найджел Алонсо Хилл
-          </div>
-
+        <div class="character-name">
+          <h1 class="character-hero__title" data-fit-title>Кеннет Хилл</h1>
+          <div class="character-hero__fullname">Кеннет Найджел Алонсо Хилл</div>
         </div>
 
-        <div
-          class="character-codifier"
-          title="Парадокс Деи"
-        >
+        <div class="character-codifier" title="Парадокс Деи">
           <span class="character-codifier__icon">✭</span>
-          <span class="character-codifier__text">
-            Парадокс Деи
-          </span>
+          <span class="character-codifier__text">Парадокс Деи</span>
         </div>
 
       </div>
-
 
       <div class="character-hero__aliases">
         Нэт · Хилл-младший · Кеннет Найджел ·
-        <span
-          class="character-alias"
-          title="Прозвище от Витс Беллех'Тет"
-        >
-          Касатик
-        </span>
+        <span class="character-alias" tabindex="0" data-tip="Прозвище от Витс Беллех'Тет">Касатик</span>
       </div>
 
+      <figure class="character-quote">
+        <blockquote>«Если не сейчас, то никогда».</blockquote>
+        <figcaption>Акт I, глава VI</figcaption>
+      </figure>
 
-      <!-- ОСНОВНЫЕ ДАННЫЕ -->
+      <div class="character-infobox">
 
-      <div class="character-stats">
+        <div class="info-tiles">
 
-        <div class="character-stat">
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4"/>
-              <path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              РАСА
-            </span>
+          <div class="info-tile">
+            <span class="info-label"><span class="info-icon" data-icon="user"></span>Раса</span>
             <strong>Человек</strong>
           </div>
-        </div>
 
-
-        <div class="character-stat character-stat--pair">
-
-          <div>
-            <span class="character-stat__label">
-              ПОЛ
-            </span>
+          <div class="info-tile">
+            <span class="info-label"><span class="info-icon" data-icon="mars"></span>Пол</span>
             <strong>Мужской</strong>
           </div>
 
-          <div>
-            <span class="character-stat__label">
-              ГЕНДЕР
-            </span>
+          <div class="info-tile">
+            <span class="info-label"><span class="info-icon" data-icon="gender"></span>Гендер</span>
             <strong>Мужской</strong>
           </div>
 
-        </div>
-
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M12 7v5l3 2"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              ДАТА РОЖДЕНИЯ
-            </span>
+          <div class="info-tile info-tile--wide">
+            <span class="info-label"><span class="info-icon" data-icon="calendar"></span>Дата рождения</span>
             <strong>29.02.1988</strong>
           </div>
 
-        </div>
-
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 19V5h16v14z"/>
-              <path d="M8 9h8M8 13h5"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              РОСТ
-            </span>
-            <strong>
-              168 см
-            </strong>
+          <div class="info-tile">
+            <span class="info-label"><span class="info-icon" data-icon="ruler"></span>Рост</span>
+            <strong>168 см</strong>
           </div>
 
         </div>
 
+        <div class="info-rows">
 
-        <div class="character-stat">
+          <div class="info-row">
+            <span class="info-label"><span class="info-icon" data-icon="users"></span>Организации</span>
+            <div class="info-value">
+              <div class="info-item"><strong>Звёздное Предлуние</strong><small>ранее</small></div>
+            </div>
+          </div>
 
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="8"/>
-              <path d="M8 12h8M12 8v8"/>
-            </svg>
-          </span>
+          <div class="info-row">
+            <span class="info-label"><span class="info-icon" data-icon="crown"></span>Титулы</span>
+            <div class="info-value">
+              <div class="info-item"><strong>Принц эньерский</strong></div>
+            </div>
+          </div>
 
-          <div>
-            <span class="character-stat__label">
-              ОРГАНИЗАЦИИ
-            </span>
-            <strong>Звёздное Предлуние</strong>
-            <small>ранее</small>
+          <div class="info-row">
+            <span class="info-label"><span class="info-icon" data-icon="pin"></span>Место рождения</span>
+            <div class="info-value">
+              <div class="info-item"><strong>Хайхилл, Англия, Азора Юрико</strong></div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label"><span class="info-icon" data-icon="home"></span>Место жительства</span>
+            <div class="info-value">
+              <div class="info-item"><strong>Путешествует по Деройсити</strong></div>
+            </div>
           </div>
 
         </div>
-
-          <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3l2.7 5.5 6.3.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.4l6.3-.9z"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              ТИТУЛЫ
-            </span>
-            <strong>Принц эньерский</strong>
-          </div>
-
-        </div>
-
-        <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="8"/>
-              <path d="M8 12h8M12 8v8"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              МЕСТО РОЖДЕНИЯ
-            </span>
-            <strong>Хайхилл, Англия, Азора Юрико</strong>
-          </div>
-
-        </div>
-
-          <div class="character-stat">
-
-          <span class="character-stat__icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3l2.7 5.5 6.3.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.4l6.3-.9z"/>
-            </svg>
-          </span>
-
-          <div>
-            <span class="character-stat__label">
-              МЕСТО ЖИТЕЛЬСТВА
-            </span>
-            <strong>Путешествует по Деройсити</strong>
-          </div>
-
-        </div>
-
 
       </div>
 
-
-      <!-- SONAR -->
 
       <div class="sonar-panel">
 
         <div class="sonar-panel__header">
-
           <div class="sonar-panel__title">
-            <span class="sonar-panel__icon">◈</span>
-            СОНАР
+            <span class="sonar-panel__icon" data-icon="wave"></span>СОНАР
           </div>
-
-          <div class="sonar-rank">
-            РАНГ 7
-          </div>
-
+          <div class="sonar-rank">РАНГ 7</div>
         </div>
-
 
         <div class="sonar-panel__links">
 
           <div class="sonar-link">
-
-            <div class="sonar-link__orb">
-              <span>H</span>
-            </div>
-
+            <div class="sonar-link__orb"><span>H</span></div>
             <div>
-              <span class="sonar-link__label">
-                ЛИНК
-              </span>
-              <strong>
-                Хаметсу Ёкахоши
-              </strong>
+              <span class="sonar-link__label">ЛИНК</span>
+              <strong>Хаметсу Ёкахоши</strong>
             </div>
-
           </div>
 
-
           <div class="sonar-link">
-
-            <div class="sonar-link__orb">
-              <span>D</span>
-            </div>
-
+            <div class="sonar-link__orb"><span>D</span></div>
             <div>
-              <span class="sonar-link__label">
-                ЛИНК
-              </span>
-              <strong>
-                Дорагон Отобаси
-              </strong>
+              <span class="sonar-link__label">ЛИНК</span>
+              <strong>Дорагон Отобаси</strong>
             </div>
-
           </div>
 
         </div>
 
       </div>
 
-
     </div>
 
   </section>
 
-  <!-- =========================================================
-       ТЕХНИЧЕСКИЕ ДАННЫЕ
-       ========================================================= -->
 
   <section class="character-section">
 
     <div class="character-section__heading">
-      <span class="character-section__eyebrow">
-        СИНХРОНИЗАЦИЯ
-      </span>
-
+      <span class="character-section__eyebrow">СИНХРОНИЗАЦИЯ</span>
       <h2>Системные параметры</h2>
     </div>
-
 
     <div class="character-tech-grid">
 
       <div class="character-tech">
-
-        <span class="character-tech__icon">⚔</span>
-
+        <span class="character-tech__icon" data-icon="sword"></span>
         <div>
-          <span>ГЕНЕЗИС ОРУЖИЯ</span>
-
-          <strong>
-            Снисхождение Звезды
-            <small>меч</small>
-          </strong>
-
-          <strong>
-            Завет Рождения
-            <small>алебарда</small>
-          </strong>
+          <span class="character-tech__label">ГЕНЕЗИС ОРУЖИЯ</span>
+          <strong>Снисхождение Звезды <small>меч</small></strong>
+          <strong>Завет Рождения <small>алебарда</small></strong>
         </div>
-
       </div>
 
-
       <div class="character-tech">
-
-        <span class="character-tech__icon">✦</span>
-
+        <span class="character-tech__icon" data-icon="sparkle"></span>
         <div>
-          <span>ФОРТЕ СИНХРОНИЗАЦИИ</span>
-
-          <strong>
-            Алгоритм Энигмы
-            <small>инструментальный / пассивный</small>
-          </strong>
+          <span class="character-tech__label">ФОРТЕ СИНХРОНИЗАЦИИ</span>
+          <strong>Алгоритм Энигмы <small>инструментальный / пассивный</small></strong>
         </div>
-
       </div>
 
-
       <div class="character-tech">
-
-        <span class="character-tech__icon">◌</span>
-
+        <span class="character-tech__icon" data-icon="cord"></span>
         <div>
-          <span>КОРД РЕЗОНАНСА</span>
-
-          <strong>
-            Затылок
-            <small>влияние</small>
-          </strong>
+          <span class="character-tech__label">КОРД РЕЗОНАНСА</span>
+          <strong>Затылок <small>влияние</small></strong>
         </div>
-
       </div>
 
-
       <div class="character-tech">
-
-        <span class="character-tech__icon">⌁</span>
-
+        <span class="character-tech__icon" data-icon="terminal"></span>
         <div>
-          <span>КОДИФИКАТОР БП</span>
-
-          <strong>
-            ✭ Парадокс Деи
-          </strong>
+          <span class="character-tech__label">КОДИФИКАТОР БП</span>
+          <strong>✭ Парадокс Деи</strong>
         </div>
-
       </div>
 
     </div>
 
   </section>
 
-
-  <!-- =========================================================
-       ГАЛЕРЕЯ ГЕНЕЗИСОВ
-       ========================================================= -->
 
   <section class="character-section">
 
     <div class="character-section__heading">
-      <span class="character-section__eyebrow">
-        SONAR / GENESIS
-      </span>
-
+      <span class="character-section__eyebrow">SONAR / GENESIS</span>
       <h2>Генезисы</h2>
-
-      <p>
-        Формы, доступные синхронизации Кеннета Хилла.
-      </p>
+      <p>Формы, доступные синхронизации Кеннета Хилла.</p>
     </div>
-
 
     <div class="genesis-gallery">
 
-      <button class="genesis-card genesis-card--sword">
-
-        <div class="genesis-card__visual">
-          <span>⚔</span>
-        </div>
-
-        <div class="genesis-card__name">
-          Снисхождение Звезды
-        </div>
-
-        <div class="genesis-card__type">
-          МЕЧ
-        </div>
-
+      <button type="button" class="genesis-card">
+        <div class="genesis-card__visual"><span data-icon="sword"></span></div>
+        <div class="genesis-card__name">Снисхождение Звезды</div>
+        <div class="genesis-card__type">МЕЧ</div>
       </button>
 
-
-      <button class="genesis-card genesis-card--halberd">
-
-        <div class="genesis-card__visual">
-          <span>⟡</span>
-        </div>
-
-        <div class="genesis-card__name">
-          Завет Рождения
-        </div>
-
-        <div class="genesis-card__type">
-          АЛЕБАРДА
-        </div>
-
+      <button type="button" class="genesis-card">
+        <div class="genesis-card__visual"><span data-icon="spear"></span></div>
+        <div class="genesis-card__name">Завет Рождения</div>
+        <div class="genesis-card__type">АЛЕБАРДА</div>
       </button>
 
-
-      <button class="genesis-card genesis-card--wings">
-
-        <div class="genesis-card__visual">
-          <span>♢</span>
-        </div>
-
-        <div class="genesis-card__name">
-          Крылья
-        </div>
-
-        <div class="genesis-card__type">
-          ГЕНЕЗИС
-        </div>
-
+      <button type="button" class="genesis-card">
+        <div class="genesis-card__visual"><span data-icon="wings"></span></div>
+        <div class="genesis-card__name">Крылья</div>
+        <div class="genesis-card__type">ГЕНЕЗИС</div>
       </button>
 
-
-      <button class="genesis-card genesis-card--cord">
-
-        <div class="genesis-card__visual">
-          <span>◌</span>
-        </div>
-
-        <div class="genesis-card__name">
-          Затылок
-        </div>
-
-        <div class="genesis-card__type">
-          КОРД РЕЗОНАНСА
-        </div>
-
+      <button type="button" class="genesis-card">
+        <div class="genesis-card__visual"><span data-icon="cord"></span></div>
+        <div class="genesis-card__name">Затылок</div>
+        <div class="genesis-card__type">КОРД РЕЗОНАНСА</div>
       </button>
 
     </div>
@@ -579,89 +333,81 @@
   </section>
 
 
-  <!-- =========================================================
-       ПОДРОБНАЯ ИНФОРМАЦИЯ
-       ========================================================= -->
-
   <section class="character-detail-grid">
 
     <article class="character-detail">
-
-      <div class="character-detail__icon">◈</div>
-
-      <div>
-        <div class="character-detail__eyebrow">
-          CHARACTER
+      <div class="character-detail__head">
+        <div class="character-detail__icon" data-icon="heart"></div>
+        <div>
+          <div class="character-detail__eyebrow">CHARACTER</div>
+          <h2>Характер</h2>
         </div>
-
-        <h2>Характер</h2>
-
-        <p>
-          Кеннет всегда был немного «не отсюда» — тихий мальчик,
-          в юности превратившийся в странного парня, который может
-          рассуждать о чём-то совершенно неинтересном так, будто
-          речь идёт о судьбах мира, но теряется, когда нужно
-          ответить на простое «как дела?».
-        </p>
       </div>
-
+      <p>
+        Кеннет всегда был немного «не отсюда» — тихий мальчик,
+        в юности превратившийся в странного парня, который может
+        рассуждать о чём-то совершенно неинтересном так, будто
+        речь идёт о судьбах мира, но теряется, когда нужно
+        ответить на простое «как дела?».
+      </p>
     </article>
-
 
     <article class="character-detail">
-
-      <div class="character-detail__icon">◇</div>
-
-      <div>
-        <div class="character-detail__eyebrow">
-          APPEARANCE
+      <div class="character-detail__head">
+        <div class="character-detail__icon" data-icon="eye"></div>
+        <div>
+          <div class="character-detail__eyebrow">APPEARANCE</div>
+          <h2>Внешность</h2>
         </div>
-
-        <h2>Внешность</h2>
-
-        <p class="character-wip">
-          В разработке
-        </p>
       </div>
-
+      <p class="character-wip">В разработке</p>
     </article>
 
-
-    <article class="character-detail character-detail--facts">
-
-      <div class="character-detail__icon">✦</div>
-
-      <div>
-
-        <div class="character-detail__eyebrow">
-          DATABASE
+    <article class="character-detail">
+      <div class="character-detail__head">
+        <div class="character-detail__icon" data-icon="sparkle"></div>
+        <div>
+          <div class="character-detail__eyebrow">DATABASE</div>
+          <h2>Интересные факты</h2>
         </div>
-
-        <h2>Интересные факты</h2>
-
-        <ul>
-          <li>В разработке</li>
-          <li>В разработке</li>
-          <li>В разработке</li>
-          <li>В разработке</li>
-        </ul>
-
       </div>
+      <ul class="character-facts">
+        <li>В разработке</li>
+        <li>В разработке</li>
+        <li>В разработке</li>
+        <li>В разработке</li>
+      </ul>
+    </article>
 
+    <article class="character-detail">
+      <div class="character-detail__head">
+        <div class="character-detail__icon" data-icon="quote"></div>
+        <div>
+          <div class="character-detail__eyebrow">QUOTES</div>
+          <h2>Цитаты</h2>
+        </div>
+      </div>
+      <ul class="character-quotes">
+        <li>
+          <blockquote>«Кто не рискует, тот не живёт».</blockquote>
+          <cite>Акт I, глава III</cite>
+        </li>
+        <li>
+          <blockquote>«Я больше не мотылёк в банке».</blockquote>
+          <cite>Акт I, глава III</cite>
+        </li>
+        <li>
+          <blockquote>«Я не слабый! Я не мальчик на побегушках!»</blockquote>
+          <cite>Акт I, глава VI</cite>
+        </li>
+      </ul>
     </article>
 
   </section>
 
   <div class="character-page__footer">
-
-    <a href="index.html">
-      ← Все персонажи
-    </a>
-
-    <a href="../glossary.html">
-      Глоссарий →
-    </a>
-
+    <a href="index.html">← Все персонажи</a>
+    <a href="../glossary.html">Глоссарий →</a>
   </div>
 
 </main>
@@ -688,5 +434,6 @@
 
 </footer>
 <script src="../assets/js/main.js"></script>
+<script src="../assets/js/character.js"></script>
 </body>
 </html>
