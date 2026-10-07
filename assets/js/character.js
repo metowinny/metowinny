@@ -3,6 +3,7 @@
   const ICONS = {
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4 3.3-6 8-6s7.3 2 8 6"/>',
     mars: '<circle cx="10" cy="14" r="5"/><path d="M14 10l6-6M15 4h5v5"/>',
+    venus: '<circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/>',
     gender: '<circle cx="9" cy="14" r="4"/><path d="M12 11l6-6M14 5h4v4M9 18v3M7 20h4"/>',
     calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     ruler: '<path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/>',
