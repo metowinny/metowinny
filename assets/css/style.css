@@ -3844,7 +3844,7 @@ transform-origin: center bottom;
 
 .character-section__heading p { margin: 0; color: var(--text-dim); }
 
-.character-tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.character-tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 
 .character-tech {
   display: flex;
@@ -3852,6 +3852,7 @@ transform-origin: center bottom;
   align-items: flex-start;
   min-width: 0;
   padding: 20px;
+   min-height: 170px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--bg-card);
