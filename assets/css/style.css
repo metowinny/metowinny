@@ -3672,7 +3672,7 @@ transform-origin: center bottom;
   background: var(--line);
 }
 
-.info-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; }
+.info-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; }
 
 .info-rows { display: grid; gap: 1px; }
 
@@ -4663,3 +4663,7 @@ a.relation-card__name:hover { color: #fff; border-bottom: 1px dotted var(--tone)
 }
 
 .character-tech-grid { align-items: start; }
+
+.info-tile__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+
+.info-tile__line small { display: inline-block; margin: 0; }
