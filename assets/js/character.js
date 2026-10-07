@@ -154,7 +154,10 @@
 
     const refs = dots.map(dot => ({
       src: dot.dataset.refSrc,
-      label: dot.dataset.refLabel || dot.getAttribute('aria-label') || ''
+      label: dot.dataset.refLabel || dot.getAttribute('aria-label') || '',
+x: dot.dataset.refX,
+y: dot.dataset.refY,
+scale: dot.dataset.refScale
     }));
 
     let current = 0;
@@ -176,6 +179,10 @@
         if (mine !== token) return;
         image.src = ref.src;
         image.alt = ref.label;
+        ['x', 'y', 'scale'].forEach(key => {
+  if (ref[key]) frame.style.setProperty('--ref-' + key, ref[key]);
+  else frame.style.removeProperty('--ref-' + key);
+});
         frame.classList.remove('is-missing');
         frame.classList.remove('is-switching');
       };
