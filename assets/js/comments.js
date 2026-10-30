@@ -976,33 +976,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (visibleCount === 0) {
-  marker.remove();
-
-  const highlight =
-    document.querySelector(
-      `.comment-highlight[data-comment-id="${CSS.escape(annotation.id)}"]`
-    );
-
-  if (highlight) {
-    const parent =
-      highlight.parentNode;
-
-    while (highlight.firstChild) {
-      parent.insertBefore(
-        highlight.firstChild,
-        highlight
-      );
+      // Комментарий без реакций всё равно должен оставаться видимым.
+      // Раньше здесь удалялась и подсветка, и локальная аннотация.
+      marker.remove();
+      return null;
     }
-
-    highlight.remove();
-  }
-
-  annotationsById.delete(
-    annotation.id
-  );
-
-  return null;
-}
 
 repositionMarkers();
 
@@ -1365,6 +1343,23 @@ function createCommentBox(
     annotation.content || '';
 
   document.body.appendChild(box);
+
+  // На компактном экране комментарий появляется по нажатию на выделение,
+  // не перекрывая всю страницу постоянно.
+  highlight.setAttribute('tabindex', '0');
+  highlight.setAttribute('role', 'button');
+  highlight.setAttribute('aria-label', 'Показать комментарий к выделению');
+  const toggleBox = () => {
+    if (window.innerWidth > 1100) return;
+    document.querySelectorAll('.comment-comment.is-open').forEach(other => {
+      if (other !== box) other.classList.remove('is-open');
+    });
+    box.classList.toggle('is-open');
+  };
+  highlight.addEventListener('click', toggleBox);
+  highlight.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleBox(); }
+  });
 
   requestAnimationFrame(() => {
     box.classList.add('is-visible');
@@ -2060,7 +2055,6 @@ function showCommentForm() {
         <input
           type="checkbox"
           class="comment-form__error-check"
-          checked
         >
 
         <span>
@@ -2131,7 +2125,7 @@ function showCommentForm() {
    * относительно выделенного текста.
    */
 
-  const formWidth = 360;
+  const formWidth = Math.min(360, window.innerWidth - 24);
   const padding = 12;
 
   let left =

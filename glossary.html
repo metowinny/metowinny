@@ -6,28 +6,34 @@
 <title>Глоссарий — Нулевой Трибунал</title>
 <meta name="description" content="Глоссарий терминов, рас, государств, миров и понятий Вселенной Нулевого Трибунала.">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="assets/logo.ico/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logo.ico/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logo.ico/apple-icon-180x180.png">
+<meta name="theme-color" content="#120b22">
+<link rel="stylesheet" href="assets/css/enhancements.css">
 </head>
 <body>
 <header class="site-header">
   <div class="site-header__row">
-    <button class="icon-btn" data-burger aria-label="Меню и другие площадки" title="Меню и другие площадки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="icon-btn" data-burger type="button" aria-expanded="false" aria-controls="site-dropdown" aria-label="Открыть меню" title="Меню и другие площадки"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <a href="index.html" class="site-logo-link"><img src="assets/img/logo.png" alt="Нулевой Трибунал" class="site-logo"></a>
-    <div class="search-box">
+    <div class="search-box" role="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" placeholder="Поиск по сайту (скоро)…" disabled>
+      <input type="search" data-site-search placeholder="Поиск по главам и терминам…" aria-label="Поиск по сайту" autocomplete="off" spellcheck="false">
     </div>
     <nav class="header-nav">
       <a href="index.html">Главная</a>
       <a href="toma/index.html">Тома</a>
-      <a href="personazhi/index.html">Персонажи</a>
+
       <a href="glossary.html" class="is-active">Глоссарий</a>
+      <a class="nav-wiki" href="https://thenulltribunal.fandom.com/ru/wiki/Home.html" target="_blank" rel="noopener noreferrer">✦ Вики ↗</a>
     </nav>
   </div>
-  <nav class="mobile-nav" data-mobile-nav>
+  <nav class="mobile-nav" data-mobile-nav id="site-dropdown" aria-label="Дополнительная навигация">
     <div class="mobile-nav__pages">
       <a href="index.html">Главная</a>
       <a href="toma/index.html">Тома</a>
-      <a href="personazhi/index.html">Персонажи</a>
+
       <a href="glossary.html">Глоссарий</a>
     </div>
     <div class="mobile-nav__platforms">
@@ -200,5 +206,6 @@
   <div>© Винни Метонимий. Серия «Нулевой Трибунал». Все права на текст и мир защищены.</div>
 </footer>
 <script src="assets/js/main.js"></script>
+<script defer src="assets/js/site-ui.js"></script>
 </body>
 </html>

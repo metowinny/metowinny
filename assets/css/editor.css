@@ -124,3 +124,35 @@
 @media (max-width:1099px){
   .editor-page{overflow-x:auto}
 }
+
+/* 2026: полноценная мобильная сетка редактора, без горизонтальной прокрутки */
+@media (max-width: 1099px) {
+  .editor-page { min-width: 0; overflow-x: hidden; }
+  .editor-shell { width: min(100% - 32px, 850px); padding: 26px 0 48px; }
+  .editor-header { flex-wrap: wrap; align-items: flex-start; gap: 15px; }
+  .editor-workspace { grid-template-columns: minmax(0, 1fr); }
+  .editor-sidebar { position: static; max-height: none; overflow: visible; }
+  .editor-stage[data-view="split"] { grid-template-columns: minmax(0, 1fr); }
+  .editor-stage[data-view="split"] .editor-pane--code { border-right: 0; border-bottom: 1px solid var(--line); }
+  .editor-pane { height: min(55vh, 650px); min-height: 350px; }
+  .editor-preview, .editor-stage[data-view="split"] .editor-preview { padding: 30px 24px; }
+  .style-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: start; }
+  .editor-footer__hint { display: none; }
+}
+@media (max-width: 560px) {
+  .editor-shell { width: calc(100% - 22px); padding-top: 15px; }
+  .editor-header h1 { font-size: 23px; }
+  .editor-header__actions { width: 100%; flex-wrap: wrap; gap: 6px; }
+  .editor-header__actions .editor-button { flex: 1 1 auto; font-size: 11px; padding: 9px; }
+  .editor-modebar { flex-wrap: wrap; gap: 4px; padding: 8px; }
+  .editor-tab { padding: 8px 11px; }
+  .editor-pane { min-height: 310px; height: 42vh; }
+  .editor-code { padding: 15px; font-size: 12px; }
+  .editor-preview, .editor-stage[data-view="split"] .editor-preview { padding: 20px 14px; }
+  .editor-sidebar { padding: 14px; }
+  .style-list { grid-template-columns: minmax(0, 1fr); }
+  .editor-output__head { padding: 12px; }
+  .editor-output h2 { font-size: 15px; }
+  .editor-output__code { padding: 12px; font-size: 11px; }
+  .editor-footer { justify-content: space-between; gap: 8px; }
+}

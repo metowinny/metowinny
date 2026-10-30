@@ -4,14 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ---------- мобильное меню ---------- */
-  const burger = document.querySelector('[data-burger]');
-  const mobileNav = document.querySelector('[data-mobile-nav]');
-  if (burger && mobileNav) {
-    burger.addEventListener('click', () => {
-      mobileNav.classList.toggle('is-open');
-    });
-  }
+  /* Мобильное меню и поиск перенесены в site-ui.js: один обработчик на кнопку. */
 
   /* ---------- аккордеон "Часть -> Акт -> Глава" теперь на нативных <details> —
      JS здесь больше не нужен, раскрытие/закрытие работает и без него ---------- */
@@ -23,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.matchMedia('(hover: none)').matches) {
         e.preventDefault();
         const wasOpen = fn.classList.contains('is-open');
-        document.querySelectorAll('.footnote.is-op5en').forEach(o => o.classList.remove('is-open'));
+        document.querySelectorAll('.footnote.is-open').forEach(o => o.classList.remove('is-open'));
         if (!wasOpen) fn.classList.add('is-open');
       }
     });
@@ -38,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const FONT_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
   const fontBtns = document.querySelectorAll('[data-font-size]');
   const savedFont = localStorage.getItem('nt-font-size');
-  if (savedFont) {
+  if (savedFont && FONT_SIZES.includes(savedFont)) {
     if (savedFont !== 'md') document.body.classList.add('font-' + savedFont);
     fontBtns.forEach(b => b.classList.toggle('is-active', b.dataset.fontSize === savedFont));
   }
