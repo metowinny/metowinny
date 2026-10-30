@@ -7,9 +7,10 @@
 <meta name="description" content="Нулевой Трибунал. Мир, сотканный из строк кода Божественного порядка.">
 <link rel="stylesheet" href="../assets/css/style.css">
 
-<link rel="icon" href="../assets/logo.ico/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="../assets/logo.ico/favicon-32x32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="../assets/logo.ico/apple-icon-180x180.png">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="manifest" href="../assets/site.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
 <meta name="theme-color" content="#120b22">
 <link rel="stylesheet" href="../assets/css/enhancements.css">
 </head>
@@ -53,18 +54,19 @@
     <span>Акт I. Валтасаров пир</span>
   </div>
 
-  <div class="reader-tools">
-    <button class="icon-btn" data-font-size="xs" title="Совсем мелко" style="font-size:11px;">A</button>
-    <button class="icon-btn" data-font-size="sm" title="Мельче" style="font-size:14px;">A</button>
-    <button class="icon-btn is-active" data-font-size="md" title="Обычный">A</button>
-    <button class="icon-btn" data-font-size="lg" title="Крупнее" style="font-size:22px;">A</button>
-    <button class="icon-btn" data-font-size="xl" title="Совсем крупно" style="font-size:26px;">A</button>
+  <div class="reader-tools" role="group" aria-label="Настройки чтения">
+    <span class="reader-tools__label">Текст</span>
+    <div class="reader-tools__group" role="group" aria-label="Размер текста">
+      <button class="icon-btn" type="button" data-font-size="sm" title="Меньше" aria-label="Меньший текст">A−</button>
+      <button class="icon-btn is-active" type="button" data-font-size="md" title="Стандартный" aria-label="Стандартный текст">A</button>
+      <button class="icon-btn" type="button" data-font-size="lg" title="Больше" aria-label="Больший текст">A+</button>
+    </div>
     <span class="reader-tools__divider"></span>
-    <button class="icon-btn" data-font-readable title="Шрифт полегче для чтения (в т.ч. для дислексии)">Aa</button>
+    <button class="icon-btn" type="button" data-font-readable title="Удобочитаемый шрифт" aria-label="Удобочитаемый шрифт" aria-pressed="false">Aa</button>
+    <button class="icon-btn" type="button" data-theme-toggle title="Светлая читалка" aria-label="Светлая читалка" aria-pressed="false">☼</button>
     <span class="reader-tools__divider"></span>
-    <button class="icon-btn" data-theme-toggle title="Светлая читалка" aria-label="Светлая читалка">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="4.5" y1="12" x2="2" y2="12"/><line x1="22" y1="12" x2="19.5" y2="12"/><line x1="18.7" y1="5.3" x2="17" y2="7"/><line x1="7" y1="17" x2="5.3" y2="18.7"/><line x1="18.7" y1="18.7" x2="17" y2="17"/><line x1="7" y1="7" x2="5.3" y2="5.3"/></svg>
-    </button>
+    <button class="icon-btn" type="button" data-reader-social title="Скрыть реакции и комментарии" aria-label="Показывать реакции и комментарии" aria-pressed="true">💬</button>
+    <button class="icon-btn" type="button" data-reader-particles title="Отключить пузырьки курсора" aria-label="Пузырьки курсора" aria-pressed="true">◌</button>
   </div>
 
   <div class="chapter-head">
@@ -389,6 +391,7 @@
   <p>© Винни Метонимий. Серия «Нулевой Трибунал». Все права на текст и мир защищены.<br>
   Металайкофос не здесь.</p>
 </footer>
+<button type="button" class="back-to-top" data-back-to-top aria-label="Вернуться наверх" title="Наверх" hidden>↑ <span>Наверх</span></button>
 <script src="../assets/js/main.js"></script>
 <script defer src="../assets/js/site-ui.js"></script>
 <script src="../assets/js/comments.js"></script>

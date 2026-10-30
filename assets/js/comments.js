@@ -391,6 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toolbar.className =
       'comment-selection-toolbar';
+    toolbar.setAttribute('role','toolbar');
+    toolbar.setAttribute('aria-label','Реакция или комментарий к выделению');
 
     toolbar.innerHTML = `
       ${Object.entries(REACTIONS).map(
@@ -417,6 +419,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.appendChild(toolbar);
 
+    if (matchMedia('(max-width: 1100px), (pointer: coarse)').matches) {
+      toolbar.classList.add('comment-selection-toolbar--bottom');
+      selectionToolbar=toolbar;
+      requestAnimationFrame(()=>toolbar.classList.add('is-visible'));
+      return;
+    }
     const toolbarWidth =
       toolbar.offsetWidth;
 
@@ -467,6 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleSelection() {
+    if(document.body.classList.contains('reader-social-off')) { removeToolbar();return; }
     const selection =
       window.getSelection();
 
@@ -1344,22 +1353,10 @@ function createCommentBox(
 
   document.body.appendChild(box);
 
-  // На компактном экране комментарий появляется по нажатию на выделение,
-  // не перекрывая всю страницу постоянно.
-  highlight.setAttribute('tabindex', '0');
-  highlight.setAttribute('role', 'button');
-  highlight.setAttribute('aria-label', 'Показать комментарий к выделению');
-  const toggleBox = () => {
-    if (window.innerWidth > 1100) return;
-    document.querySelectorAll('.comment-comment.is-open').forEach(other => {
-      if (other !== box) other.classList.remove('is-open');
-    });
-    box.classList.toggle('is-open');
-  };
-  highlight.addEventListener('click', toggleBox);
-  highlight.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleBox(); }
-  });
+  // Единственная мобильная панель объединяет и реакции, и комментарии.
+  highlight.setAttribute('tabindex','0');
+  highlight.setAttribute('role','button');
+  highlight.setAttribute('aria-label','Показать реакции и комментарий');
 
   requestAnimationFrame(() => {
     box.classList.add('is-visible');
@@ -1367,6 +1364,62 @@ function createCommentBox(
 
   return box;
 }
+
+  // На мобильном касание отметки открывает полноценную нижнюю карточку.
+  let mobilePanel=null;
+  const closeMobilePanel=()=>{mobilePanel?.remove();mobilePanel=null;};
+  function showMobilePanel(annotation,highlight){
+    if(!annotation||!highlight||document.body.classList.contains('reader-social-off'))return;
+    closeMobilePanel();removeToolbar();
+    const panel=document.createElement('section');
+    panel.className='comment-mobile-panel';
+    panel.setAttribute('role','dialog');
+    panel.setAttribute('aria-label','Отклики на выделенный текст');
+    const head=document.createElement('div');head.className='comment-mobile-panel__head';
+    const title=document.createElement('strong');title.textContent='✦ Отклики читателей';
+    const close=document.createElement('button');close.type='button';close.className='comment-mobile-panel__close';
+    close.textContent='✕';close.setAttribute('aria-label','Закрыть');close.addEventListener('click',closeMobilePanel);
+    head.append(title,close);panel.append(head);
+    const buttons=document.createElement('div');buttons.className='comment-mobile-panel__reactions';
+    for(const [key,reaction] of Object.entries(REACTIONS)){
+      const b=document.createElement('button');b.type='button';b.className='comment-mobile-panel__reaction';
+      b.title=reaction.title;b.setAttribute('aria-label',reaction.title);
+      const emoji=document.createElement('span');emoji.textContent=reaction.emoji;
+      const count=document.createElement('small');count.textContent=annotation.reactionState?.[key]?.count||'';
+      b.append(emoji,count);
+      b.classList.toggle('is-mine',!!annotation.reactionState?.[key]?.mine);
+      b.addEventListener('click',async()=>{
+        await toggleReaction(annotation,key,highlight,b);
+        if(mobilePanel===panel){count.textContent=annotation.reactionState?.[key]?.count||'';
+          b.classList.toggle('is-mine',!!annotation.reactionState?.[key]?.mine);}
+      });
+      buttons.append(b);
+    }
+    panel.append(buttons);
+    const saved=document.querySelector(`.comment-comment[data-comment-id="${CSS.escape(annotation.id)}"]`);
+    const content=saved?.querySelector('.comment-comment__content')?.textContent||annotation.content||'';
+    if(content){
+      const text=document.createElement('div');text.className='comment-mobile-panel__text';
+      const label=document.createElement('strong');label.textContent=annotation.is_error_report?'⚑ Замечание':'💬 Комментарий';
+      const p=document.createElement('p');p.textContent=content;text.append(label,p);panel.append(text);
+    }else{
+      const hint=document.createElement('p');hint.className='comment-mobile-panel__hint';
+      hint.textContent='Здесь оставили реакцию. Выбери смайлик, чтобы добавить свою.';panel.append(hint);
+    }
+    document.body.append(panel);mobilePanel=panel;
+    requestAnimationFrame(()=>panel.classList.add('is-visible'));
+  }
+  reader.addEventListener('click',event=>{
+    if(!matchMedia('(max-width: 1100px), (pointer: coarse)').matches)return;
+    const hl=event.target.closest('.comment-highlight[data-comment-id]');
+    if(!hl||!reader.contains(hl)||window.getSelection()?.toString().trim())return;
+    showMobilePanel(annotationsById.get(hl.dataset.commentId),hl);
+  });
+  reader.addEventListener('keydown',event=>{
+    if(!['Enter',' '].includes(event.key))return;
+    const hl=event.target.closest('.comment-highlight[data-comment-id]');if(!hl)return;
+    event.preventDefault();showMobilePanel(annotationsById.get(hl.dataset.commentId),hl);
+  });
 
   function positionCommentBox(
   box,
@@ -1416,10 +1469,9 @@ function createCommentBox(
   for (
     const annotation of comments
   ) {
-    annotationsById.set(
-      annotation.id,
-      annotation
-    );
+    const existing=annotationsById.get(annotation.id);
+    if(existing?.reactionState)annotation.reactionState=existing.reactionState;
+    annotationsById.set(annotation.id,annotation);
 
     let highlight =
       document.querySelector(
@@ -1860,10 +1912,18 @@ function repositionMarkers() {
    * ============================================================
    */
 
-  document.addEventListener(
-    'selectionchange',
-    handleSelection
-  );
+  let mobileSelectionTimer=null;
+  document.addEventListener('selectionchange',()=>{
+    if(matchMedia('(pointer: coarse)').matches){
+      clearTimeout(mobileSelectionTimer);
+      mobileSelectionTimer=setTimeout(handleSelection,150);
+    }else handleSelection();
+  });
+  reader.addEventListener('touchend',()=>{
+    if(document.body.classList.contains('reader-social-off'))return;
+    clearTimeout(mobileSelectionTimer);
+    mobileSelectionTimer=setTimeout(handleSelection,240);
+  },{passive:true});
 
   document.addEventListener(
     'mousedown',
@@ -1891,6 +1951,7 @@ function repositionMarkers() {
 document.addEventListener(
   'click',
   async event => {
+    if(mobilePanel && !event.target.closest('.comment-mobile-panel,.comment-highlight[data-comment-id]'))closeMobilePanel();
 
     const selectionReaction =
       event.target.closest(
@@ -1948,6 +2009,8 @@ document.addEventListener(
   window.addEventListener(
     'scroll',
     () => {
+      // Карточка откликов фиксируется снизу до явного закрытия.
+      // Не закрывать её при остаточном скролле iOS после касания.
       removeToolbar();
     },
     { passive: true }
@@ -1961,9 +2024,12 @@ document.addEventListener(
 window.addEventListener(
     'resize',
     () => {
-      repositionCommentBoxes();
+      repositionCommentBoxes();closeMobilePanel();
     }
   );
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){closeMobilePanel();removeToolbar();}
+  });
 
 /*
  * ============================================================

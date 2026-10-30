@@ -28,9 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ---------- настройки читалки: размер шрифта (5 уровней) ---------- */
-  const FONT_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
+  const FONT_SIZES = ['sm', 'md', 'lg'];
   const fontBtns = document.querySelectorAll('[data-font-size]');
-  const savedFont = localStorage.getItem('nt-font-size');
+  const storedFont = localStorage.getItem('nt-font-size');
+  const savedFont = storedFont === 'xs' ? 'sm' : storedFont === 'xl' ? 'lg' : storedFont;
   if (savedFont && FONT_SIZES.includes(savedFont)) {
     if (savedFont !== 'md') document.body.classList.add('font-' + savedFont);
     fontBtns.forEach(b => b.classList.toggle('is-active', b.dataset.fontSize === savedFont));
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const size = btn.dataset.fontSize;
       FONT_SIZES.forEach(s => document.body.classList.remove('font-' + s));
-      fontBtns.forEach(b => b.classList.remove('is-active'));
+      fontBtns.forEach(b => { b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
       if (size !== 'md') {
         document.body.classList.add('font-' + size);
         localStorage.setItem('nt-font-size', size);
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('nt-font-size');
       }
       btn.classList.add('is-active');
+      btn.setAttribute('aria-pressed','true');
     });
   });
 
@@ -60,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     readableBtn.addEventListener('click', () => {
       const on = document.body.classList.toggle('font-readable');
       readableBtn.classList.toggle('is-active', on);
+      readableBtn.setAttribute('aria-pressed',String(on));
       if (on) localStorage.setItem('nt-font-readable', '1');
       else localStorage.removeItem('nt-font-readable');
     });
@@ -72,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyReaderTheme = (on) => {
       readerArea.classList.toggle('theme-light', on);
       themeToggle.classList.toggle('is-active', on);
+      themeToggle.setAttribute('aria-pressed',String(on));
       themeToggle.title = on ? 'Тёмная читалка' : 'Светлая читалка';
       themeToggle.setAttribute('aria-label', themeToggle.title);
     };
@@ -81,6 +85,31 @@ document.addEventListener('DOMContentLoaded', () => {
       applyReaderTheme(on);
       if (on) localStorage.setItem('nt-reader-theme', 'light');
       else localStorage.removeItem('nt-reader-theme');
+    });
+  }
+
+  /* Сохраняемые независимые настройки главы. */
+  for (const [attr, key, cls, labelOn, labelOff] of [
+    ['data-reader-social','nt-reader-social','reader-social-off','Скрыть реакции и комментарии','Показать реакции и комментарии'],
+    ['data-reader-particles','nt-reader-particles','reader-particles-off','Отключить пузырьки курсора','Включить пузырьки курсора']
+  ]) {
+    const btn=document.querySelector('['+attr+']');
+    if (!btn) continue;
+    const apply=on=>{
+      document.body.classList.toggle(cls,!on);
+      btn.classList.toggle('is-active',on);
+      btn.setAttribute('aria-pressed',String(on));
+      btn.title=on?labelOn:labelOff;
+      if (!on && cls==='reader-social-off') {
+        window.getSelection()?.removeAllRanges();
+        document.querySelectorAll('.comment-selection-toolbar,.comment-mobile-panel,.comment-form').forEach(el=>el.remove());
+      }
+      if (!on && cls==='reader-particles-off') document.querySelectorAll('.cursor-particle').forEach(el=>el.remove());
+    };
+    apply(localStorage.getItem(key)!=='off');
+    btn.addEventListener('click',()=>{
+      const on=document.body.classList.contains(cls);
+      apply(on);localStorage.setItem(key,on?'on':'off');
     });
   }
 
@@ -150,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeParticles = 0;
 
     function spawnParticle(x, y) {
-      if (activeParticles >= MAX_PARTICLES) return;
+      if (document.body.classList.contains('reader-particles-off') || activeParticles >= MAX_PARTICLES) return;
       activeParticles++;
       const el = document.createElement('span');
       const isBlue = Math.random() < 0.5;

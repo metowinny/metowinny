@@ -134,7 +134,7 @@
           if (content.includes(t)) score += Math.min(8, content.split(t).length - 1);
         }
         return { ...doc, score };
-      }).filter(Boolean).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ru'));
+      }).filter(Boolean).sort((a, b) => Number(b.type === 'Глоссарий') - Number(a.type === 'Глоссарий') || b.score - a.score || a.title.localeCompare(b.title, 'ru'));
       render(matches, norm(query));
     } catch (error) {
       console.error('[Site search]', error);
@@ -166,4 +166,15 @@
   document.addEventListener('pointerdown', event => {
     if (!host.contains(event.target)) show(false);
   });
+})();
+
+/* Возврат наверх: без лишних слушателей и без появления на первом экране. */
+(() => {
+ const btn=document.querySelector('[data-back-to-top]');
+ if(!btn)return;
+ let queued=false;
+ const refresh=()=>{btn.hidden=scrollY<420;queued=false;};
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(refresh)}},{passive:true});
+ btn.addEventListener('click',()=>scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));
+ refresh();
 })();
