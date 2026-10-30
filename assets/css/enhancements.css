@@ -397,3 +397,67 @@ body:has(.hero) {
     mask-image: radial-gradient(ellipse 80% 72% at 50% 34%, #000 32%, transparent 94%);
   }
 }
+
+/* ==============================================================
+   2.1.2 | точечный мобильный патч
+   Не изменяет HTML глав, текст, работу комментариев или JS.
+   ============================================================== */
+
+/* Витрина: мобильные частицы остаются на периферии, а не поверх букв.
+   На ПК исходный порядок наложения элементов не меняем. */
+
+/* Три вкладки на главной — компактная горизонтальная группа на телефоне.
+   На ПК исходная вертикальная навигация сохраняется. */
+@media (max-width: 759px) {
+  .about-grid .info-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+  }
+  .about-grid .info-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 50px;
+    padding: 10px 7px;
+    border-radius: 13px;
+    font-size: clamp(10px, 2.8vw, 13px);
+    line-height: 1.25;
+    letter-spacing: 0;
+    overflow-wrap: normal;
+    text-wrap: balance;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Картинка с непрозрачным логотипом прикрывает пузырьки в центре;
+     её радиальная маска оставляет их заметными у боковых краёв. */
+  .hero__frame { isolation: isolate; }
+  .hero__particles { z-index: 1; }
+  .hero__bg { z-index: 2; }
+  .hero__content { z-index: 3; }
+
+  /* Вернуть авторскую верстку: обычная проза выравнивается по ширине.
+     Эпиграфы, стихи и прочие специально оформленные блоки имеют свои стили. */
+  .reader,
+  body.font-readable .reader {
+    font-size: 18px;
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+
+  /* В старом style.css мобильный font-sm задан с !important (18px).
+     Без такого же приоритета A− совпадает со стандартными 18px. */
+  body.font-sm .reader { font-size: 16px !important; }
+  body.font-lg .reader { font-size: 21px !important; }
+
+  /* Частицы заметны на периферии иллюстрации, не затемняют надпись. */
+  .hero__particles .bubble--1 { left: 2%; }
+  .hero__particles .bubble--2 { left: 8%; }
+  .hero__particles .bubble--3 { left: 3%; }
+  .hero__particles .bubble--4 { left: 93%; }
+  .hero__particles .bubble--5 { left: 88%; }
+}
