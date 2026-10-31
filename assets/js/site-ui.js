@@ -898,38 +898,65 @@
     render();
   }
 
-  // Действия появляются только через общий скрипт; существующие HTML глав не редактируются.
-  const toolbar = $('nav', 'nt-library-toolbar');
-  toolbar.setAttribute('aria-label', 'Навигация по библиотеке');
-  function tool(label, callback) {
-    const button = $('button', 'nt-library-toolbar__button', label);
-    button.type = 'button'; button.addEventListener('click', callback); toolbar.append(button);
-    return button;
-  }
-  if (isChapterPage || isManuscript || isSynopses || location.pathname === base.pathname || location.pathname === new URL('index.html', base).pathname) {
-    tool('☷ Все главы', showChapters);
-    // У обычных глав закладка теперь встроена в панель реакций к выделению.
-    // В рукописи комментариев нет, поэтому оставляем отдельный режим выбора.
-    if (isManuscript) {
-      bookmarkButton = tool('⚑ Поставить закладку', beginBookmarkSelection);
-      bookmarkButton?.setAttribute('aria-pressed', 'false');
-      bookmarkButton?.setAttribute('title', 'Выберите абзац касанием или нажатием мыши');
+  // Единая навигация в шапке. Не редактируем HTML страниц и глав:
+  // ссылки и SVG добавляются общим скриптом после загрузки DOM.
+  // Кнопки взаимодействуют с прежними диалогами, ничего не дублируется.
+  function mountHeaderActions() {
+    const row = document.querySelector('.site-header__row');
+    const primary = row?.querySelector('.header-nav');
+    if (!row || !primary || row.querySelector('.nt-header-actions')) return;
+
+    // Логотип уже ведёт на главную, второй ссылки в шапке не нужно.
+    for (const link of primary.querySelectorAll('a')) {
+      if (!link.classList.contains('nav-wiki')) link.remove();
     }
-    tool('☆ Закладки', showBookmarks);
-    const manuscript = $('a', 'nt-library-toolbar__button', '▤ Рукопись'); manuscript.href = new URL('manuscript.html', base).href; toolbar.append(manuscript);
-    const synopses = $('a', 'nt-library-toolbar__button', '✧ Синопсисы'); synopses.href = new URL('synopses.html', base).href; toolbar.append(synopses);
-    const anchor = document.querySelector('.reader-tools') || document.querySelector('.tome-hero') || document.querySelector('.hero') || document.querySelector('.page-head');
-    if (anchor) anchor.insertAdjacentElement('afterend', toolbar);
-    else document.querySelector('main')?.prepend(toolbar);
+    for (const link of document.querySelectorAll('.mobile-nav__pages a')) {
+      if (new URL(link.href, base).pathname === new URL('index.html', base).pathname ||
+          new URL(link.href, base).pathname === base.pathname) link.remove();
+    }
+
+    const icons = {
+      volumes: '<rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/><path d="M5 7h3M16 7h3M5 17h3M16 17h3"/>',
+      glossary: '<path d="M12 7v14M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4 4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2h-3a4 4 0 0 0-4 4 4 4 0 0 0-4-4H5a2 2 0 0 0-2 2Z"/>',
+      chapters: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="m3 6 1.5 1.5L7 4.5M3 12h3M3 18h3"/>',
+      bookmarks: '<path d="M6 3.5A1.5 1.5 0 0 1 7.5 2h9A1.5 1.5 0 0 1 18 3.5V22l-6-4-6 4Z"/>',
+      manuscript: '<path d="M8 21h11a2 2 0 0 0 2-2V5a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v12a4 4 0 0 0 4 4Z"/><path d="M8 21a4 4 0 0 1 0-8h13M9 7h8M9 10h5"/>',
+      synopses: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>'
+    };
+    const actions = $('nav', 'nt-header-actions');
+    actions.setAttribute('aria-label', 'Навигация по библиотеке');
+    const addIcon = (name, title, url, callback) => {
+      const control = $(url ? 'a' : 'button', 'nt-header-actions__item');
+      if (url) control.href = new URL(url, base).href;
+      else control.type = 'button';
+      if (callback) control.addEventListener('click', callback);
+      control.title = title;
+      control.setAttribute('aria-label', title);
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '1.7');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = icons[name];
+      control.append(svg);
+      if (url && location.pathname === new URL(url, base).pathname) {
+        control.setAttribute('aria-current', 'page');
+      }
+      actions.append(control);
+      return control;
+    };
+    addIcon('volumes', 'Тома', 'toma/index.html');
+    addIcon('glossary', 'Глоссарий', 'glossary.html');
+    addIcon('chapters', 'Все главы', null, showChapters);
+    addIcon('bookmarks', 'Закладки', null, showBookmarks);
+    addIcon('manuscript', 'Рукопись', 'manuscript.html');
+    addIcon('synopses', 'Синопсисы', 'synopses.html');
+    row.insertBefore(actions, primary);
   }
-  if (isChapterPage || isManuscript) {
-    const floating = $('button', 'nt-library-quick', '☷');
-    floating.type = 'button';
-    floating.title = 'Список всех глав';
-    floating.setAttribute('aria-label', 'Быстрый переход между главами');
-    floating.addEventListener('click', showChapters);
-    document.body.append(floating);
-  }
+  mountHeaderActions();
 
   // Скрытый от спойлеров синопсис: закрыт по умолчанию в каждой главе.
   if (isChapterPage) {
@@ -957,7 +984,8 @@
         const resume = document.querySelector('.nt-resume-chip');
         if (resume) extras.append(resume);
       }
-      extras.append(details);
+      // Сначала синопсис (по умолчанию закрытый), после него «Вернуться к чтению».
+      extras.insertBefore(details, extras.querySelector('.nt-resume-chip'));
     });
     const pos = new URLSearchParams(location.search).get('ntbookmark');
     if (pos !== null && /^\d{1,5}$/.test(pos) && reader) {

@@ -1007,3 +1007,115 @@ body.font-readable .nt-summary__text { font-family: 'Golos Text', 'Open Sans', A
   .comment-selection-toolbar__bookmark { width: 39px; min-width: 39px; padding: 7px; }
   .comment-selection-toolbar__bookmark span:last-child { display: none; }
 }
+
+
+/* ─── QoL 2.2.4: единая навигация в закреплённой шапке ──────────────
+   Шесть SVG-иконок вместо рядов библиотечных кнопок в контенте.
+   Ссылка «Вики» остаётся заметной и текстовой; логотип ведёт на главную. */
+.nt-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  font-family: var(--font-ui, sans-serif);
+}
+.nt-header-actions__item {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 36px;
+  flex: 0 0 35px;
+  padding: 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-dim, #b6a6d9);
+  background: transparent;
+  cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nt-header-actions__item svg { display: block; width: 20px; height: 20px; flex: none; }
+.nt-header-actions__item:hover,
+.nt-header-actions__item:focus-visible,
+.nt-header-actions__item[aria-current="page"] {
+  color: #f0ddff;
+  background: rgba(142, 87, 205, .18);
+  border-color: rgba(191, 136, 251, .43);
+}
+.nt-header-actions__item[aria-current="page"] { color: var(--violet-300, #c9a3ff); }
+/* После переноса ссылок плавающий дубль оглавления не нужен. */
+.nt-library-toolbar, .nt-library-quick { display: none !important; }
+.site-header__row .header-nav { align-items: center; flex: 0 0 auto; }
+.site-header__row .header-nav .nav-wiki {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(180,126,232,.34);
+}
+@media (min-width: 880px) {
+  .site-header__row { gap: clamp(6px, 1vw, 14px); }
+  .site-header__row .site-logo { max-width: clamp(112px, 12vw, 170px); }
+  .site-header__row .search-box { flex: 1 1 160px; min-width: 120px; }
+  .site-header__row .header-nav { display: flex; }
+}
+@media (max-width: 1000px) and (min-width: 880px) {
+  .nt-header-actions { gap: 1px; }
+  .nt-header-actions__item { width: 32px; height: 34px; flex-basis: 32px; padding: 6px; }
+  .site-header__row .header-nav .nav-wiki { padding: 8px 9px; }
+}
+@media (max-width: 879px) {
+  /* Три независимые строки: логотип/Вики, поиск, библиотечные иконки.
+     На телефоне нет горизонтальной прокрутки и перекрытия поиска. */
+  .site-header__row {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    row-gap: 7px;
+    column-gap: 8px;
+  }
+  .site-header__row > [data-burger] { grid-column: 1; grid-row: 1; }
+  .site-header__row > .site-logo-link {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+  }
+  .site-header__row > .header-nav {
+    display: flex;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .site-header__row > .search-box {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .site-header__row > .nt-header-actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    justify-content: space-evenly;
+    border-top: 1px solid rgba(178, 113, 235, .14);
+    padding-top: 5px;
+    gap: 3px;
+  }
+  .nt-header-actions__item { width: 38px; height: 36px; flex-basis: 38px; }
+  .site-header__row .header-nav .nav-wiki { font-size: 12px; padding: 8px 10px; }
+  .site-header__row .site-logo { max-width: min(180px, 48vw); }
+  .site-search-results { top: 109px; }
+  .reader-tools { top: 155px; }
+}
+@media (max-width: 390px) {
+  .nt-header-actions__item { width: 35px; height: 34px; flex-basis: 35px; }
+  .site-header__row .site-logo { max-width: min(164px, 45vw); }
+  .site-header__row .header-nav .nav-wiki { font-size: 11px; padding: 7px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nt-header-actions__item { transition: none; }
+}
