@@ -214,6 +214,39 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(info)); } catch (_) { /* private mode */ }
   }
 
+  // Плавное движение полоски и лёгкие искры у её кончика.
+  // Одинаковая механика для обычных глав и для непрерывной рукописи.
+  window.NTReadingProgress = (bar, fill) => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let last = null;
+    let lastSpark = 0;
+    const update = (value) => {
+      const percent = Math.max(0, Math.min(100, Number(value) || 0));
+      const previous = last;
+      last = percent;
+      fill.style.width = percent.toFixed(2) + '%';
+      bar.setAttribute('aria-valuenow', String(Math.round(percent)));
+      const now = performance.now();
+      if (previous === null || Math.abs(percent - previous) < .12 ||
+          reduceMotion.matches || document.hidden || now - lastSpark < 85 || percent <= .4) return;
+      lastSpark = now;
+      // Искорки создаются только при реальном изменении прогресса, не по таймеру.
+      const edge = fill.getBoundingClientRect().right - bar.getBoundingClientRect().left;
+      for (let i = 0; i < 2; i++) {
+        const spark = document.createElement('i');
+        spark.className = 'nt-progress-spark';
+        spark.setAttribute('aria-hidden', 'true');
+        spark.style.left = Math.max(0, Math.min(bar.clientWidth, edge)) + 'px';
+        spark.style.setProperty('--nt-spark-x', (Math.random() * 16 - 8).toFixed(1) + 'px');
+        spark.style.setProperty('--nt-spark-y', (Math.random() * 13 + 5).toFixed(1) + 'px');
+        spark.style.setProperty('--nt-spark-size', (Math.random() * 1.7 + 1.3).toFixed(1) + 'px');
+        bar.append(spark);
+        spark.addEventListener('animationend', () => spark.remove(), { once: true });
+      }
+    };
+    return update;
+  };
+
   // Прогресс относится к тексту главы, не к футеру/комментариям после него.
   if (reader) {
     const bar = document.createElement('div');
@@ -227,6 +260,7 @@
     fill.className = 'nt-reading-progress__fill';
     bar.appendChild(fill);
     document.body.appendChild(bar);
+    const setProgress = window.NTReadingProgress(bar, fill);
 
     const name = (document.querySelector('.chapter-head__title')?.textContent || document.title)
       .replace(/\s+/g, ' ').trim();
@@ -241,7 +275,7 @@
       const bottom = reader.getBoundingClientRect().bottom + window.scrollY;
       const begin = Math.max(0, top - window.innerHeight * .70);
       const finish = Math.max(begin + 1, bottom - window.innerHeight * .30);
-      return Math.round(Math.max(0, Math.min(100, (window.scrollY - begin) / (finish - begin) * 100)));
+      return Math.max(0, Math.min(100, (window.scrollY - begin) / (finish - begin) * 100));
     }
     function persist() {
       if (currentPercent < 3) return;
@@ -256,9 +290,9 @@
     }
     function update() {
       frame = 0;
-      currentPercent = measure();
-      fill.style.width = currentPercent + '%';
-      bar.setAttribute('aria-valuenow', String(currentPercent));
+      const exactPercent = measure();
+      currentPercent = Math.round(exactPercent);
+      setProgress(exactPercent);
       if (currentPercent >= 3 && Date.now() - lastSaved > 1500) persist();
     }
     function queue() {
@@ -277,14 +311,14 @@
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'nt-resume-chip';
-      chip.textContent = '↳ Продолжить с ' + prior.percent + '%';
+      chip.textContent = '↳ Вернуться к чтению · ' + prior.percent + '%';
       chip.title = 'Вернуться на место, где вы остановились';
       chip.addEventListener('click', () => {
         const max = Math.max(0, document.documentElement.scrollHeight - innerHeight);
         window.scrollTo({ top: Math.min(prior.y, max), behavior: 'auto' });
         chip.remove();
       });
-      document.querySelector('.chapter-head')?.insertAdjacentElement('afterend', chip);
+      (document.querySelector('.chapter-top-nav') || document.querySelector('.chapter-head'))?.insertAdjacentElement('afterend', chip);
     }
   }
 
@@ -624,35 +658,94 @@
   // закладка переживёт изменение размера текста, ширины экрана и шрифтов.
   const targets = root => [...root.querySelectorAll('p, blockquote, h2, h3, h4, li')]
     .filter(el => !el.closest('.nt-summary') && !el.closest('.nt-manuscript-heading'));
-  function currentPoint() {
+  // Можно указать конкретный абзац щелчком или касанием. Без выбора
+  // сохраняется абзац возле верхней трети экрана (доступный запасной путь).
+  function currentPoint(chosenNode = null) {
     if (!reader) return null;
     let scope = reader;
     let file = location.pathname.split('/').pop();
     if (isManuscript) {
       const sections = [...reader.querySelectorAll('.nt-manuscript-chapter')];
-      scope = sections.filter(section => section.getBoundingClientRect().top <= innerHeight * .38).pop() || sections[0];
+      scope = chosenNode?.closest('.nt-manuscript-chapter') ||
+        sections.filter(section => section.getBoundingClientRect().top <= innerHeight * .38).pop() || sections[0];
       if (!scope) return null;
       file = scope.dataset.source;
     }
     const nodes = targets(scope);
     if (!nodes.length || !allowed(file)) return null;
-    let best = 0, score = Infinity;
-    nodes.forEach((node, idx) => {
-      const r = node.getBoundingClientRect();
-      const distance = r.bottom < 70 ? 1e5 + 70 - r.bottom : Math.abs(r.top - innerHeight * .33);
-      if (distance < score) { best = idx; score = distance; }
-    });
+    let best = -1;
+    if (chosenNode) {
+      // От вложенных элементов (в том числе подсветок комментариев) идём к абзацу.
+      const target = chosenNode.closest('p, blockquote, h2, h3, h4, li');
+      if (target && scope.contains(target)) best = nodes.indexOf(target);
+    }
+    if (best < 0) {
+      let score = Infinity;
+      nodes.forEach((node, idx) => {
+        const r = node.getBoundingClientRect();
+        const distance = r.bottom < 70 ? 1e5 + 70 - r.bottom : Math.abs(r.top - innerHeight * .33);
+        if (distance < score) { best = idx; score = distance; }
+      });
+    }
     const node = nodes[best];
+    if (!node) return null;
     const title = isManuscript ? scope.dataset.title : normText(document.querySelector('.chapter-head__title')?.textContent);
-    return { file, path: isManuscript ? scope.dataset.path : location.pathname.slice(base.pathname.length), title: title || chapterTitle(file), block: best, excerpt: normText(node.textContent).slice(0, 100), updated: Date.now() };
+    return { file, path: isManuscript ? scope.dataset.path : location.pathname.slice(base.pathname.length),
+      title: title || chapterTitle(file), block: best, excerpt: normText(node.textContent).slice(0, 100), updated: Date.now() };
   }
-  function addBookmark() {
-    const point = currentPoint();
-    if (!point) return announce('Закладку можно поставить после загрузки текста.');
+  function addBookmark(chosenNode = null) {
+    const point = currentPoint(chosenNode);
+    if (!point) return announce('Не удалось определить абзац. Дождитесь загрузки главы.');
     const items = bookmarks().filter(b => !((b.path || ('glavy/' + b.file)) === point.path && b.block === point.block));
     items.unshift({ ...point, id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 7) });
-    if (saveBookmarks(items.slice(0, 150))) announce('✦ Закладка сохранена');
+    if (saveBookmarks(items.slice(0, 150))) announce('✦ Закладка сохранена на выбранном абзаце');
     else announce('Не удалось сохранить: браузер запрещает локальное хранение.');
+  }
+  let bookmarkPicking = false;
+  let bookmarkButton = null;
+  let bookmarkTip = null;
+  function endBookmarkPicking() {
+    bookmarkPicking = false;
+    reader?.classList.remove('nt-bookmark-picking');
+    bookmarkButton?.classList.remove('is-active');
+    bookmarkButton?.setAttribute('aria-pressed', 'false');
+    bookmarkTip?.remove();
+    bookmarkTip = null;
+  }
+  function beginBookmarkSelection() {
+    if (!reader) return announce('Закладка доступна при чтении главы.');
+    if (bookmarkPicking) return endBookmarkPicking();
+    bookmarkPicking = true;
+    reader.classList.add('nt-bookmark-picking');
+    bookmarkButton?.classList.add('is-active');
+    bookmarkButton?.setAttribute('aria-pressed', 'true');
+    bookmarkTip = $('div', 'nt-bookmark-picker');
+    const message = $('span', 'nt-bookmark-picker__text', '✦ Нажмите на абзац, который хотите сохранить');
+    const visible = $('button', 'nt-bookmark-picker__action', 'Текущее место');
+    visible.type = 'button';
+    visible.addEventListener('click', () => { addBookmark(); endBookmarkPicking(); });
+    const cancel = $('button', 'nt-bookmark-picker__cancel', 'Отмена ×');
+    cancel.type = 'button';
+    cancel.addEventListener('click', endBookmarkPicking);
+    bookmarkTip.append(message, visible, cancel);
+    document.body.append(bookmarkTip);
+  }
+  if (reader) {
+    // В режиме выбора перехватываем только один клик. В остальное время
+    // все реакции, комментарии, ссылки и выделение текста работают как раньше.
+    reader.addEventListener('click', event => {
+      if (!bookmarkPicking) return;
+      const target = event.target instanceof Element ? event.target.closest('p, blockquote, h2, h3, h4, li') : null;
+      if (!target || !reader.contains(target) || target.closest('.nt-manuscript-heading')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      addBookmark(target);
+      endBookmarkPicking();
+    }, true);
+    document.addEventListener('keydown', event => {
+      if (bookmarkPicking && event.key === 'Escape') endBookmarkPicking();
+    });
   }
   function announce(message) {
     let toast = document.querySelector('.nt-toast');
@@ -739,7 +832,7 @@
       modalBody.replaceChildren();
       const items = bookmarks();
       if (!items.length) {
-        modalBody.append($('p', 'nt-library-empty', 'Здесь пока пусто. Откройте главу, прокрутите к нужному месту и нажмите «＋ Закладка».'));
+        modalBody.append($('p', 'nt-library-empty', 'Пока пусто. В читалке нажмите «Поставить закладку», затем выберите нужный абзац.'));
         return;
       }
       for (const b of items) {
@@ -762,10 +855,15 @@
   function tool(label, callback) {
     const button = $('button', 'nt-library-toolbar__button', label);
     button.type = 'button'; button.addEventListener('click', callback); toolbar.append(button);
+    return button;
   }
   if (isChapterPage || isManuscript || isSynopses || location.pathname.includes('/toma/') || location.pathname === base.pathname || location.pathname === new URL('index.html', base).pathname) {
     tool('☷ Все главы', showChapters);
-    if (isChapterPage || isManuscript) tool('＋ Закладка', addBookmark);
+    if (isChapterPage || isManuscript) {
+      bookmarkButton = tool('⚑ Поставить закладку', beginBookmarkSelection);
+      bookmarkButton?.setAttribute('aria-pressed', 'false');
+      bookmarkButton?.setAttribute('title', 'Выберите абзац касанием или нажатием мыши');
+    }
     tool('☆ Закладки', showBookmarks);
     const manuscript = $('a', 'nt-library-toolbar__button', '▤ Рукопись'); manuscript.href = new URL('manuscript.html', base).href; toolbar.append(manuscript);
     const synopses = $('a', 'nt-library-toolbar__button', '✧ Синопсисы'); synopses.href = new URL('synopses.html', base).href; toolbar.append(synopses);
@@ -908,13 +1006,14 @@
           bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-label', 'Прогресс рукописи');
           bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', '100');
           const fill = $('div', 'nt-reading-progress__fill'); bar.append(fill); document.body.append(bar);
+          const setProgress = window.NTReadingProgress ? window.NTReadingProgress(bar, fill) : (percent) => { fill.style.width = percent + '%'; };
           let frame = 0;
           function update() {
             frame = 0;
             const height = Math.max(1, area.offsetHeight - innerHeight * .5);
             const passed = scrollY - (area.getBoundingClientRect().top + scrollY) + innerHeight * .35;
-            const percent = Math.max(0, Math.min(100, Math.round(passed / height * 100)));
-            fill.style.width = percent + '%'; bar.setAttribute('aria-valuenow', String(percent));
+            const percent = Math.max(0, Math.min(100, passed / height * 100));
+            setProgress(percent);
           }
           addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });
           addEventListener('resize', update, { passive: true }); update();
