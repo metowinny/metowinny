@@ -1119,3 +1119,152 @@ body.font-readable .nt-summary__text { font-family: 'Golos Text', 'Open Sans', A
 @media (prefers-reduced-motion: reduce) {
   .nt-header-actions__item { transition: none; }
 }
+
+
+/* ── QoL 2.2.5 · узкие экраны, книжная палитра, единый скролл ────────── */
+/* Карточка «Продолжить» на странице тома: без неоправданной пустоты. */
+.reader-top > .nt-continue-card--tome {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* Диалог главы прокручивается ТОЛЬКО внутри одного контейнера. */
+.nt-library-modal {
+  overflow: hidden;
+  scrollbar-width: none;
+}
+.nt-library-modal__shell {
+  min-height: 0;
+  max-height: min(86dvh, 800px);
+  overflow: hidden;
+}
+.nt-library-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--violet-700) var(--bg-panel);
+}
+.nt-library-modal__body::-webkit-scrollbar { width: 7px; }
+.nt-library-modal__body::-webkit-scrollbar-track { background: var(--bg-panel); }
+.nt-library-modal__body::-webkit-scrollbar-thumb {
+  background: var(--violet-700);
+  border-radius: 7px;
+}
+
+/* Синопсисы и рукопись используют приглушённые цвета читалки,
+   а не отдельную розовую дизайн-систему. */
+:is(.nt-manuscript-page, .nt-synopses-page) .nt-manuscript-top h1 {
+  color: var(--text-main);
+  text-shadow: none;
+}
+:is(.nt-manuscript-page, .nt-synopses-page) .nt-manuscript-intro,
+:is(.nt-manuscript-page, .nt-synopses-page) .nt-manuscript-status,
+.nt-synopses-note {
+  color: var(--text-dim);
+}
+.nt-synopses-page .nt-synopses-volume__title,
+.nt-synopses-page .nt-synopses-act,
+.nt-synopses-page .nt-synopses-entry__title {
+  color: var(--text-main);
+  text-shadow: none;
+}
+.nt-synopses-page .nt-synopses-volume__title {
+  border-bottom-color: var(--line);
+}
+.nt-synopses-page .nt-synopses-act { color: var(--violet-300); }
+.nt-synopses-page .nt-synopses-entry {
+  background: var(--bg-card);
+  border-color: var(--line);
+  box-shadow: none;
+}
+.nt-synopses-page .nt-synopses-entry__text {
+  color: var(--text-main);
+}
+.nt-synopses-page .nt-synopses-entry__link {
+  color: var(--violet-300);
+}
+.nt-manuscript-page .nt-manuscript-jump a {
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border-color: var(--line);
+}
+.nt-manuscript-page .nt-manuscript-jump a:hover,
+.nt-manuscript-page .nt-manuscript-jump a:focus-visible {
+  color: var(--text-main);
+  border-color: var(--violet-400);
+}
+.nt-manuscript-page .nt-manuscript-heading {
+  background: linear-gradient(90deg, transparent, var(--bg-card), transparent);
+  border-color: var(--line);
+}
+.nt-manuscript-page .nt-manuscript-heading__label,
+.nt-manuscript-page .nt-manuscript-heading a {
+  color: var(--text-dim);
+}
+.nt-manuscript-page .nt-manuscript-heading h2 {
+  color: var(--text-main);
+  text-shadow: none;
+}
+
+/* Закладка по выделению — без комментариев, только в рукописи. */
+.nt-manuscript-selection {
+  position: fixed;
+  z-index: 3200;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%) translateY(-8px);
+  display: none;
+  width: max-content;
+  max-width: calc(100vw - 20px);
+  padding: 5px;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.48);
+}
+.nt-manuscript-selection.is-visible { display: block; }
+.nt-manuscript-selection__save {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: 600 12px/1.4 var(--font-ui, sans-serif);
+  cursor: pointer;
+}
+.nt-manuscript-selection__save:hover,
+.nt-manuscript-selection__save:focus-visible {
+  background: rgba(169,112,255,.13);
+  color: var(--violet-300);
+}
+.nt-manuscript-page .nt-manuscript-save-btn {
+  font: 700 19px/1 var(--font-ui, sans-serif);
+}
+
+/* Мобильная шапка уступает место повествованию при движении вниз. */
+@media (max-width: 879px) {
+  .site-header {
+    transition: transform 245ms cubic-bezier(.25,.75,.25,1);
+    will-change: transform;
+  }
+  body.nt-mobile-header-hidden .site-header {
+    transform: translateY(calc(-100% - 2px));
+    pointer-events: none;
+  }
+  body.nt-mobile-header-hidden .reader-tools { top: 8px; }
+  .nt-manuscript-selection {
+    left: 50% !important;
+    right: auto;
+    top: auto !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    min-width: 138px;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none !important; }
+}

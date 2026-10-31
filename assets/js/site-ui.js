@@ -169,6 +169,49 @@
   });
 })();
 
+/* Мобильная шапка: освобождаем экран при чтении, возвращаем при движении вверх.
+   Не скрываем её, пока открыт поиск, выпадающее меню или фокус в шапке. */
+(() => {
+  'use strict';
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  const mobile = window.matchMedia('(max-width: 879px)');
+  let previous = window.scrollY;
+  let distance = 0;
+  let direction = 0;
+  let frame = 0;
+  const canHide = () => !header.contains(document.activeElement) &&
+    !header.querySelector('[data-mobile-nav].is-open') &&
+    !header.querySelector('[data-site-search][aria-expanded="true"]');
+  function setHidden(hidden) {
+    document.body.classList.toggle('nt-mobile-header-hidden', hidden && mobile.matches);
+  }
+  function update() {
+    frame = 0;
+    const current = window.scrollY;
+    const delta = current - previous;
+    previous = current;
+    if (!mobile.matches || current < 110 || !canHide()) {
+      distance = 0; direction = 0; setHidden(false); return;
+    }
+    if (Math.abs(delta) < 1) return;
+    const nextDirection = Math.sign(delta);
+    if (nextDirection !== direction) { direction = nextDirection; distance = 0; }
+    distance += Math.abs(delta);
+    if (distance >= (direction > 0 ? 26 : 13)) {
+      setHidden(direction > 0);
+      distance = 0;
+    }
+  }
+  window.addEventListener('scroll', () => {
+    if (!frame) frame = window.requestAnimationFrame(update);
+  }, { passive: true });
+  mobile.addEventListener('change', () => { previous = window.scrollY; setHidden(false); });
+  header.addEventListener('focusin', () => setHidden(false));
+  header.addEventListener('pointerdown', () => setHidden(false));
+  window.addEventListener('pageshow', () => { previous = window.scrollY; setHidden(false); });
+})();
+
 /* Возврат наверх: без лишних слушателей и без появления на первом экране. */
 (() => {
  const btn=document.querySelector('[data-back-to-top]');
@@ -216,7 +259,7 @@
 
   // Плавное движение полоски и лёгкие искры у её кончика.
   // Одинаковая механика для обычных глав и для непрерывной рукописи.
-  window.NTReadingProgress = (bar, fill) => {
+  window.NTReadingProgress = (bar, fill, { minDelta = .12 } = {}) => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let last = null;
     let lastSpark = 0;
@@ -227,7 +270,7 @@
       fill.style.width = percent.toFixed(2) + '%';
       bar.setAttribute('aria-valuenow', String(Math.round(percent)));
       const now = performance.now();
-      if (previous === null || Math.abs(percent - previous) < .12 ||
+      if (previous === null || Math.abs(percent - previous) < minDelta ||
           reduceMotion.matches || document.hidden || now - lastSpark < 85 || percent <= .4) return;
       lastSpark = now;
       // Искорки создаются только при реальном изменении прогресса, не по таймеру.
@@ -1060,6 +1103,65 @@
     const area = document.querySelector('[data-nt-manuscript]');
     const status = document.querySelector('[data-nt-manuscript-status]');
     const jump = document.querySelector('[data-nt-manuscript-jump]');
+    // Закладки в рукописи работают независимо от комментариев и Supabase.
+    // Выделение текста показывает компактную панель, точный Range остаётся
+    // неизменённым до нажатия «В закладки».
+    if (area) {
+      const toolbar = $('div', 'nt-manuscript-selection');
+      toolbar.setAttribute('role', 'toolbar');
+      toolbar.setAttribute('aria-label', 'Действия с выделенным фрагментом');
+      const save = $('button', 'nt-manuscript-selection__save', '🔖 В закладки');
+      save.type = 'button';
+      save.title = 'Сохранить выделенный текст в закладках';
+      toolbar.append(save);
+      document.body.append(toolbar);
+      let selected = null;
+      let selectionFrame = 0;
+      function hideSelection() { toolbar.classList.remove('is-visible'); selected = null; }
+      function refreshSelection() {
+        selectionFrame = 0;
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.rangeCount || !selection.toString().trim()) {
+          hideSelection(); return;
+        }
+        const range = selection.getRangeAt(0);
+        if (!area.contains(range.commonAncestorContainer)) { hideSelection(); return; }
+        selected = range.cloneRange();
+        if (window.matchMedia('(max-width: 650px)').matches) {
+          toolbar.style.left = ''; toolbar.style.top = '';
+        } else {
+          const rects = range.getClientRects();
+          const rect = rects.length ? rects[rects.length - 1] : range.getBoundingClientRect();
+          toolbar.style.left = Math.max(80, Math.min(innerWidth - 80, rect.left + rect.width / 2)) + 'px';
+          toolbar.style.top = Math.max(58, rect.top - 12) + 'px';
+        }
+        toolbar.classList.add('is-visible');
+      }
+      function scheduleSelection() {
+        if (!selectionFrame) selectionFrame = requestAnimationFrame(refreshSelection);
+      }
+      // Не даём браузеру снять выделение раньше, чем сохраним Range.
+      save.addEventListener('pointerdown', event => event.preventDefault());
+      save.addEventListener('click', () => {
+        if (selected && window.NTBookmarks?.saveRange(selected)) {
+          window.getSelection()?.removeAllRanges();
+          hideSelection();
+        }
+      });
+      document.addEventListener('selectionchange', scheduleSelection);
+      area.addEventListener('pointerup', scheduleSelection);
+      area.addEventListener('keyup', scheduleSelection);
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') hideSelection(); });
+      const saveHere = document.querySelector('[data-nt-manuscript-bookmark]');
+      saveHere?.addEventListener('click', () => {
+        const selection = window.getSelection();
+        if (selected && selection && !selection.isCollapsed) {
+          window.NTBookmarks?.saveRange(selected);
+          selection.removeAllRanges();
+          hideSelection();
+        } else window.NTBookmarks?.saveVisible();
+      });
+    }
     if (area) (async () => {
       try {
         const list = await chapters();
@@ -1118,7 +1220,7 @@
           bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-label', 'Прогресс рукописи');
           bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', '100');
           const fill = $('div', 'nt-reading-progress__fill'); bar.append(fill); document.body.append(bar);
-          const setProgress = window.NTReadingProgress ? window.NTReadingProgress(bar, fill) : (percent) => { fill.style.width = percent + '%'; };
+          const setProgress = window.NTReadingProgress ? window.NTReadingProgress(bar, fill, { minDelta: .008 }) : (percent) => { fill.style.width = percent + '%'; };
           let frame = 0;
           function update() {
             frame = 0;
