@@ -928,3 +928,82 @@ body.font-readable .nt-summary__text { font-family: 'Golos Text', 'Open Sans', A
   .nt-reading-progress__fill { transition: none; }
   .nt-progress-spark { display: none; animation: none; }
 }
+
+
+/* ─── QoL 2.2.3 · единая область до эпиграфа ─────────────────── */
+.reader-top .chapter-top-nav.nt-chapter-top-nav--with-extras { margin-bottom: 17px; }
+.reader-top .nt-chapter-extras {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 auto 39px;
+  max-width: 100%;
+}
+.reader-top .nt-chapter-extras .nt-resume-chip {
+  flex: none;
+  margin: 0 auto;
+  max-width: 100%;
+}
+.reader-top .nt-chapter-extras .nt-summary {
+  width: 100%;
+  margin: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* На странице тома карточка занимает ту же ширину, что и основной блок,
+   без вложенного вычисления отступов (wrap уже ограничивает ширину). */
+.reader-top > .nt-continue-card--tome {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin: 22px 0 34px;
+}
+/* Кнопка закладки в панели реакций — часть той же группы действий. */
+.comment-selection-toolbar__bookmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-main, #f6e7ff);
+  background: transparent;
+  border: 1px solid rgba(180, 128, 243, .4);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font: 600 12px/1.25 var(--font-ui, sans-serif);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.comment-selection-toolbar__bookmark:hover,
+.comment-selection-toolbar__bookmark:focus-visible {
+  color: #fff;
+  background: rgba(139, 83, 210, .2);
+  border-color: var(--violet-400, #bd83fa);
+}
+.comment-mobile-panel__bookmark {
+  align-self: stretch;
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  color: var(--text-main, #f5e9ff);
+  background: var(--bg-panel-2, #241436);
+  border: 1px solid var(--line-strong, #744e92);
+  border-radius: 9px;
+  font: 600 12px/1.45 var(--font-ui, sans-serif);
+  cursor: pointer;
+}
+@media (max-width: 1100px), (pointer: coarse) {
+  .comment-selection-toolbar__bookmark { padding: 9px 11px; }
+}
+@media (max-width: 650px) {
+  .reader-top .chapter-top-nav.nt-chapter-top-nav--with-extras { margin-bottom: 12px; }
+  .reader-top .nt-chapter-extras { gap: 10px; margin-bottom: 26px; }
+  .reader-top > .nt-continue-card--tome { width: 100%; margin: 15px 0 26px; }
+}
+@media (max-width: 650px) {
+  /* На 320px панель реакций с закладкой должна умещаться целиком. */
+  .comment-selection-toolbar__bookmark { width: 39px; min-width: 39px; padding: 7px; }
+  .comment-selection-toolbar__bookmark span:last-child { display: none; }
+}

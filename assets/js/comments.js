@@ -415,9 +415,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <span>💬</span>
         <span>Добавить комментарий</span>
       </button>
+      <button
+        type="button"
+        class="comment-selection-toolbar__bookmark"
+        aria-label="Добавить закладку на выделенный фрагмент"
+        title="Сохранить место чтения в закладках"
+      >
+        <span aria-hidden="true">🔖</span>
+        <span>Закладка</span>
+      </button>
     `;
 
     document.body.appendChild(toolbar);
+    // Не теряем выделение при нажатии «Закладка» мышью или пальцем.
+    toolbar.querySelector('.comment-selection-toolbar__bookmark')?.addEventListener('pointerdown', event => event.preventDefault());
 
     if (matchMedia('(max-width: 1100px), (pointer: coarse)').matches) {
       toolbar.classList.add('comment-selection-toolbar--bottom');
@@ -1396,6 +1407,14 @@ function createCommentBox(
       buttons.append(b);
     }
     panel.append(buttons);
+    // Сохраняем место даже у уже прокомментированного фрагмента.
+    const mark=document.createElement('button');
+    mark.type='button';mark.className='comment-mobile-panel__bookmark';
+    mark.textContent='🔖 В закладки';
+    mark.addEventListener('click',()=>{
+      if(window.NTBookmarks?.saveNode(highlight)) closeMobilePanel();
+    });
+    panel.append(mark);
     const saved=document.querySelector(`.comment-comment[data-comment-id="${CSS.escape(annotation.id)}"]`);
     const content=saved?.querySelector('.comment-comment__content')?.textContent||annotation.content||'';
     if(content){
@@ -1952,6 +1971,18 @@ document.addEventListener(
   'click',
   async event => {
     if(mobilePanel && !event.target.closest('.comment-mobile-panel,.comment-highlight[data-comment-id]'))closeMobilePanel();
+
+    const bookmarkAction = event.target.closest('.comment-selection-toolbar__bookmark');
+    if (bookmarkAction) {
+      event.preventDefault();
+      event.stopPropagation();
+      const succeeded = window.NTBookmarks?.saveRange(currentSelection?.range);
+      if (succeeded) {
+        removeToolbar();
+        window.getSelection()?.removeAllRanges();
+      }
+      return;
+    }
 
     const selectionReaction =
       event.target.closest(

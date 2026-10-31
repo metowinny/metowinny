@@ -247,6 +247,20 @@
     return update;
   };
 
+  // Служебная область сразу за разделителем навигации, перед эпиграфом.
+  // Авторскую разметку .reader не трогаем: здесь только интерфейсные вставки.
+  function ensureChapterExtras() {
+    const nav = document.querySelector('.chapter-top-nav');
+    if (!nav) return null;
+    let extras = nav.nextElementSibling;
+    if (extras?.classList.contains('nt-chapter-extras')) return extras;
+    extras = document.createElement('div');
+    extras.className = 'nt-chapter-extras';
+    nav.classList.add('nt-chapter-top-nav--with-extras');
+    nav.insertAdjacentElement('afterend', extras);
+    return extras;
+  }
+
   // Прогресс относится к тексту главы, не к футеру/комментариям после него.
   if (reader) {
     const bar = document.createElement('div');
@@ -318,7 +332,9 @@
         window.scrollTo({ top: Math.min(prior.y, max), behavior: 'auto' });
         chip.remove();
       });
-      (document.querySelector('.chapter-top-nav') || document.querySelector('.chapter-head'))?.insertAdjacentElement('afterend', chip);
+      const extras = ensureChapterExtras();
+      if (extras) extras.append(chip);
+      else (document.querySelector('.chapter-top-nav') || document.querySelector('.chapter-head'))?.insertAdjacentElement('afterend', chip);
     }
   }
 
@@ -329,7 +345,7 @@
     const last = readLast();
     if (last && last.percent >= 3) {
       const card = document.createElement('a');
-      card.className = 'nt-continue-card';
+      card.className = 'nt-continue-card' + (location.pathname.includes('/toma/') ? ' nt-continue-card--tome' : '');
       card.href = last.url.href;
       const copy = document.createElement('span');
       copy.className = 'nt-continue-card__copy';
@@ -693,14 +709,46 @@
     return { file, path: isManuscript ? scope.dataset.path : location.pathname.slice(base.pathname.length),
       title: title || chapterTitle(file), block: best, excerpt: normText(node.textContent).slice(0, 100), updated: Date.now() };
   }
-  function addBookmark(chosenNode = null) {
+  function addBookmark(chosenNode = null, selectedQuote = '', charOffset = null) {
     const point = currentPoint(chosenNode);
-    if (!point) return announce('Не удалось определить абзац. Дождитесь загрузки главы.');
-    const items = bookmarks().filter(b => !((b.path || ('glavy/' + b.file)) === point.path && b.block === point.block));
+    if (!point) { announce('Не удалось определить место в главе.'); return false; }
+    // Храним цитату и точное смещение только локально. В Supabase не отправляем.
+    const quote = normText(selectedQuote).slice(0, 280);
+    if (quote) { point.quote = quote; point.excerpt = quote.slice(0, 115); }
+    if (Number.isInteger(charOffset) && charOffset >= 0) point.offset = charOffset;
+    // Разные цитаты в одном большом абзаце можно сохранить независимо.
+    const items = bookmarks().filter(b => !((b.path || ('glavy/' + b.file)) === point.path &&
+      b.block === point.block && (quote ? b.quote === quote : !b.quote)));
     items.unshift({ ...point, id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 7) });
-    if (saveBookmarks(items.slice(0, 150))) announce('✦ Закладка сохранена на выбранном абзаце');
-    else announce('Не удалось сохранить: браузер запрещает локальное хранение.');
+    if (saveBookmarks(items.slice(0, 150))) { announce('✦ Закладка сохранена'); return true; }
+    announce('Не удалось сохранить: браузер запрещает локальное хранение.');
+    return false;
   }
+  // Сайт комментариев передаёт сюда выбранный Range, не обращаясь к базе.
+  // Никаких обёрток вокруг выделения: авторские DOM-узлы остаются нетронутыми.
+  window.NTBookmarks = Object.freeze({
+    saveRange(range) {
+      if (!reader || !range || !reader.contains(range.commonAncestorContainer)) return false;
+      const anchor = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement;
+      if (!anchor || !reader.contains(anchor)) return false;
+      const paragraph = anchor.closest('p, blockquote, h2, h3, h4, li');
+      let offset = null;
+      if (paragraph && paragraph.contains(range.startContainer)) {
+        try {
+          const before = document.createRange();
+          before.selectNodeContents(paragraph);
+          before.setEnd(range.startContainer, range.startOffset);
+          offset = before.toString().length;
+        } catch (_) { /* остаётся закладка на абзаце */ }
+      }
+      return addBookmark(anchor, range.toString(), offset);
+    },
+    saveNode(node) {
+      if (!reader || !(node instanceof Element) || !reader.contains(node)) return false;
+      return addBookmark(node, normText(node.textContent));
+    },
+    saveVisible() { return addBookmark(); }
+  });
   let bookmarkPicking = false;
   let bookmarkButton = null;
   let bookmarkTip = null;
@@ -758,6 +806,7 @@
   const toBookmarkURL = b => {
     const url = safeChapterURL(b.path || ('glavy/' + b.file)) || new URL(pathOf(b.file));
     url.searchParams.set('ntbookmark', String(b.block));
+    if (b.quote && b.id) url.searchParams.set('ntmark', b.id);
     return url.href;
   };
 
@@ -832,7 +881,7 @@
       modalBody.replaceChildren();
       const items = bookmarks();
       if (!items.length) {
-        modalBody.append($('p', 'nt-library-empty', 'Пока пусто. В читалке нажмите «Поставить закладку», затем выберите нужный абзац.'));
+        modalBody.append($('p', 'nt-library-empty', 'Пока пусто. В главе выделите интересующий текст и нажмите «Закладка» в панели реакций.'));
         return;
       }
       for (const b of items) {
@@ -857,9 +906,11 @@
     button.type = 'button'; button.addEventListener('click', callback); toolbar.append(button);
     return button;
   }
-  if (isChapterPage || isManuscript || isSynopses || location.pathname.includes('/toma/') || location.pathname === base.pathname || location.pathname === new URL('index.html', base).pathname) {
+  if (isChapterPage || isManuscript || isSynopses || location.pathname === base.pathname || location.pathname === new URL('index.html', base).pathname) {
     tool('☷ Все главы', showChapters);
-    if (isChapterPage || isManuscript) {
+    // У обычных глав закладка теперь встроена в панель реакций к выделению.
+    // В рукописи комментариев нет, поэтому оставляем отдельный режим выбора.
+    if (isManuscript) {
       bookmarkButton = tool('⚑ Поставить закладку', beginBookmarkSelection);
       bookmarkButton?.setAttribute('aria-pressed', 'false');
       bookmarkButton?.setAttribute('title', 'Выберите абзац касанием или нажатием мыши');
@@ -893,15 +944,48 @@
       const paragraph = $('p', 'nt-summary__text', text);
       details.append(head, paragraph);
       details.addEventListener('toggle', () => { head.textContent = details.open ? '✧ Скрыть краткое содержание' : '✧ Краткое содержание · раскрыть (спойлеры)'; });
-      const chapterHead = document.querySelector('.chapter-head');
-      if (chapterHead) chapterHead.insertAdjacentElement('afterend', details);
+      // Синопсис живёт после разделителя навигации, рядом с продолжением чтения.
+      // HTML эпиграфа и текста главы не перемещаем и не изменяем.
+      const nav = document.querySelector('.chapter-top-nav');
+      if (!nav) return;
+      let extras = nav.nextElementSibling;
+      if (!extras?.classList.contains('nt-chapter-extras')) {
+        extras = $('div', 'nt-chapter-extras');
+        nav.classList.add('nt-chapter-top-nav--with-extras');
+        nav.insertAdjacentElement('afterend', extras);
+        // На случай порядка загрузки: перемещаем только нашу UI-кнопку.
+        const resume = document.querySelector('.nt-resume-chip');
+        if (resume) extras.append(resume);
+      }
+      extras.append(details);
     });
     const pos = new URLSearchParams(location.search).get('ntbookmark');
     if (pos !== null && /^\d{1,5}$/.test(pos) && reader) {
       const block = targets(reader)[Number(pos)];
       if (block) window.addEventListener('load', () => {
-        // Даём изображениям и шрифтам стабилизировать высоту текста.
-        block.scrollIntoView({ block: 'center', behavior: 'auto' });
+        // По возможности возвращаем к точному выделению, даже если внутри
+        // абзаца есть вложенные span и авторские эффекты.
+        const markerId = new URLSearchParams(location.search).get('ntmark');
+        const saved = markerId ? bookmarks().find(b => b.id === markerId && b.block === Number(pos) &&
+          (b.path || ('glavy/' + b.file)) === location.pathname.slice(base.pathname.length)) : null;
+        let anchored = false;
+        if (saved && Number.isInteger(saved.offset) && saved.offset >= 0) {
+          const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+          let left = saved.offset, node;
+          while ((node = walker.nextNode())) {
+            if (left > node.length) { left -= node.length; continue; }
+            const range = document.createRange();
+            range.setStart(node, left);
+            range.collapse(true);
+            const rect = range.getBoundingClientRect();
+            if (rect.height > 0) {
+              window.scrollTo({ top: Math.max(0, scrollY + rect.top - innerHeight * .36), behavior: 'auto' });
+              anchored = true;
+            }
+            break;
+          }
+        }
+        if (!anchored) block.scrollIntoView({ block: 'center', behavior: 'auto' });
         block.classList.add('nt-bookmark-target');
         setTimeout(() => block.classList.remove('nt-bookmark-target'), 3500);
       }, { once: true });
