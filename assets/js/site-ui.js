@@ -230,7 +230,7 @@
 
     const name = (document.querySelector('.chapter-head__title')?.textContent || document.title)
       .replace(/\s+/g, ' ').trim();
-    const current = new URL(chapterName, chapterRoot).href;
+    const current = new URL(location.pathname, location.origin).href;
     const prior = readLast();
     let frame = 0;
     let lastSaved = 0;
@@ -246,7 +246,7 @@
     function persist() {
       if (currentPercent < 3) return;
       storeLast({
-        path: new URL(chapterName, chapterRoot).pathname.slice(root.pathname.length),
+        path: location.pathname.slice(root.pathname.length),
         title: name,
         percent: currentPercent,
         y: Math.max(0, Math.round(window.scrollY)),
@@ -373,7 +373,9 @@
       side.replaceChildren(link);
     }
   }
-  if (reader) {
+  // Автоматические соседние переходы здесь относятся только к первому тому.
+  // Вложенные папки будущих томов нельзя связывать с главами первого тома.
+  if (reader && !location.pathname.slice(chapterRoot.pathname.length).includes('/')) {
     // На опубликованных главах оставляем прежние красивые названия ссылок.
     // Перестраиваем только устаревшие/отсутствующие переходы.
     for (const [side, filename] of [['next', nextFile(chapterName)], ['prev', previousFile(chapterName)]]) {
@@ -421,7 +423,7 @@
 })();
 
 
-/* Нулевой Трибунал — QoL 2.2: каталог, поиск новых глав, закладки,
+/* Нулевой Трибунал — QoL 2.2.1: каталог, поиск новых глав, закладки,
    синопсисы, рукопись и быстрое оглавление. Авторский HTML глав не изменяет. */
 (() => {
   'use strict';
@@ -431,7 +433,7 @@
   const chapterRoot = new URL('glavy/', base);
   const indexURL = new URL('assets/search-index.json', base);
   const summariesURL = new URL('assets/chapter-summaries.json', base);
-  const chapterRE = /^glava-([1-5])-([1-9]|10)\.html$/;
+  const chapterRE = /^glava-([1-9]\d*)-([1-9]\d*)\.html$/;
   const allowed = name => name === 'prolog.html' || chapterRE.test(name);
   const isChapterPage = location.pathname.startsWith(chapterRoot.pathname) && allowed(location.pathname.split('/').pop());
   const isManuscript = location.pathname === new URL('manuscript.html', base).pathname;
@@ -449,16 +451,33 @@
   const order = file => file === 'prolog.html' ? 0 : chapterRE.test(file) ?
     Number(file.match(chapterRE)[1]) * 10 + Number(file.match(chapterRE)[2]) : Infinity;
   const chapterTitle = file => file === 'prolog.html' ? 'Пролог' : (file.match(chapterRE) ? file.match(chapterRE)[1] + '.' + file.match(chapterRE)[2] : 'Глава');
-  const advance = file => {
+  const advance = (file, maxAct = 5, perAct = 10) => {
     if (file === 'prolog.html') return 'glava-1-1.html';
     const m = file.match(chapterRE);
     if (!m) return null;
     const a = +m[1], b = +m[2];
-    return b < 10 ? `glava-${a}-${b + 1}.html` : a < 5 ? `glava-${a + 1}-1.html` : null;
+    return b < perAct ? `glava-${a}-${b + 1}.html` : a < maxAct ? `glava-${a + 1}-1.html` : null;
   };
   const normText = s => (s || '').replace(/\s+/g, ' ').trim();
   const catalogURL = new URL('assets/chapter-catalog.json', base);
   let docsPromise, catalogPromise, summaryPromise;
+  // Сохраняем полный путь: в разных томах могут быть одноимённые glava-1-1.html.
+  function safeChapterURL(url) {
+    try {
+      const resolved = new URL(url, base);
+      if (resolved.origin !== base.origin || !resolved.pathname.startsWith(chapterRoot.pathname) ||
+          !allowed(resolved.pathname.split('/').pop()) || resolved.search || resolved.hash) return null;
+      return resolved;
+    } catch (_) { return null; }
+  }
+  const relativeChapterPath = url => safeChapterURL(url)?.pathname.slice(base.pathname.length) || '';
+  const volumeIdOf = ch => ch.volume || 'volume-1';
+  const actOf = ch => Number(ch.act) || Number(fileOf(ch.url).match(chapterRE)?.[1]) || 1;
+  const volumeTitle = v => v.title || v.name || v.id;
+  const actTitle = (v, act) => {
+    const found = v.acts && (v.acts[String(act)] || v.acts[act]);
+    return typeof found === 'string' && found.trim() ? found.trim() : 'Акт ' + act;
+  };
 
   function parseChapter(html, file) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -514,38 +533,74 @@
     })().catch(error => { docsPromise = null; throw error; });
     return docsPromise;
   }
-  function chapters() {
+  // Каталог томов — единственный источник группировки для быстрого оглавления
+  // и сборника синопсисов. Новые тома можно регистрировать в JSON, не меняя JS.
+  function catalog() {
     if (!catalogPromise) catalogPromise = (async () => {
-      // Лёгкий каталог (~2 КБ), а не полнотекстовый поисковый индекс (~1,5 МБ).
       const response = await fetch(catalogURL, { cache: 'no-cache' });
       if (!response.ok) throw new Error('Не найден каталог глав');
       const data = await response.json();
       if (!Array.isArray(data.chapters)) throw new Error('Неверный каталог');
-      const list = data.chapters.filter(item => item && allowed(fileOf(item.url)))
-        .map(item => ({ ...item, type: 'Глава' }));
-      const known = new Set(list.map(item => fileOf(item.url)));
-      const latest = [...known].sort((a, b) => order(b) - order(a))[0] || 'prolog.html';
-      let next = advance(latest);
-      while (next && !known.has(next)) {
-        let found;
-        try {
-          const head = await fetch(pathOf(next), { method: 'HEAD', cache: 'no-store' });
-          found = head.status === 200;
-        } catch (_) { found = false; }
-        if (!found) break;
-        try {
-          const response = await fetch(pathOf(next), { cache: 'no-store' });
-          if (!response.ok) break;
-          const parsed = parseChapter(await response.text(), next);
-          list.push({ url: 'glavy/' + next, title: parsed.title, type: 'Глава' });
-          known.add(next);
-        } catch (error) { console.warn('[NT catalog]', error); break; }
-        next = advance(next);
+      const volumes = Array.isArray(data.volumes) && data.volumes.length ? data.volumes
+        .filter(v => v && typeof v.id === 'string' && v.id.trim())
+        : [{ id: 'volume-1', title: 'Том I. Усмирение Боли', url: 'toma/usmirenie-boli.html',
+            acts: { '1': 'Акт I. Валтасаров пир', '2': 'Акт II. И воспылают горизонты' } }];
+      const validVolumes = new Set(volumes.map(v => v.id));
+      const list = data.chapters.filter(item => item && typeof item.url === 'string' && safeChapterURL(item.url))
+        .map(item => ({ ...item, url: relativeChapterPath(item.url), volume: volumeIdOf(item), type: 'Глава' }))
+        .filter(ch => validVolumes.has(ch.volume));
+      const known = new Set(list.map(ch => ch.url));
+
+      // На GitHub Pages нет API для просмотра директории. Для каждого тома с
+      // discovery проверяем последовательно имена файлов в заданной папке.
+      // Никаких догадок о расположении ещё не созданного II тома не делаем.
+      for (const volume of volumes) {
+        const discovery = volume.discovery;
+        if (!discovery || discovery.enabled !== true) continue;
+        const dir = typeof discovery.directory === 'string' ? discovery.directory : 'glavy/';
+        const dirURL = safeChapterURL(dir + 'prolog.html');
+        if (!dirURL) continue;
+        const perAct = Number(discovery.chaptersPerAct) || 10;
+        const maxAct = Number(discovery.acts) || 5;
+        if (!Number.isInteger(perAct) || perAct < 1 || perAct > 99 ||
+            !Number.isInteger(maxAct) || maxAct < 1 || maxAct > 99) continue;
+        const own = list.filter(ch => ch.volume === volume.id && ch.url.startsWith(dir));
+        const latest = own.sort((a, b) => order(fileOf(b.url)) - order(fileOf(a.url)))[0];
+        if (!latest) continue;
+        let next = advance(fileOf(latest.url), maxAct, perAct);
+        let checked = 0;
+        while (next && checked++ < 500) {
+          const match = next.match(chapterRE);
+          if (match && (+match[1] > maxAct || +match[2] > perAct)) break;
+          const path = dir + next;
+          if (known.has(path)) { next = advance(next, maxAct, perAct); continue; }
+          const url = safeChapterURL(path);
+          if (!url) break;
+          let found = false;
+          try {
+            const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+            found = head.ok && head.status === 200;
+          } catch (_) { /* offline */ }
+          if (!found) break;
+          try {
+            const result = await fetch(url, { cache: 'no-store' });
+            if (!result.ok) break;
+            const parsed = parseChapter(await result.text(), next);
+            list.push({ url: path, title: parsed.title, type: 'Глава', volume: volume.id,
+              act: Number(next.match(chapterRE)?.[1]) || 1 });
+            known.add(path);
+          } catch (error) { console.warn('[NT catalog]', error); break; }
+          next = advance(next, maxAct, perAct);
+        }
       }
-      return list.sort((a, b) => order(fileOf(a.url)) - order(fileOf(b.url)));
+      const volumeOrder = new Map(volumes.map((v, i) => [v.id, i]));
+      list.sort((a, b) => (volumeOrder.get(a.volume) ?? Infinity) - (volumeOrder.get(b.volume) ?? Infinity) ||
+        order(fileOf(a.url)) - order(fileOf(b.url)));
+      return { chapters: list, volumes };
     })().catch(error => { catalogPromise = null; throw error; });
     return catalogPromise;
   }
+  const chapters = async () => (await catalog()).chapters;
   function summaries() {
     if (!summaryPromise) summaryPromise = fetch(summariesURL, { cache: 'no-cache' })
       .then(response => response.ok ? response.json() : { chapters: {} })
@@ -558,7 +613,7 @@
   function bookmarks() {
     try {
       const data = JSON.parse(localStorage.getItem(STORAGE) || '[]');
-      return Array.isArray(data) ? data.filter(b => b && allowed(b.file) && Number.isInteger(b.block) && b.block >= 0).slice(0, 150) : [];
+      return Array.isArray(data) ? data.filter(b => b && (safeChapterURL(b.path || ('glavy/' + b.file))) && Number.isInteger(b.block) && b.block >= 0).slice(0, 150) : [];
     } catch (_) { return []; }
   }
   function saveBookmarks(items) {
@@ -589,12 +644,12 @@
     });
     const node = nodes[best];
     const title = isManuscript ? scope.dataset.title : normText(document.querySelector('.chapter-head__title')?.textContent);
-    return { file, title: title || chapterTitle(file), block: best, excerpt: normText(node.textContent).slice(0, 100), updated: Date.now() };
+    return { file, path: isManuscript ? scope.dataset.path : location.pathname.slice(base.pathname.length), title: title || chapterTitle(file), block: best, excerpt: normText(node.textContent).slice(0, 100), updated: Date.now() };
   }
   function addBookmark() {
     const point = currentPoint();
     if (!point) return announce('Закладку можно поставить после загрузки текста.');
-    const items = bookmarks().filter(b => !(b.file === point.file && b.block === point.block));
+    const items = bookmarks().filter(b => !((b.path || ('glavy/' + b.file)) === point.path && b.block === point.block));
     items.unshift({ ...point, id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 7) });
     if (saveBookmarks(items.slice(0, 150))) announce('✦ Закладка сохранена');
     else announce('Не удалось сохранить: браузер запрещает локальное хранение.');
@@ -608,7 +663,7 @@
     announce.timer = setTimeout(() => toast.classList.remove('is-visible'), 2800);
   }
   const toBookmarkURL = b => {
-    const url = new URL(pathOf(b.file));
+    const url = safeChapterURL(b.path || ('glavy/' + b.file)) || new URL(pathOf(b.file));
     url.searchParams.set('ntbookmark', String(b.block));
     return url.href;
   };
@@ -635,26 +690,48 @@
   async function showChapters() {
     openModal('✦ Быстрый переход по главам');
     try {
-      const list = await chapters();
+      const { chapters: list, volumes } = await catalog();
       if (!modal.open) return;
       modalBody.replaceChildren();
       if (!list.length) { modalBody.append($('p', 'nt-library-empty', 'Пока нет опубликованных глав.')); return; }
-      let lastAct = null;
-      for (const ch of list) {
-        const file = fileOf(ch.url);
-        const act = file === 'prolog.html' ? 0 : Number(file.match(chapterRE)[1]);
-        if (act !== lastAct) { modalBody.append($('h3', 'nt-library-act', act === 0 ? 'Пролог' : 'Акт ' + act)); lastAct = act; }
-        const link = $('a', 'nt-library-chapter', ch.title);
-        link.href = pathOf(file);
-        if (file === location.pathname.split('/').pop()) { link.classList.add('is-current'); link.setAttribute('aria-current', 'page'); }
-        modalBody.append(link);
+      const current = location.pathname;
+      for (const volume of volumes) {
+        const own = list.filter(ch => ch.volume === volume.id);
+        if (!own.length) continue;
+        const group = $('section', 'nt-library-volume');
+        const volumeHead = $('h3', 'nt-library-volume__title', volumeTitle(volume));
+        group.append(volumeHead);
+        let lastAct = null;
+        for (const ch of own) {
+          const act = actOf(ch);
+          if (act !== lastAct) {
+            group.append($('h4', 'nt-library-act', actTitle(volume, act)));
+            lastAct = act;
+          }
+          const link = $('a', 'nt-library-chapter', ch.title);
+          link.href = safeChapterURL(ch.url).href;
+          if (new URL(link.href).pathname === current) {
+            link.classList.add('is-current'); link.setAttribute('aria-current', 'page');
+          }
+          group.append(link);
+        }
+        modalBody.append(group);
       }
       const links = $('div', 'nt-library-modal__links');
-      for (const [label, url] of [['Рукопись', 'manuscript.html'], ['Синопсисы', 'synopses.html'], ['Том I', 'toma/usmirenie-boli.html']]) {
+      for (const [label, url] of [['Рукопись', 'manuscript.html'], ['Синопсисы', 'synopses.html']]) {
         const a = $('a', '', label + ' ↗'); a.href = new URL(url, base).href; links.append(a);
       }
+      for (const volume of volumes) {
+        if (!volume.url) continue;
+        const a = $('a', '', volumeTitle(volume) + ' ↗');
+        a.href = new URL(volume.url, base).href;
+        links.append(a);
+      }
       modalBody.append(links);
-    } catch (error) { modalBody.replaceChildren($('p', 'nt-library-empty', 'Не удалось загрузить каталог. Проверьте подключение.')); }
+    } catch (error) {
+      console.warn('[NT library] Не удалось открыть оглавление', error);
+      modalBody.replaceChildren($('p', 'nt-library-empty', 'Не удалось загрузить каталог. Проверьте подключение.'));
+    }
   }
   function showBookmarks() {
     openModal('☆ Мои закладки');
@@ -709,7 +786,9 @@
   if (isChapterPage) {
     summaries().then(data => {
       const file = location.pathname.split('/').pop();
-      const text = typeof data[file] === 'string' ? data[file].trim() : '';
+      const key = location.pathname.slice(base.pathname.length);
+      const raw = data[key] ?? (key === 'glavy/' + file ? data[file] : undefined);
+      const text = typeof raw === 'string' ? raw.trim() : '';
       if (!text) return;
       const details = $('details', 'nt-summary');
       const head = $('summary', 'nt-summary__toggle', '✧ Краткое содержание · раскрыть (спойлеры)');
@@ -733,19 +812,38 @@
 
   if (isSynopses) {
     const container = document.querySelector('[data-nt-synopses]');
-    if (container) Promise.all([chapters(), summaries()]).then(([list, data]) => {
+    if (container) Promise.all([catalog(), summaries()]).then(([{ chapters: list, volumes }, data]) => {
       container.replaceChildren();
-      const note = $('p', 'nt-synopses-note', 'Содержит сюжетные подробности. Все синопсисы скрыты до нажатия.');
-      container.append(note);
-      for (const ch of list) {
-        const file = fileOf(ch.url), text = (data[file] || '').trim();
-        const details = $('details', 'nt-synopses-entry');
-        const summary = $('summary', '', ch.title + (text ? ' · раскрыть' : ' · синопсис ожидается'));
-        const description = $('p', '', text || 'Краткое содержание этой главы пока не добавлено.');
-        const link = $('a', 'nt-synopses-entry__link', 'Читать главу ↗'); link.href = pathOf(file);
-        details.append(summary, description, link); container.append(details);
+      container.append($('p', 'nt-synopses-note', 'Внимание: ниже открыто изложены события опубликованных глав, включая сюжетные повороты.'));
+      for (const volume of volumes) {
+        const own = list.filter(ch => ch.volume === volume.id);
+        if (!own.length) continue;
+        const group = $('section', 'nt-synopses-volume');
+        group.append($('h2', 'nt-synopses-volume__title', volumeTitle(volume)));
+        let lastAct = null;
+        for (const ch of own) {
+          const act = actOf(ch);
+          if (act !== lastAct) {
+            group.append($('h3', 'nt-synopses-act', actTitle(volume, act)));
+            lastAct = act;
+          }
+          const file = fileOf(ch.url);
+          const raw = data[ch.url] ?? (ch.url === 'glavy/' + file ? data[file] : undefined);
+          const text = typeof raw === 'string' ? raw.trim() : '';
+          const article = $('article', 'nt-synopses-entry');
+          article.append($('h4', 'nt-synopses-entry__title', ch.title));
+          article.append($('p', 'nt-synopses-entry__text', text || 'Краткое содержание этой главы пока не добавлено.'));
+          const link = $('a', 'nt-synopses-entry__link', 'Читать главу ↗');
+          link.href = safeChapterURL(ch.url).href;
+          article.append(link);
+          group.append(article);
+        }
+        container.append(group);
       }
-    }).catch(() => container.replaceChildren($('p', 'nt-library-empty', 'Не удалось загрузить список глав.')));
+    }).catch(error => {
+      console.warn('[NT synopses]', error);
+      container.replaceChildren($('p', 'nt-library-empty', 'Не удалось загрузить список глав.'));
+    });
   }
 
   if (isManuscript) {
@@ -759,18 +857,20 @@
         // Загружаем последовательно: мобильный браузер не получает 16 больших
         // документов одновременно. Содержание клонируется без исполнения скриптов.
         for (let i = 0; i < list.length; i++) {
-          const file = fileOf(list[i].url);
+          const ch = list[i];
+          const file = fileOf(ch.url);
           try {
-            const response = await fetch(pathOf(file));
+            const response = await fetch(safeChapterURL(ch.url));
             if (!response.ok) throw new Error('HTTP ' + response.status);
             const parsed = parseChapter(await response.text(), file);
             const section = $('section', 'nt-manuscript-chapter');
-            section.id = 'nt-' + file.replace('.html', '');
+            section.id = 'nt-' + ch.url.replace(/[^a-z0-9-]/gi, '-');
             section.dataset.source = file;
+            section.dataset.path = ch.url;
             section.dataset.title = parsed.title;
             const head = $('div', 'nt-manuscript-heading');
             head.append($('span', 'nt-manuscript-heading__label', `ROOTS / ${i + 1} из ${list.length}`), $('h2', '', parsed.title));
-            const origin = $('a', '', 'Открыть отдельную главу ↗'); origin.href = pathOf(file); head.append(origin);
+            const origin = $('a', '', 'Открыть отдельную главу ↗'); origin.href = safeChapterURL(ch.url).href; head.append(origin);
             section.append(head);
             // Извлекаем лишь авторский контейнер текста, не подключая из чужой
             // страницы JS, обработчики комментариев, навигацию или футер.
@@ -779,12 +879,12 @@
             for (const node of section.querySelectorAll('[src], [href], [poster], [srcset]')) {
               for (const attr of ['src', 'href', 'poster']) {
                 const value = node.getAttribute(attr);
-                if (value && !/^(?:#|data:|javascript:|mailto:|tel:)/i.test(value)) node.setAttribute(attr, new URL(value, pathOf(file)).href);
+                if (value && !/^(?:#|data:|javascript:|mailto:|tel:)/i.test(value)) node.setAttribute(attr, new URL(value, safeChapterURL(ch.url)).href);
               }
               const srcset = node.getAttribute('srcset');
               if (srcset) node.setAttribute('srcset', srcset.split(',').map(part => {
                 const pair = part.trim().split(/\s+/, 2);
-                return pair[0] ? new URL(pair[0], pathOf(file)).href + (pair[1] ? ' ' + pair[1] : '') : '';
+                return pair[0] ? new URL(pair[0], safeChapterURL(ch.url)).href + (pair[1] ? ' ' + pair[1] : '') : '';
               }).join(', '));
             }
             area.append(section);

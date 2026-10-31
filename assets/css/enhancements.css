@@ -676,3 +676,79 @@ body:has(.hero) {
  font: 700 24px/1 var(--font-ui,sans-serif); cursor: pointer; backdrop-filter: blur(12px); }
 .nt-library-quick:hover { background: #4b247a; color: #fff; }
 @media (max-width: 650px) { .nt-library-quick { left: 9px; width: 35px; height: 35px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); border-radius: 11px; font-size: 20px; opacity: .8; } }
+
+/* QoL 2.2.1 — типографика синопсисов и навигация по нескольким томам. */
+.nt-library-volume + .nt-library-volume {
+  margin-top: 24px; padding-top: 18px;
+  border-top: 1px solid rgba(190, 126, 255, .28);
+}
+.nt-library-volume__title {
+  margin: 2px 0 14px; padding: 10px 13px;
+  border-left: 3px solid #ae68ec; border-radius: 5px 10px 10px 5px;
+  background: linear-gradient(90deg, rgba(125, 45, 194, .22), transparent);
+  color: #f0d7ff;
+  font: 700 clamp(14px, 3vw, 18px)/1.45 var(--font-display, sans-serif);
+}
+.nt-library-volume .nt-library-act {
+  margin: 20px 0 5px; padding: 0 12px;
+  font-size: 12px; letter-spacing: .05em;
+  text-transform: none;
+}
+.nt-library-volume .nt-library-chapter { padding-left: 15px; }
+
+/* Синопсис в читалке повторяет размер и шрифт основного текста,
+   но не наследует абзацный отступ: это отдельный информационный блок. */
+.nt-summary__text {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 20px;
+  line-height: 1.85;
+  text-align: justify;
+  text-indent: 0;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+}
+body.font-sm .nt-summary__text { font-size: 18px; }
+body.font-lg .nt-summary__text { font-size: 23px; }
+body.font-readable .nt-summary__text {
+  font-family: 'Golos Text', 'Open Sans', Arial, sans-serif;
+  letter-spacing: .018em;
+  word-spacing: .05em;
+  line-height: 1.95;
+}
+.reader-top.theme-light .nt-summary__text { color: #342044; }
+
+.nt-synopses-volume { margin: 34px 0 42px; }
+.nt-synopses-volume__title {
+  margin: 0 0 18px; padding-bottom: 12px;
+  color: #e8bbff; border-bottom: 1px solid rgba(191, 132, 249, .38);
+  font: 700 clamp(22px, 4vw, 30px)/1.3 var(--font-display, sans-serif);
+}
+.nt-synopses-act {
+  margin: 27px 0 15px;
+  color: #cf9df3;
+  font: 700 clamp(16px, 3vw, 19px)/1.45 var(--font-display, sans-serif);
+}
+.nt-synopses-entry { margin: 0 0 15px; padding: clamp(17px, 3vw, 25px); }
+.nt-synopses-entry__title {
+  margin: 0 0 12px; color: #e9c4ff;
+  text-align: left;
+  font: 700 clamp(17px, 3vw, 21px)/1.45 var(--font-display, sans-serif);
+}
+.nt-synopses-entry .nt-synopses-entry__text {
+  margin: 0 0 13px;
+  font: 18px/1.8 var(--font-serif, Georgia, serif);
+  text-align: justify;
+  text-indent: 0;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+  color: #e3d6ef;
+}
+@media (max-width: 650px) {
+  .nt-summary__text { font-size: 18px; line-height: 1.82; }
+  body.font-sm .nt-summary__text { font-size: 16px; }
+  body.font-lg .nt-summary__text { font-size: 21px; }
+  .nt-synopses-entry .nt-synopses-entry__text { font-size: 17px; }
+  .nt-synopses-volume { margin: 24px 0 32px; }
+}

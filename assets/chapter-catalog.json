@@ -1,70 +1,119 @@
 {
-  "version": 1,
-  "note": "Справочник текущих глав для быстрой навигации. Новые соседние файлы обнаруживаются браузером автоматически.",
+  "version": 2,
+  "note": "Тома и акты берутся из volumes; новые тома добавляются туда и в chapters. Система не смешивает главы разных томов с одинаковыми номерами.",
   "chapters": [
     {
       "url": "glavy/prolog.html",
-      "title": "Пролог. Светская преамбула"
+      "title": "Пролог. Светская преамбула",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-1.html",
-      "title": "Глава 1.1. Веяние чужеземных ветров"
+      "title": "Глава 1.1. Веяние чужеземных ветров",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-2.html",
-      "title": "Глава 1.2. Юность впереди"
+      "title": "Глава 1.2. Юность впереди",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-3.html",
-      "title": "Глава 1.3. Бабочка в паутине"
+      "title": "Глава 1.3. Бабочка в паутине",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-4.html",
-      "title": "Глава 1.4. Наваждение"
+      "title": "Глава 1.4. Наваждение",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-5.html",
-      "title": "Глава 1.5. Тезис о неназванном"
+      "title": "Глава 1.5. Тезис о неназванном",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-6.html",
-      "title": "Глава 1.6. Фальшь Белого Хора"
+      "title": "Глава 1.6. Фальшь Белого Хора",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-7.html",
-      "title": "Глава 1.7. О вере и доверии"
+      "title": "Глава 1.7. О вере и доверии",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-8.html",
-      "title": "Глава 1.8. Казус белли"
+      "title": "Глава 1.8. Казус белли",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-9.html",
-      "title": "Глава 1.9. Свобода, я воздам"
+      "title": "Глава 1.9. Свобода, я воздам",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-1-10.html",
-      "title": "Глава 1.10. Где начинается судьба"
+      "title": "Глава 1.10. Где начинается судьба",
+      "volume": "volume-1",
+      "act": 1
     },
     {
       "url": "glavy/glava-2-1.html",
-      "title": "Глава 2.1. Тени утра"
+      "title": "Глава 2.1. Тени утра",
+      "volume": "volume-1",
+      "act": 2
     },
     {
       "url": "glavy/glava-2-2.html",
-      "title": "Глава 2.2. На слабо"
+      "title": "Глава 2.2. На слабо",
+      "volume": "volume-1",
+      "act": 2
     },
     {
       "url": "glavy/glava-2-3.html",
-      "title": "Глава 2.3. Знание в незнании"
+      "title": "Глава 2.3. Знание в незнании",
+      "volume": "volume-1",
+      "act": 2
     },
     {
       "url": "glavy/glava-2-4.html",
-      "title": "Глава 2.4. Честь, глефа и сила Слова"
+      "title": "Глава 2.4. Честь, глефа и сила Слова",
+      "volume": "volume-1",
+      "act": 2
     },
     {
       "url": "glavy/glava-2-5.html",
-      "title": "Глава 2.5. Кто я тебе?"
+      "title": "Глава 2.5. Кто я тебе?",
+      "volume": "volume-1",
+      "act": 2
+    }
+  ],
+  "volumes": [
+    {
+      "id": "volume-1",
+      "title": "Том I. Усмирение Боли",
+      "url": "toma/usmirenie-boli.html",
+      "acts": {
+        "1": "Акт I. Валтасаров пир",
+        "2": "Акт II. И воспылают горизонты"
+      },
+      "discovery": {
+        "enabled": true,
+        "directory": "glavy/",
+        "acts": 5,
+        "chaptersPerAct": 10
+      }
     }
   ]
 }
